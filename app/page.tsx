@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 /**
  * yourkey.app landing page — permanent brand home.
@@ -288,18 +289,18 @@ export default function Home() {
             >
               hello@yourkey.app
             </a>
-            <a
+            <Link
               href="/privacy"
               className="text-sm text-[var(--color-text-secondary)] transition hover:text-[var(--color-gold)]"
             >
               Privacy
-            </a>
-            <a
+            </Link>
+            <Link
               href="/terms"
               className="text-sm text-[var(--color-text-secondary)] transition hover:text-[var(--color-gold)]"
             >
               Terms
-            </a>
+            </Link>
           </div>
 
           <p className="text-xs text-[var(--color-text-dim)]">
