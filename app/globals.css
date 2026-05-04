@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+/* ─── Your Key brand palette ─────────────────────────────────────────────────
+   Pulled directly from manifest-app/constants/theme.ts so the website reads
+   visually identical to the app — zero brand jump when users move between
+   yourkey.app and the iOS/Android app. */
+
+@theme inline {
+  /* Backgrounds */
+  --color-background: #0A0E27;       /* deep midnight blue — page background */
+  --color-card: #131736;             /* cards, sections */
+  --color-card-hover: #1A2040;       /* card hover state */
+  --color-secondary: #1E2247;        /* navy depth */
+
+  /* Brand accents */
+  --color-gold: #D4AF37;             /* warm luxury gold — primary CTA */
+  --color-gold-muted: #B8963E;       /* gold hover */
+  --color-gold-dim: #8B6914;         /* subtle gold for dim accents */
+  --color-purple: #7C3AED;           /* aurora purple */
+
+  /* Text */
+  --color-foreground: #FFFFFF;       /* primary text */
+  --color-text-secondary: #8892B0;   /* secondary text */
+  --color-text-dim: #4A5568;         /* dim text / metadata */
+
+  /* Typography */
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-playfair);
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle aurora glow behind the hero — adds depth without distraction */
+.aurora-glow {
+  background: radial-gradient(
+    ellipse at top,
+    rgba(124, 58, 237, 0.15) 0%,
+    rgba(212, 175, 55, 0.05) 35%,
+    transparent 70%
+  );
+}
+
+/* Smooth scroll for anchor links (when we add nav later) */
+html {
+  scroll-behavior: smooth;
+}
