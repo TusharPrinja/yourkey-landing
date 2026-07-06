@@ -2,69 +2,66 @@ import Image from "next/image";
 import Link from "next/link";
 
 /**
- * yourkey.app landing page — permanent brand home.
+ * yourkey.app — permanent brand home. Rebuilt 2026-07-06 (billion-pound pass).
  *
- * Pre-launch state: hero CTA = "Join the waitlist" (email → Firestore).
- * Post-launch state: hero CTA swaps to App Store + Play Store buttons.
+ * Register: the temple, not the SaaS page. Deep navy, ornate gold, ceremony
+ * language — the same aesthetic as the app itself.
  *
- * All content verified against:
- *   - data/lessons.ts (12 modules, ~130 lessons)
- *   - docs/Learn Tab Lesson Outlines.md (formula, 12 mentors)
- *   - app/ directory (22 features confirmed)
+ * Content verified against the shipped app (2026-07-06):
+ *  - Formula T = R / f(C·E·g) — canon per the filmed seminar M1.2
+ *  - 11-module FILMED seminar (71 lessons) wired via Bunny + The Examination
+ *  - Tool list current: The Magnet + Vibration Raiser in; AI Coach deleted
+ *    (absorbed into the Mastermind Council, 2026-05-22)
+ *
+ * Pre-launch: no email capture (decided 2026-05-04). At launch, slot the
+ * App Store / Play badges into the hero CTA.
  */
 export default function Home() {
   return (
     <main className="relative flex flex-col">
       {/* ─── Hero ───────────────────────────────────────────────────────── */}
       <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 py-24 text-center">
-        {/* Aurora gradient backdrop — subtle, not loud */}
         <div className="aurora-glow pointer-events-none absolute inset-0 -z-10" />
 
-        {/* Logo */}
+        {/* The Key — the brand IS the object */}
         <div className="mb-10">
           <Image
             src="/logo.png"
             alt="Your Key"
-            width={140}
-            height={140}
+            width={150}
+            height={150}
             priority
-            className="drop-shadow-[0_0_30px_rgba(124,58,237,0.4)]"
+            className="drop-shadow-[0_0_40px_rgba(212,175,55,0.35)]"
           />
         </div>
 
-        {/* Wordmark */}
         <p className="mb-6 font-sans text-sm uppercase tracking-[0.4em] text-[var(--color-gold)]">
           Your Key
         </p>
 
-        {/* Headline */}
         <h1 className="mb-6 max-w-4xl font-display text-4xl font-medium leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-          The science of manifestation,
-          <br className="hidden sm:block" />{" "}
-          <span className="text-[var(--color-gold)]">in your pocket.</span>
+          The door was never locked.
         </h1>
 
-        {/* Subheadline */}
-        <p className="mb-12 max-w-2xl text-base leading-relaxed text-[var(--color-text-secondary)] sm:text-lg md:text-xl">
-          AI-personalized practices grounded in 12 canon mentors and
-          peer-reviewed psychology — built around the formula{" "}
-          <span className="font-mono text-white">T = R / f(AVEg)</span>.
+        <p className="mb-8 max-w-2xl text-base leading-relaxed text-[var(--color-text-secondary)] sm:text-lg md:text-xl">
+          A filmed manifestation seminar, twenty daily practice tools, and
+          twelve canon mentors — engineered around one formula:{" "}
+          <span className="font-mono text-white">T&nbsp;=&nbsp;R&nbsp;/&nbsp;f(C·E·g)</span>.
         </p>
 
-        {/* Hero CTA placeholder — currently no email capture (decided 2026-05-04
-            to avoid email follow-up debt; pre-launch traffic ~0). At APP LAUNCH,
-            slot <DownloadButtons /> here with Apple + Google Play badges linking
-            to actual store URLs. See memory/project_website_launch_swap.md for
-            the full launch-day swap checklist. Until then, the rich content
-            below + scroll indicator is the implicit CTA. */}
+        <div className="mb-4 inline-flex items-center gap-3 rounded-full border border-[var(--color-gold)]/30 bg-[var(--color-gold)]/5 px-6 py-3">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--color-gold)]" />
+          <span className="text-sm tracking-wide text-[var(--color-gold)]">
+            Coming soon to the App&nbsp;Store
+          </span>
+        </div>
 
-        {/* Scroll indicator — gentle bounce so users know there's more below */}
         <a
-          href="#why"
+          href="#seminar"
           aria-label="Scroll down"
           className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-3 text-[var(--color-text-dim)] transition hover:text-[var(--color-gold)]"
         >
-          <span className="text-[10px] uppercase tracking-[0.3em]">Scroll</span>
+          <span className="text-[10px] uppercase tracking-[0.3em]">Enter</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"
@@ -82,7 +79,54 @@ export default function Home() {
         </a>
       </section>
 
-      {/* ─── 3 Pillars — what makes Your Key uniquely defensible ────────── */}
+      {/* ─── The Seminar — the crown jewel ─────────────────────────────── */}
+      <section id="seminar" className="relative px-6 py-24 sm:py-32">
+        <div className="mx-auto max-w-5xl text-center">
+          <p className="mb-4 text-sm uppercase tracking-[0.4em] text-[var(--color-gold)]">
+            The Academy
+          </p>
+          <h2 className="mb-6 font-display text-3xl font-medium leading-tight text-white sm:text-4xl md:text-5xl">
+            A full seminar. Filmed. Inside the app.
+          </h2>
+          <p className="mx-auto mb-14 max-w-3xl text-base leading-relaxed text-[var(--color-text-secondary)] sm:text-lg">
+            Not slides. Not a voice-over. Eleven modules taught face-to-camera
+            at the whiteboard — from the Law of Attraction&apos;s mechanics,
+            through six doors into the subconscious, to the single word the
+            entire canon rests on. Then <span className="text-white">The
+            Examination</span>: concept-level tests that seal each module, and
+            a Final that proves the teaching lives in you.
+          </p>
+
+          <div className="grid gap-6 text-left sm:grid-cols-3">
+            <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-8">
+              <p className="mb-2 font-display text-4xl text-[var(--color-gold)]">11</p>
+              <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
+                modules — foundations, the formula, the subconscious engine
+                room, aligned action, wealth, health, relationships, mistakes,
+                contradictions… and the closing.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-8">
+              <p className="mb-2 font-display text-4xl text-[var(--color-gold)]">71</p>
+              <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
+                filmed lessons, each one grounded in the mentors&apos; own
+                books and peer-reviewed psychology — and each one pointing at
+                a tool you can open the same minute.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-8">
+              <p className="mb-2 font-display text-4xl text-[var(--color-gold)]">1</p>
+              <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
+                Final Examination. Earn all eleven module seals to face it.
+                Pass it, and you haven&apos;t watched a seminar — you&apos;ve
+                absorbed one.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 3 Pillars ──────────────────────────────────────────────────── */}
       <section id="why" className="relative px-6 py-24 sm:py-32">
         <div className="mx-auto max-w-6xl">
           <div className="mb-16 text-center">
@@ -95,7 +139,6 @@ export default function Home() {
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
-            {/* Pillar 1 — 12 Canon Mentors (CORRECTED LIST) */}
             <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-8 transition hover:border-[var(--color-gold)]/30 hover:bg-[var(--color-card-hover)]">
               <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-gold)]/10 text-xl font-display text-[var(--color-gold)]">
                 01
@@ -109,12 +152,11 @@ export default function Home() {
                 Wattles. Joseph Murphy. Abraham-Hicks. Louise Hay.
               </p>
               <p className="text-sm leading-relaxed text-[var(--color-text-dim)]">
-                Their teachings are woven into every tool, every prompt, every
-                lesson — not name-dropped, structurally embedded.
+                Not name-dropped — structurally embedded in every tool, every
+                lesson, every word the app speaks to you.
               </p>
             </div>
 
-            {/* Pillar 2 — The Formula (CORRECTED A = AFFIRMATIONS) */}
             <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-8 transition hover:border-[var(--color-gold)]/30 hover:bg-[var(--color-card-hover)]">
               <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-gold)]/10 text-xl font-display text-[var(--color-gold)]">
                 02
@@ -123,42 +165,44 @@ export default function Home() {
                 Built on a formula
               </h3>
               <p className="mb-4 font-mono text-base text-[var(--color-gold)]">
-                T = R / f(AVEg)
+                T = R / f(C·E·g)
               </p>
               <p className="mb-4 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                Time-to-manifest equals Resistance divided by the function of{" "}
-                <span className="text-white">Affirmations</span>,{" "}
-                <span className="text-white">Visualisations</span>,{" "}
-                <span className="text-white">Emotion</span>, and{" "}
-                <span className="text-white">gratitude</span>.
+                Time-to-manifest equals{" "}
+                <span className="text-white">Resistance</span> divided by the
+                function of <span className="text-white">Consistency</span> of
+                practice, in elevated <span className="text-white">Emotion</span>,
+                held in <span className="text-white">gratitude</span>.
               </p>
               <p className="text-sm leading-relaxed text-[var(--color-text-dim)]">
-                Every tool moves a variable in your favour.
+                Every tool in the app moves one of those variables in your
+                favour. Nothing is decoration.
               </p>
             </div>
 
-            {/* Pillar 3 — Course (CORRECTED to 12 modules, ~130 lessons) */}
             <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-8 transition hover:border-[var(--color-gold)]/30 hover:bg-[var(--color-card-hover)]">
               <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-gold)]/10 text-xl font-display text-[var(--color-gold)]">
                 03
               </div>
               <h3 className="mb-4 font-display text-2xl font-medium text-white">
-                12-module masterclass
+                The Key itself
               </h3>
               <p className="mb-4 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                Over 130 lessons across 12 modules — from the foundations of
-                mental science through advanced practice, ending with a
-                personal benediction from the founder.
+                Your streak lives inside a giant ornate key. Practise and it
+                glows. Miss days and it rusts — one turn restores the shine.
+                Thirty days forges the 30th Turning: a hallmark no one
+                else&apos;s key carries.
               </p>
               <p className="text-sm leading-relaxed text-[var(--color-text-dim)]">
-                Most apps give you tools. We teach you why they work.
+                No leaderboards. No points. The Key is the avatar — and it
+                remembers.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── What's Inside — the tools (EXPANDED to 22 features) ─────── */}
+      {/* ─── What's Inside — the tools ─────────────────────────────────── */}
       <section className="relative px-6 py-24 sm:py-32">
         <div className="mx-auto max-w-6xl">
           <div className="mb-16 text-center">
@@ -166,77 +210,74 @@ export default function Home() {
               What&apos;s inside
             </p>
             <h2 className="font-display text-3xl font-medium leading-tight text-white sm:text-4xl md:text-5xl">
-              22 tools, every one purposeful.
+              Twenty tools, every one purposeful.
               <br />
               <span className="text-[var(--color-gold)]">None overlap.</span>
             </h2>
           </div>
 
-          {/* Top tier — the headline tools with full descriptions */}
           <div className="mb-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <ToolCard
-              title="Daily Affirmations"
-              body="AI-personalized affirmations matched to your goal, narrated by AI or your own voice. Repetition rewires neural pathways — Murphy + Hill autosuggestion."
+              title="The Magnet"
+              body="The keystone practice — visualisation, spoken affirmation, scripting, body state and gratitude compounded into one daily session. Five channels into the subconscious at once."
             />
             <ToolCard
               title="Guided Visualization"
-              body="Sensory-immersive scripts grounded in Wattles. Headphones recommended — binaural beats sync your brain into receptive theta state."
+              body="Sensory-immersive scripts grounded in Wattles, personalised to your exact goal. Binaural underlay settles the brain into a receptive state."
             />
             <ToolCard
-              title="Camera Mirror"
-              body="Speak your affirmations directly to yourself in a mirror — your own voice or AI narration. Tracy's recorded-voice technique made daily."
-            />
-            <ToolCard
-              title="Subliminal Mode"
-              body="Custom subliminal scripts at 0.8x speed for deep subconscious uptake. Plays under your music while you work, walk, or sleep."
-            />
-            <ToolCard
-              title="Future Self Letter"
-              body="An AI-written letter to you from your future self at the moment of arrival — in your context, narrated by AI voice."
-            />
-            <ToolCard
-              title="Identity Blueprint"
-              body="Who you must become for the goal to be inevitable. Generated from your Definite Chief Aim, refined as you grow into the role."
-            />
-            <ToolCard
-              title="Revision (Goddard)"
-              body="Neville Goddard&apos;s revision technique — rewrite the day in your imagination before sleep. Audio in your voice or AI narration."
-            />
-            <ToolCard
-              title="AI Coach"
-              body="A pocket conversation with the canon. Bring any block, any doubt, any question — answered in the voice of the most relevant of 12 mentors."
+              title="Daily Affirmations"
+              body="Personalised affirmations matched to your goal — narrated, or recorded in your own voice. Murphy and Hill's autosuggestion, made daily."
             />
             <ToolCard
               title="Mastermind Council"
-              body="Hill&apos;s Master Mind principle, daily. Three mentors weigh in on Growth tier. Five voices on Elite. The full council on demand."
+              body="Hill's Master Mind principle on demand. Bring any block or question — the council of twelve mentors answers in their own voices."
+            />
+            <ToolCard
+              title="Vibration Raiser"
+              body="A pre-practice ritual that lifts your emotional state up the scale before the real work — because the broadcast matters more than the words."
+            />
+            <ToolCard
+              title="Subliminal Mode"
+              body="Custom subliminal scripts for deep subconscious uptake. Plays under your music while you work, walk, or fall asleep."
+            />
+            <ToolCard
+              title="Dream Programming"
+              body="Goddard's state-akin-to-sleep, engineered. Programme the night shift — your subconscious works while you rest."
+            />
+            <ToolCard
+              title="Revision"
+              body="Rewrite the day in imagination before sleep — Goddard's revision technique with audio in your voice or narrated."
+            />
+            <ToolCard
+              title="Identity Blueprint"
+              body="You attract what you ARE. A day-by-day programme that rebuilds the identity your goal belongs to — for wealth, health, or love."
             />
           </div>
 
-          {/* Second tier — compressed list of the rest */}
           <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-8">
             <p className="mb-4 text-sm uppercase tracking-[0.3em] text-[var(--color-gold)]">
-              Plus 13 more
+              And the rest of the ring
             </p>
             <div className="grid gap-x-6 gap-y-3 text-sm text-[var(--color-text-secondary)] sm:grid-cols-2 md:grid-cols-3">
-              <span>Self-Recorded Visualization</span>
+              <span>Future Self Letter</span>
+              <span>Camera Mirror</span>
               <span>Vision Board</span>
               <span>Scripting</span>
               <span>Gratitude Journal</span>
               <span>369 Method</span>
               <span>Breathwork</span>
               <span>EFT Tapping</span>
-              <span>Dream Programming</span>
-              <span>Downstream (Action)</span>
-              <span>Definite Chief Aim Flow</span>
+              <span>The Downstream</span>
+              <span>Definite Chief Aim</span>
               <span>Alignment Analytics</span>
-              <span>Evidence Log</span>
-              <span>Mentor Library</span>
+              <span>Evidence Library</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── How It Works — 3 steps ────────────────────────────────────── */}
+      {/* ─── How It Works ──────────────────────────────────────────────── */}
       <section className="relative px-6 py-24 sm:py-32">
         <div className="mx-auto max-w-5xl">
           <div className="mb-16 text-center">
@@ -251,18 +292,18 @@ export default function Home() {
           <div className="space-y-12">
             <Step
               number="1"
-              title="Define your goal"
-              body="The Definite Chief Aim flow walks you through the questions Hill insisted on a century ago — what, why, by when, who else benefits, how it feels. Your goal becomes precise enough to manifest."
+              title="Forge your goal"
+              body="A guided ceremony walks you through the questions Hill insisted on a century ago — what, exactly, and why. Vague goals cannot be delivered. Yours becomes precise enough to manifest."
             />
             <Step
               number="2"
-              title="Practise daily"
-              body="Open the app. Pick a tool. Run it for 3-10 minutes. Every tool is personalized to your goal, grounded in canon mentors, scientifically validated. Track your streak."
+              title="Turn the Key daily"
+              body="Open the app. The morning, midday and evening Turnings each recommend the right practice for the hour. Three to ten minutes — every tool personalised to your goal, every practice turning the Key."
             />
             <Step
               number="3"
-              title="Watch your alignment rise"
-              body="As resistance drops and practice rises, the manifestation curve shortens. The Learn tab teaches the principles. The Practice tab applies them. The Goals tab tracks the arc."
+              title="Shrink the T"
+              body="As Resistance drops and Consistency, Emotion and gratitude rise, time-to-manifest shortens — that is the formula doing its work. The seminar teaches why. The tools do it. The Key remembers."
             />
           </div>
         </div>
