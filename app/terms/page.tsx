@@ -1,7 +1,6 @@
-import Image from "next/image";
-import Link from "next/link";
 import type { Metadata } from "next";
 import { TERMS_OF_SERVICE } from "@/lib/legal";
+import { SiteNav, SiteFooter } from "@/components/site";
 
 export const metadata: Metadata = {
   title: "Terms of Service — Your Key",
@@ -29,29 +28,7 @@ function LegalPage({ title, body }: { title: string; body: string }) {
 
   return (
     <main className="relative flex min-h-screen flex-col">
-      <header className="border-b border-white/5 px-6 py-6">
-        <div className="mx-auto flex max-w-4xl items-center justify-between">
-          <Link
-            href="/"
-            className="flex items-center gap-3 transition hover:opacity-80"
-          >
-            <Image
-              src="/logo.png"
-              alt="Your Key"
-              width={32}
-              height={32}
-              className="rounded-md"
-            />
-            <span className="font-display text-lg text-white">Your Key</span>
-          </Link>
-          <Link
-            href="/"
-            className="text-sm text-[var(--color-text-secondary)] transition hover:text-[var(--color-gold)]"
-          >
-            ← Back to home
-          </Link>
-        </div>
-      </header>
+      <SiteNav />
 
       <div className="px-6 py-16 text-center">
         <p className="mb-4 text-sm uppercase tracking-[0.4em] text-[var(--color-gold)]">
@@ -69,43 +46,7 @@ function LegalPage({ title, body }: { title: string; body: string }) {
         </div>
       </article>
 
-      <footer className="mt-auto border-t border-white/5 px-6 py-12">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 sm:flex-row">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/logo.png"
-              alt="Your Key"
-              width={32}
-              height={32}
-              className="rounded-md"
-            />
-            <span className="font-display text-lg text-white">Your Key</span>
-          </div>
-          <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-6">
-            <a
-              href="mailto:hello@yourkey.app"
-              className="text-sm text-[var(--color-text-secondary)] transition hover:text-[var(--color-gold)]"
-            >
-              hello@yourkey.app
-            </a>
-            <Link
-              href="/privacy"
-              className="text-sm text-[var(--color-text-secondary)] transition hover:text-[var(--color-gold)]"
-            >
-              Privacy
-            </Link>
-            <Link
-              href="/terms"
-              className="text-sm text-[var(--color-text-secondary)] transition hover:text-[var(--color-gold)]"
-            >
-              Terms
-            </Link>
-          </div>
-          <p className="text-xs text-[var(--color-text-dim)]">
-            © 2026 Your Key App Ltd
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }
