@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import {
   SiteNav,
   SiteFooter,
@@ -206,6 +207,14 @@ export default function Home() {
               </div>
             </div>
           </div>
+
+          {/* Mid-page CTA nudge — the hero and final section bracket the
+              page, but three sections in a row (Academy, Pillars, and the
+              upcoming gamification block) had no download prompt between
+              them. This closes that gap without repeating the full hero. */}
+          <div className="mt-16 flex justify-center">
+            <DownloadBadges />
+          </div>
         </section>
 
         {/* ─── The Key Remembers — gamification ──────────────────────────── */}
@@ -248,6 +257,31 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* ─── Founding Keepers teaser ────────────────────────────────────── */}
+        <section className="relative px-6 pb-24">
+          <div className="mx-auto max-w-5xl">
+            <Link
+              href="/pricing"
+              className="group block overflow-hidden rounded-2xl border border-[var(--color-gold)]/30 bg-gradient-to-br from-[#0D1133] via-[#1F1A08] to-[#050308] p-8 transition hover:border-[var(--color-gold)]/60 sm:p-10"
+            >
+              <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+                <div>
+                  <p className="mb-2 text-sm uppercase tracking-[0.3em] text-[var(--color-gold)]">
+                    🗝 Founding Keepers — first 100, held forever
+                  </p>
+                  <h2 className="font-display text-2xl font-medium text-white sm:text-3xl">
+                    The Inner Circle. You don&apos;t get more of the app —
+                    you get inducted into it.
+                  </h2>
+                </div>
+                <span className="inline-flex flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-[var(--color-gold)] px-6 py-3 text-sm font-semibold text-[var(--color-background)] transition group-hover:bg-[var(--color-gold-muted)]">
+                  See the offer
+                </span>
+              </div>
+            </Link>
           </div>
         </section>
 
