@@ -147,9 +147,9 @@ export default function Home() {
                 12 Canon Mentors
               </h3>
               <p className="mb-4 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                Napoleon Hill. Brian Tracy. Jim Rohn. Earl Shoaff. Earl
-                Nightingale. Neville Goddard. Bob Proctor. James Allen. Wallace
-                Wattles. Joseph Murphy. Abraham-Hicks. Louise Hay.
+                Wallace Wattles. James Allen. Napoleon Hill. Neville Goddard.
+                Earl Nightingale. Joseph Murphy. Bob Proctor. Abraham-Hicks.
+                William Walker Atkinson. Charles Haanel. Jim Rohn. Brian Tracy.
               </p>
               <p className="text-sm leading-relaxed text-[var(--color-text-dim)]">
                 Not name-dropped — structurally embedded in every tool, every
