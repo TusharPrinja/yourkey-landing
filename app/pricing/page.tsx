@@ -12,7 +12,7 @@ import { SiteNav, SiteFooter, DownloadBadges } from "@/components/site";
 export const metadata: Metadata = {
   title: "Pricing — Your Key",
   description:
-    "Free forever with real practice, or go deeper with Growth and Elite. Simple monthly and annual plans, cancel anytime in your App Store settings.",
+    "Free forever with real practice, or go deeper with Growth, Elite, or the Inner Circle. Simple monthly and annual plans, cancel anytime in your App Store settings.",
 };
 
 export default function PricingPage() {
@@ -147,6 +147,60 @@ export default function PricingPage() {
                 className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-white transition hover:border-[var(--color-gold)]/40 hover:bg-white/10"
               >
                 Choose Elite
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* ─── The Inner Circle ─────────────────────────────────────────── */}
+        <section className="relative px-6 py-16">
+          <div className="mx-auto max-w-4xl overflow-hidden rounded-2xl border border-[var(--color-gold)]/30 bg-gradient-to-br from-[#0D1133] via-[#1F1A08] to-[#050308] p-8 sm:p-12">
+            <p className="mb-3 text-sm uppercase tracking-[0.3em] text-[var(--color-gold)]">
+              🗝 Founding Keepers — first 100, £39.99/mo held forever
+            </p>
+            <h2 className="mb-3 font-display text-3xl font-medium text-white sm:text-4xl">
+              The Inner Circle
+            </h2>
+            <p className="mb-8 max-w-2xl text-base leading-relaxed text-[var(--color-text-secondary)]">
+              You don&apos;t get more of the app. You get inducted into it.
+            </p>
+
+            <div className="mb-8 grid gap-6 sm:grid-cols-3">
+              <div>
+                <p className="mb-1 font-medium text-white">🏛️ The Full Council</p>
+                <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
+                  All twelve mentors, every session. Every mind you&apos;ve ever
+                  learned from, in the room with you, at once.
+                </p>
+              </div>
+              <div>
+                <p className="mb-1 font-medium text-white">✉️ The Monthly Reading</p>
+                <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
+                  A personal letter from the council, every month — written from
+                  your goals, your evidence, the rhythm of your practice.
+                </p>
+              </div>
+              <div>
+                <p className="mb-1 font-medium text-white">♾️ The Council never closes</p>
+                <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
+                  Fifty sessions a day, and your name honoured among the first
+                  one hundred Keepers. Once claimed, closed forever.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-6">
+              <p className="font-display text-3xl font-medium text-white">
+                £44.99
+                <span className="ml-1 text-base font-normal text-[var(--color-text-dim)]">
+                  /month · or £37.50/mo billed annually (£449.99)
+                </span>
+              </p>
+              <a
+                href="#download"
+                className="inline-flex items-center justify-center rounded-full bg-[var(--color-gold)] px-6 py-3 text-sm font-semibold text-[var(--color-background)] transition hover:bg-[var(--color-gold-muted)]"
+              >
+                Claim a Founding Seat
               </a>
             </div>
           </div>
