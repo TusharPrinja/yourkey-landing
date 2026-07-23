@@ -156,7 +156,7 @@ export default function PricingPage() {
         <section className="relative px-6 py-16">
           <div className="mx-auto max-w-4xl overflow-hidden rounded-2xl border border-[var(--color-gold)]/30 bg-gradient-to-br from-[#0D1133] via-[#1F1A08] to-[#050308] p-8 sm:p-12">
             <p className="mb-3 text-sm uppercase tracking-[0.3em] text-[var(--color-gold)]">
-              🗝 Founding Keepers — first 100, £39.99/mo held forever
+              🗝 Founding Keepers — the early-supporter rate, £39.99/mo locked while you stay
             </p>
             <h2 className="mb-3 font-display text-3xl font-medium text-white sm:text-4xl">
               The Inner Circle
@@ -183,8 +183,8 @@ export default function PricingPage() {
               <div>
                 <p className="mb-1 font-medium text-white">♾️ The Council never closes</p>
                 <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                  Fifty sessions a day, and your name honoured among the first
-                  one hundred Keepers. Once claimed, closed forever.
+                  Fifty sessions a day, and the Founding rate locked in for as
+                  long as you stay a Keeper.
                 </p>
               </div>
             </div>
@@ -200,7 +200,7 @@ export default function PricingPage() {
                 href="#download"
                 className="inline-flex items-center justify-center rounded-full bg-[var(--color-gold)] px-6 py-3 text-sm font-semibold text-[var(--color-background)] transition hover:bg-[var(--color-gold-muted)]"
               >
-                Claim a Founding Seat
+                Claim the Founding rate
               </a>
             </div>
           </div>

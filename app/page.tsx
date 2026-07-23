@@ -270,7 +270,7 @@ export default function Home() {
               <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
                 <div>
                   <p className="mb-2 text-sm uppercase tracking-[0.3em] text-[var(--color-gold)]">
-                    🗝 Founding Keepers — first 100, held forever
+                    🗝 Founding Keepers — the early-supporter rate, locked while you stay
                   </p>
                   <h2 className="font-display text-2xl font-medium text-white sm:text-3xl">
                     The Inner Circle. You don&apos;t get more of the app —
