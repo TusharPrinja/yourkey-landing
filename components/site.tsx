@@ -168,27 +168,9 @@ export function DownloadBadges() {
         </span>
       </a>
 
-      <a
-        href="#"
-        className="inline-flex items-center gap-3 rounded-2xl border border-[var(--color-gold)]/40 bg-[var(--color-card)] px-6 py-3 transition hover:border-[var(--color-gold)]/70 hover:bg-[var(--color-card-hover)]"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          className="text-[var(--color-gold)]"
-        >
-          <path d="M3.61 1.81c-.31.32-.5.81-.5 1.44v17.5c0 .63.19 1.12.5 1.44l.1.09L13.7 12.7v-.4L3.71 1.72l-.1.09zM16.9 15.9l-3.15-3.15v-.5l3.15-3.15.07.04 3.73 2.12c1.07.6 1.07 1.6 0 2.2l-3.73 2.12-.07.04zM4.5 21.7l9.2-9.2v-.5l-9.2-9.2c-.2.11-.35.32-.4.6v17.5c.05.28.2.49.4.6z" />
-        </svg>
-        <span className="text-left">
-          <span className="block text-[10px] uppercase tracking-wide text-[var(--color-text-secondary)]">
-            Get it on
-          </span>
-          <span className="block text-sm font-medium text-white">Google Play</span>
-        </span>
-      </a>
+      {/* iOS-only at launch — a Google Play badge would misrepresent
+          availability (ACL/UWG misleading-conduct exposure). Restore an
+          Android badge only when an Android build actually ships. */}
     </div>
   );
 }

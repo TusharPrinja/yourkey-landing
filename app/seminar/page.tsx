@@ -28,12 +28,12 @@ const MODULES = [
   {
     n: "02",
     title: "The Law of Attraction",
-    body: "What actually happens between a thought and a thing. Ask, believe, receive — and the neuroscience that explains why the old teachers were right.",
+    body: "What the tradition teaches happens between a thought and a thing. Ask, believe, receive — and the modern research that echoes what the old teachers taught.",
   },
   {
     n: "03",
     title: "The Subconscious Engine Room",
-    body: "Six doors into the part of your mind that runs 95% of your life. Autosuggestion, imagination, repetition — the mechanics behind every audio tool in the app.",
+    body: "Six doors into the part of your mind that quietly runs so much of your life. Autosuggestion, imagination, repetition — the mechanics behind every audio tool in the app.",
   },
   {
     n: "04",

@@ -154,13 +154,14 @@ export default function Home() {
                   12 Canon Mentors
                 </h3>
                 <p className="mb-4 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                  Wallace Wattles. James Allen. Napoleon Hill. Neville Goddard.
-                  Earl Nightingale. Joseph Murphy. Bob Proctor. Abraham-Hicks.
-                  William Walker Atkinson. Charles Haanel. Jim Rohn. Brian Tracy.
+                  A century of published teaching — from the pioneers who first
+                  named the Law of Attraction to the modern masters of goal
+                  achievement and the subconscious mind.
                 </p>
                 <p className="text-sm leading-relaxed text-[var(--color-text-dim)]">
-                  Not name-dropped — structurally embedded in every tool, every
-                  lesson, every word the app speaks to you.
+                  Not name-dropped — their published concepts are structurally
+                  embedded in every tool, every lesson, every word the app
+                  speaks to you.
                 </p>
               </div>
 
@@ -310,11 +311,11 @@ export default function Home() {
               />
               <ToolCard
                 title="Daily Affirmations"
-                body="Personalised affirmations matched to your goal — narrated, or recorded in your own voice. Murphy and Hill's autosuggestion, made daily."
+                body="Personalised affirmations matched to your goal — narrated, or recorded in your own voice. Classic autosuggestion, made daily."
               />
               <ToolCard
                 title="Mastermind Council"
-                body="Hill's Master Mind principle on demand. Bring any block or question — the council of twelve mentors answers in their own voices."
+                body="The mastermind principle on demand. Bring any block or question — twelve schools of teaching answer it, one clear guiding voice applying their published concepts."
               />
               <ToolCard
                 title="Vibration Raiser"

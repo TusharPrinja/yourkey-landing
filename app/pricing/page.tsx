@@ -79,7 +79,7 @@ export default function PricingPage() {
             {/* Growth — highlighted */}
             <div className="relative flex flex-col rounded-2xl border-2 border-[var(--color-gold)]/50 bg-[var(--color-card)] p-8 shadow-[0_0_60px_rgba(212,175,55,0.12)] lg:-translate-y-4">
               <span className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-[var(--color-gold)] px-4 py-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-background)]">
-                Most chosen
+                Recommended
               </span>
 
               <p className="mb-2 text-sm uppercase tracking-[0.3em] text-[var(--color-gold)]">
@@ -248,7 +248,7 @@ export default function PricingPage() {
                 </h3>
                 <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
                   Subscriptions renew automatically until you cancel. Cancel
-                  any time in your App Store or Google Play account settings
+                  any time in your App Store account settings
                   — it takes effect at the end of the period you&apos;ve
                   already paid for.
                 </p>
