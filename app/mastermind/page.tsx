@@ -29,7 +29,7 @@ const MENTORS: { name: string; concept: string }[] = [
   { name: "Earl Nightingale", concept: "We become what we think about" },
   { name: "Joseph Murphy", concept: "The power of the subconscious" },
   { name: "Bob Proctor", concept: "The paradigm shift" },
-  { name: "Abraham-Hicks", concept: "The emotional guidance scale" },
+  { name: "Abraham-Hicks", concept: "Alignment & releasing resistance" },
   {
     name: "William Walker Atkinson",
     concept: "The man who NAMED the Law of Attraction",

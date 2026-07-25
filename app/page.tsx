@@ -377,7 +377,7 @@ export default function Home() {
               <Step
                 number="1"
                 title="Forge your goal"
-                body="A guided ceremony walks you through the questions Hill insisted on a century ago — what, exactly, and why. Vague goals cannot be delivered. Yours becomes precise enough to manifest."
+                body="A guided ceremony walks you through the questions Hill insisted on a century ago — what, exactly, and why. Vague goals go nowhere. Yours becomes precise enough to practise with real clarity."
               />
               <Step
                 number="2"
@@ -387,7 +387,7 @@ export default function Home() {
               <Step
                 number="3"
                 title="Shrink the T"
-                body="As Resistance drops and Consistency, Emotion and gratitude rise, time-to-manifest shortens — that is the formula doing its work. The seminar teaches why. The tools do it. The Key remembers."
+                body="As Resistance drops and Consistency, Emotion and gratitude rise, the formula is designed to shrink your time-to-manifest. The seminar teaches why. The tools give you the daily practice. The Key remembers."
               />
             </div>
           </div>
