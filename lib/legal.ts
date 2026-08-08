@@ -35,21 +35,23 @@ We use your information to: provide, operate, and maintain Your Key service; per
 
 3. WHERE YOUR DATA LIVES & INTERNATIONAL TRANSFERS
 
-Our core infrastructure (Google Firebase Authentication, Firestore database, and Cloud Functions) runs in Google Cloud's United States region (us-central1). Personalised audio files are stored with Cloudflare (R2 object storage) with a United States–based backup in Firebase Storage. This means your personal data is transferred to and processed in the United States.
+Our core infrastructure runs on Microsoft Azure in the United Kingdom (UK South region): Azure Cosmos DB stores your account and app data, and Azure Functions provides sign-in and the services the app calls. Personalised audio files are stored with Cloudflare (R2 object storage). Your account data is stored and processed in the United Kingdom, and password-reset emails are delivered via Azure Communication Services in Europe.
 
-Where personal data is transferred outside the UK/EEA, we rely on recognised safeguards: our processors (Google, Microsoft, Cloudflare, Sentry, RevenueCat) are certified under the EU–US / UK–US Data Privacy Framework and/or process data under Standard Contractual Clauses and the UK International Data Transfer Addendum as part of their standard data-processing terms. Copies of the relevant mechanisms are available from each processor, or from us on request.
+The AI that writes your personalised content does NOT run on our servers or anyone else's: it runs entirely on your own device. The goals and reflections you write are never transmitted to an AI service to be processed. Some limited processing does take place outside the UK — our error-monitoring and subscription providers (Sentry, RevenueCat) operate internationally. The safeguards described below apply to those transfers.
+
+Where personal data is transferred outside the UK/EEA, we rely on recognised safeguards: our processors (Microsoft, Cloudflare, Sentry, RevenueCat) are certified under the EU–US / UK–US Data Privacy Framework and/or process data under Standard Contractual Clauses and the UK International Data Transfer Addendum as part of their standard data-processing terms. Copies of the relevant mechanisms are available from each processor, or from us on request.
 
 4. THIRD-PARTY PROCESSORS
 
 We use the following third-party services to operate Your Key:
 
-  Firebase / Google (Authentication, Database & Functions, USA): Your account credentials and app data are stored securely using Google Firebase. Firebase is governed by Google's Privacy Policy (policies.google.com/privacy).
+  Microsoft Azure (Authentication, Database & Functions): Your account credentials and app data are stored in the United Kingdom using Azure Cosmos DB, with sign-in provided by our own service on Azure Functions. Microsoft is governed by the Microsoft Privacy Statement (privacy.microsoft.com/privacystatement).
 
-  Microsoft Azure OpenAI Service (AI Content Generation): The goals and descriptions you enter, along with your Mastermind council conversation history, are sent to Microsoft Azure OpenAI Service to generate affirmations, visualisation scripts, and mentor responses. Microsoft processes this data within the Azure tenancy under the Azure OpenAI data-protection terms — data is NOT used to train OpenAI's foundation models and is NOT shared with OpenAI directly. We do not send your name or email address to Azure — only the goal content you explicitly enter into the App. Microsoft Azure is governed by the Microsoft Privacy Statement (privacy.microsoft.com).
+  ON-DEVICE AI (Content Generation & Voice — NO THIRD PARTY): Your affirmations, visualisation scripts, guidance and spoken audio are written and voiced by AI models that run ON YOUR PHONE. The models are downloaded to your device once, and from then on the goals and reflections you write are processed locally. They are not sent to Microsoft, OpenAI, or any other AI provider — there is no AI request leaving your device to be processed, so there is nothing for a third party to receive, store, or train on.
 
-  Microsoft Azure Speech Services (Text-to-Speech): Visualisation scripts and personalised audio clips are voiced by Microsoft Azure Neural TTS. Only the text being voiced is transmitted; no personal identifiers are sent. Covered by the same Microsoft Privacy Statement above.
+  ONE EXCEPTION, AND IT IS DELIBERATELY SMALL: The Downstream (a paid-plan tool that builds a practical action plan around your goal) sends the text needed for that request — the goal and context you enter into that tool — to our own authenticated service, which passes it to Microsoft Azure OpenAI Service for processing. Microsoft processes it under the Azure OpenAI data-protection terms: it is NOT used to train AI models and is NOT shared with OpenAI the company. We do not send your name or email address with the request. Everything you have written elsewhere in the App stays on your device. If you are offline, the tool builds your plan from our own written material instead. Microsoft Azure is governed by the Microsoft Privacy Statement (privacy.microsoft.com).
 
-  Cloudflare R2 (Audio Storage): Your personalised visualisation audio files are stored in Cloudflare R2. Cloudflare receives only the audio content and file paths; no personal identifiers. Cloudflare R2 is governed by their Privacy Policy (cloudflare.com/privacypolicy).
+  Cloudflare R2 (Content Delivery): Cloudflare R2 delivers the App's downloadable content to your device — the AI model pack and the Academy course videos. These downloads carry no personal identifiers and nothing you have written. Your personalised audio is generated and stored on your device, not in R2. Cloudflare is governed by their Privacy Policy (cloudflare.com/privacypolicy).
 
   RevenueCat (Subscription Management): If you subscribe to a paid plan, RevenueCat processes subscription events, entitlements, and purchase receipts on our behalf. RevenueCat receives your anonymised user ID (not your email or display name) and subscription status, solely to keep your paid entitlements in sync across your devices. RevenueCat is governed by their Privacy Policy (revenuecat.com/privacy).
 
@@ -106,7 +108,7 @@ By downloading, installing, or using the Your Key application ("the App"), you a
 
 2. DESCRIPTION OF SERVICE
 
-Your Key is a personal development application built on the law-of-attraction and self-improvement tradition. The App provides: personalised AI-generated affirmations built around your goals; guided audio visualisation sessions narrated by AI; educational content on manifestation, success philosophy, and subconscious-focused practice; structured practice tools (including journalling, breathwork, visualisation, and night-time routines); and AI features that apply the published concepts of historical self-improvement teachers to your goals.
+Your Key is a personal development application built on the law-of-attraction and self-improvement tradition. The App provides: personalised AI-generated affirmations built around your goals; guided audio visualisation sessions narrated by AI; educational content on manifestation, success philosophy, and subconscious-focused practice; structured practice tools (including journalling, breathwork, visualisation, and night-time routines); and AI features powered by Your Key Intelligence — the App's own library of teachings — applied to your goals.
 
 Your Key is a practice framework, not a promise. Personal outcomes — financial, professional, relational, or otherwise — depend on many factors outside the App, including your own actions and circumstances. We make no representation or guarantee that you will achieve any particular goal, income, relationship, health improvement, or other outcome by using the App, and testimonials or illustrative stories within the App are not a promise of results.
 
@@ -137,47 +139,55 @@ You agree not to: create fake accounts or use the App for fraudulent or deceptiv
 
 6. INTELLECTUAL PROPERTY
 
-All content within Your Key is the intellectual property of Your Key App Ltd (or its licensors) and is protected by applicable copyright, trade mark, and other intellectual property law. This includes, without limitation: all educational lessons, modules, and written content; all branding, design, visual elements, and user interface components; the AI mentor council ("Mastermind") system, its configuration, and all associated prompts; and the App's overall structure, features, and functionality. AI-generated affirmations, visualisation scripts, and mentor responses are produced for your personal use only and may not be reproduced, shared, or distributed for commercial purposes.
+All content within Your Key is the intellectual property of Your Key App Ltd (or its licensors) and is protected by applicable copyright, trade mark, and other intellectual property law. This includes, without limitation: all educational lessons, modules, and written content; all branding, design, visual elements, and user interface components; Your Key Intelligence — the App's own library of teachings — together with its configuration and all associated prompts; and the App's overall structure, features, and functionality. AI-generated affirmations, visualisation scripts, and Mastermind responses are produced for your personal use only and may not be reproduced, shared, or distributed for commercial purposes.
 
-7. AI-GENERATED CONTENT — GENERAL DISCLAIMER
+7. THE ON-DEVICE MODELS — THIRD-PARTY NOTICES
 
-Affirmations, guided visualisations, identity-blueprint content, and Mastermind responses are generated by artificial intelligence (Microsoft Azure OpenAI Service — primarily GPT-4o-class models — together with Microsoft Azure Speech Services for text-to-speech narration). While we design our systems with quality and safety in mind, AI-generated output may be imperfect, occasionally inaccurate, internally inconsistent, or unsuited to your individual circumstances. AI-generated content is provided for personal-development and motivational purposes only. Your Key does not guarantee any specific outcome from use of AI-generated content and is not responsible for decisions you make based on it.
+Your Key generates on your own device. To do that, the App downloads and runs open-weight models supplied by third parties. Those models remain the work of their authors and are provided to you under their own terms, which sit alongside these ones.
 
-7A. MENTOR CONCEPTS IN THE MASTERMIND
+Gemma is provided under and subject to the Gemma Terms of Use found at ai.google.dev/gemma/terms. Your use of the model within Your Key is additionally subject to Google's Gemma Prohibited Use Policy, found at ai.google.dev/gemma/prohibited_use_policy, which you agree to observe. The model weights we distribute have been configured by us for this App; they are not the original files as published, and Google has not reviewed, endorsed, or approved Your Key. Google claims no rights in the text the model produces for you — what you generate is yours, subject to section 6 above.
 
-The "Mastermind" feature within Your Key allows you to ask a question and receive an AI-generated response that APPLIES the published concepts of one of twelve teachers in the self-improvement tradition. As of the date of these Terms, these teachers are: Wallace D. Wattles, James Allen, Napoleon Hill, Neville Goddard, Earl Nightingale, Joseph Murphy, Bob Proctor, Abraham-Hicks (channelled by Esther Hicks), William Walker Atkinson, Charles F. Haanel, Jim Rohn, and Brian Tracy. We reserve the right to add, remove, or substitute teachers without notice.
+Kokoro, the voice model, and its supporting pronunciation data are likewise the work of their authors and are used under their own open licences.
+
+Nothing in this section grants you any right in those models beyond running them inside Your Key.
+
+8. AI-GENERATED CONTENT — GENERAL DISCLAIMER
+
+Affirmations, guided visualisations, identity-blueprint content, and Mastermind responses are generated by artificial intelligence that runs ON YOUR OWN DEVICE (a language model and a text-to-speech voice model, downloaded to your phone once and run locally thereafter — no AI request leaves your device). While we design our systems with quality and safety in mind, AI-generated output may be imperfect, occasionally inaccurate, internally inconsistent, or unsuited to your individual circumstances. AI-generated content is provided for personal-development and motivational purposes only. Your Key does not guarantee any specific outcome from use of AI-generated content and is not responsible for decisions you make based on it.
+
+8A. YOUR KEY INTELLIGENCE
+
+Your Key Intelligence is the App's own library of teachings. It was written for Your Key and distilled from the Your Key seminar, and it is what answers you in the Mastermind, in The Invisible Council, and wherever else the App generates guidance.
 
 You acknowledge and agree that:
 
-(a) Each Mastermind response is generated by artificial intelligence and is NOT the actual words, statements, opinions, or advice of the named teacher. The AI does not speak as any teacher and does not imitate any teacher's voice; it explains and applies their published concepts with attribution.
+(a) Every response is generated by artificial intelligence. It is not a person speaking, and it is not the words, statements, opinions, or advice of any teacher, author, or public figure. Your Key Intelligence speaks only in Your Key's own voice, and it does not name, quote, imitate, or claim to speak for anyone.
 
-(b) None of the named teachers, nor any of their estates, foundations, publishers, family members, employees, agents, or successors-in-interest (including, without limitation, the Napoleon Hill Foundation, Nightingale-Conant, SUCCESS Magazine, Jim Rohn International, Brian Tracy International, Brian Tracy Solutions, the Proctor Gallagher Institute, Sandy Gallagher, Abraham-Hicks Publications Inc., Esther Hicks, or any publisher of the named teachers' works) has reviewed, endorsed, sponsored, licensed, approved, affiliated with, or is otherwise associated with Your Key, the Mastermind feature, or the AI-generated responses, except where we have publicly stated otherwise in a signed written notice.
+(b) Your Key App Ltd is independent. No teacher, author, public figure, estate, foundation, or publisher has reviewed, endorsed, sponsored, licensed, approved, affiliated with, or is otherwise associated with Your Key, Your Key Intelligence, or any AI-generated response, except where we have publicly stated otherwise in a signed written notice. Where the App draws on the wider tradition of manifestation and success philosophy, it does so as a synthesis expressed in our own words — the ideas of that tradition are not owned by anyone, and we present none of them as anyone's endorsement of us.
 
-(c) The AI synthesises its responses from publicly available teachings of each named teacher, including works currently in the public domain (in particular, the published works of Wallace D. Wattles, James Allen, William Walker Atkinson, Charles F. Haanel, and the public-domain portions of Napoleon Hill's catalogue) and, for authors whose works remain under copyright in some jurisdictions (such as Neville Goddard, whose works are protected in the UK and EU until the end of 2042), from references used for the purpose of educational study, criticism, and review under the fair-dealing exceptions of the UK Copyright, Designs and Patents Act 1988 sections 29 and 30, the United States fair-use doctrine of 17 U.S.C. § 107, and equivalent provisions in other jurisdictions.
+(c) Your Key Intelligence is provided for personal reflection, education, and motivation only. It is not intended to be, and must not be relied upon as, medical, psychological, psychiatric, legal, financial, investment, or professional advice of any kind.
 
-(d) The Mastermind is provided for personal reflection, education, and motivation only. It is not intended to be, and must not be relied upon as, medical, psychological, psychiatric, legal, financial, investment, or professional advice of any kind.
+(d) If you hold rights that you believe are affected by any content in the App, you may contact us at hello@yourkey.app with reasonable proof of your interest, and we will review and, where appropriate, remove or amend the content within seven (7) days of receiving a well-formed request, without admission of liability.
 
-(e) If you are a named teacher, the estate of a named teacher, or the holder of rights in the published works of a named teacher, and you wish for that teacher to be removed from the Mastermind, you may contact us at hello@yourkey.app with reasonable proof of your interest, and we will remove the named teacher from the Mastermind feature within seven (7) days of receiving a well-formed request, without admission of liability.
-
-8. NO MEDICAL ADVICE & PRACTICE SAFETY
+9. NO MEDICAL ADVICE & PRACTICE SAFETY
 
 Your Key is a personal development app and is NOT a substitute for professional medical, psychological, or psychiatric advice, diagnosis, or treatment. The content, affirmations, visualisations, breathwork, and coaching provided within Your Key are intended solely for personal growth, motivation, and goal achievement, and any health-adjacent practice in the App is intended to sit alongside — never instead of — any care you receive. If you are experiencing mental health difficulties, emotional distress, depression, anxiety, or any other psychological or psychiatric condition, please consult a qualified healthcare professional immediately. Do not disregard or delay seeking professional medical advice because of anything you have read, heard, or experienced within Your Key.
 
 Breathwork safety: breath-retention and paced-breathing exercises are not suitable for everyone. Do not practise them while driving, standing, or in or near water, and consult a healthcare professional first if you are pregnant or have a cardiovascular, respiratory, blood-pressure, or seizure-related condition, or a history of fainting.
 
-8A. NO FINANCIAL ADVICE
+9A. NO FINANCIAL ADVICE
 
 The App's content frequently concerns goals about money, wealth, business, and career. All such content — including lessons, affirmations, visualisations, Mastermind responses, and action suggestions — is educational and motivational only. Nothing in the App is financial, investment, tax, or business advice; we are not a financial adviser and are not authorised or regulated by the Financial Conduct Authority. Do not make financial decisions based on App content without consulting a qualified professional. You are solely responsible for your financial decisions.
 
-9. LIMITATION OF LIABILITY
+10. LIMITATION OF LIABILITY
 
 To the fullest extent permitted by applicable law, Your Key App Ltd, its directors, employees, and agents shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from or in connection with your use of the App. Our total cumulative liability for any claim arising from or related to these terms or your use of the App shall not exceed the total amount you have paid in subscription fees in the twelve months immediately preceding the claim. Nothing in these terms excludes or limits liability for death or personal injury caused by negligence, for fraud, or for any other liability that cannot be excluded by law, and nothing in these terms affects your non-waivable statutory consumer rights.
 
-10. GOVERNING LAW
+11. GOVERNING LAW
 
 These Terms of Service are governed by and construed in accordance with the laws of England and Wales. Any disputes arising under or in connection with these terms shall be subject to the exclusive jurisdiction of the courts of England and Wales, except that consumers resident elsewhere retain any protection afforded by mandatory provisions of the law of their country of residence.
 
-11. CONTACT
+12. CONTACT
 
 Your Key App Ltd
 Company number 17047088 (England and Wales)
