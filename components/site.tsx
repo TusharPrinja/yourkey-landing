@@ -23,7 +23,7 @@ export function SiteNav() {
       <nav className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-6 py-4">
         <Link href="/" className="flex items-center gap-3">
           <Image
-            src="/logo.png"
+            src="/app-icon.png"
             alt="Your Key"
             width={32}
             height={32}
@@ -46,7 +46,7 @@ export function SiteNav() {
           </div>
 
           <a
-            href="#download"
+            href="https://apps.apple.com/app/id6790191980"
             className="whitespace-nowrap rounded-full border border-[var(--color-gold)]/40 bg-[var(--color-gold)]/10 px-5 py-2 text-sm font-medium text-[var(--color-gold)] transition hover:bg-[var(--color-gold)]/20"
           >
             Download
@@ -64,7 +64,7 @@ export function SiteFooter() {
         <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-between sm:gap-6 w-full">
           <div className="flex items-center gap-3">
             <Image
-              src="/logo.png"
+              src="/app-icon.png"
               alt="Your Key"
               width={32}
               height={32}

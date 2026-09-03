@@ -29,7 +29,7 @@ export const metadata: Metadata = {
       "AI-personalized manifestation practices. 12 canon mentors. One formula.",
     url: "https://yourkey.app",
     siteName: "Your Key",
-    images: [{ url: "/logo.png", width: 1024, height: 1024 }],
+    images: [{ url: "/app-icon.png", width: 1024, height: 1024 }],
     locale: "en_GB",
     type: "website",
   },
@@ -38,10 +38,10 @@ export const metadata: Metadata = {
     title: "Your Key — The science of manifestation",
     description:
       "AI-personalized manifestation practices. 12 canon mentors. One formula.",
-    images: ["/logo.png"],
+    images: ["/app-icon.png"],
   },
   icons: {
-    icon: "/logo.png",
+    icon: "/app-icon.png",
   },
 };
 

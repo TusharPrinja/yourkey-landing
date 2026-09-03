@@ -36,7 +36,7 @@ export default function Home() {
           {/* The Key — the brand IS the object */}
           <div className="mb-10">
             <Image
-              src="/logo.png"
+              src="/app-icon.png"
               alt="Your Key"
               width={150}
               height={150}
@@ -225,7 +225,7 @@ export default function Home() {
               <div className="grid gap-10 md:grid-cols-[auto_1fr] md:items-center">
                 <div className="flex justify-center md:justify-start">
                   <Image
-                    src="/logo.png"
+                    src="/app-icon.png"
                     alt="The Key"
                     width={96}
                     height={96}
