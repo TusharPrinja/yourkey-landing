@@ -147,7 +147,7 @@ export function DownloadBadges() {
   return (
     <div id="download" className="flex flex-wrap items-center justify-center gap-4">
       <a
-        href="#"
+        href="https://apps.apple.com/app/id6790191980"
         className="inline-flex items-center gap-3 rounded-2xl border border-[var(--color-gold)]/40 bg-[var(--color-card)] px-6 py-3 transition hover:border-[var(--color-gold)]/70 hover:bg-[var(--color-card-hover)]"
       >
         <svg
