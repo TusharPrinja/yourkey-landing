@@ -53,6 +53,8 @@ p{margin:0}.lede{font-size:17px;line-height:1.55;color:var(--mute)}
 .pill{align-self:flex-start;padding:6px 12px;border-radius:999px;background:var(--wash);border:1px solid var(--line);color:var(--kicker);font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
 .cta{display:flex;align-items:center;justify-content:center;min-height:56px;padding:0 18px;border-radius:14px;background:var(--accent);color:var(--on);font-weight:750;font-size:17px;text-decoration:none;text-align:center}
 .cta:focus-visible,.ghost:focus-visible,summary:focus-visible,.plan:focus-within{outline:3px solid var(--text);outline-offset:3px}
+.price{display:flex;align-items:baseline;gap:8px;margin-top:2px}.price b{font-size:46px;line-height:1;font-weight:750;letter-spacing:-.02em;font-variant-numeric:tabular-nums}.price span{font-size:18px;color:var(--mute)}
+.billed{font-size:15.5px;color:var(--mute);margin-top:-6px}
 .second{text-align:center;font-size:15px;font-weight:600;color:var(--kicker);text-decoration:none;padding:4px}
 .trust{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;list-style:none;margin:2px 0 0;padding:0;font-size:12.5px;color:var(--mute)}
 .trust li::before{content:"✓ ";color:var(--accent);font-weight:700}
@@ -128,8 +130,10 @@ footer nav{display:flex;flex-wrap:wrap;gap:16px;font-size:14px}footer nav a{colo
     <p class="lede">It runs your week as a leader — your people, the decisions you keep moving to next week, the leader traits one at a time, and your head. Inside Your Key, the free iPhone app.</p>
     <div class="offer">
       <span class="pill buy">18% less than in the app</span>
-      <a class="cta buy" href="#plans" data-preview>Join Leadership — £64.99 a year</a>
-      <a class="second buy" href="#plans" data-preview>Or £12.99 a month</a>
+      <div class="price buy"><b>£5.42</b><span>a month</span></div>
+      <p class="billed buy">Billed £64.99 once a year.</p>
+      <a class="cta buy" href="#plans" data-preview>Join Leadership</a>
+      <a class="second buy" href="#plans" data-preview>Or pay £12.99 month to month</a>
       <ul class="trust buy"><li>Full refund within 14 days</li><li>Apple Pay and cards</li><li>Secure checkout by Stripe</li></ul>
       <div class="android-only note">
         <p>Your Key is on iPhone for now.</p>
@@ -232,7 +236,7 @@ footer nav{display:flex;flex-wrap:wrap;gap:16px;font-size:14px}footer nav a{colo
   <section id="plans" class="stack" data-sticky-off>
     <p class="k">Choose your plan</p>
     <div class="plans buy">
-      <label class="plan"><input type="radio" name="plan" value="yearly" checked><span class="radio"></span><span class="txt"><b>Yearly</b><span>£5.42 a month, billed £64.99 once a year</span></span><span class="best">Best value</span></label>
+      <label class="plan"><input type="radio" name="plan" value="yearly" checked><span class="radio"></span><span class="txt"><b>Yearly</b><span>£5.42 a month, billed £64.99 once a year</span></span><span class="best">Save £90.89 a year</span></label>
       <label class="plan"><input type="radio" name="plan" value="monthly"><span class="radio"></span><span class="txt"><b>Monthly</b><span>£12.99, billed every month</span></span></label>
       <a class="cta cta-y" href="#plans" data-preview>Join Leadership — £64.99 a year</a>
       <a class="cta cta-m" href="#plans" data-preview>Join Leadership — £12.99 a month</a>
@@ -260,9 +264,9 @@ footer nav{display:flex;flex-wrap:wrap;gap:16px;font-size:14px}footer nav a{colo
 
   <section class="end stack" data-sticky-off>
     <h2>Start today, with fourteen days to change your mind.</h2>
-    <p class="mute">£64.99 a year, or £12.99 a month.</p>
-    <a class="cta buy" href="#plans" data-preview>Join Leadership — £64.99 a year</a>
-    <a class="second buy" href="#plans" data-preview>Or £12.99 a month</a>
+    <p class="mute">£5.42 a month, billed £64.99 once a year. Or £12.99 month to month.</p>
+    <a class="cta buy" href="#plans" data-preview>Join Leadership</a>
+    <a class="second buy" href="#plans" data-preview>Or pay £12.99 month to month</a>
       <div class="android-only note">
         <p>Your Key is on iPhone for now.</p>
         <a class="ghost" href="mailto:hello@yourkey.app?subject=Android%3A%20the%20Leadership%20package">Email me when it is on Android</a>
