@@ -64,6 +64,9 @@ p{margin:0}.lede{font-size:17px;line-height:1.55;color:var(--mute)}
 .us b{color:var(--kicker)}.us p{font-family:var(--serif);font-size:20px;line-height:1.4}
 .part{padding:16px 0;border-top:1px solid var(--rule2);display:flex;flex-direction:column;gap:6px}
 .part .k{letter-spacing:.16em}.part p{font-size:15px;line-height:1.53;color:var(--mute)}
+.part ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+.part li{position:relative;padding-left:18px;font-size:15.5px;line-height:1.45;color:var(--mute)}
+.part li::before{content:"";position:absolute;left:2px;top:.58em;width:6px;height:6px;border-radius:50%;background:var(--accent)}
 .door{padding:18px;border-radius:20px;background:var(--card);border:1px solid var(--rule);display:flex;flex-direction:column;gap:6px}
 .door b{font-size:17px;line-height:1.4}.door p{font-size:15px;line-height:1.53;color:var(--mute)}
 .safety{padding:16px 18px;border-radius:16px;border:1px solid var(--line);font-size:14.5px;line-height:1.55;color:var(--mute)}
@@ -131,10 +134,10 @@ footer nav{display:flex;flex-wrap:wrap;gap:16px;font-size:14px}footer nav a{colo
     <div class="offer">
       <span class="pill buy">18% less than in the app</span>
       <div class="price buy"><b>£5.42</b><span>a month</span></div>
-      <p class="billed buy">Billed £64.99 once a year.</p>
+      <p class="billed buy">Billed £64.99 once a year — £1.25 a week.</p>
       <a class="cta buy" href="#plans" data-preview>Join Time</a>
       <a class="second buy" href="#plans" data-preview>Or pay £12.99 month to month</a>
-      <ul class="trust buy"><li>Full refund within 14 days</li><li>Apple Pay and cards</li><li>Secure checkout by Stripe</li></ul>
+      <ul class="trust buy"><li>Full refund within 14 days</li><li>Cancel any time</li><li>Apple Pay and cards</li><li>Secure checkout by Stripe</li></ul>
       <div class="android-only note">
         <p>Your Key is on iPhone for now.</p>
         <a class="ghost" href="mailto:hello@yourkey.app?subject=Android%3A%20the%20Time%20package">Email me when it is on Android</a>
@@ -185,10 +188,10 @@ footer nav{display:flex;flex-wrap:wrap;gap:16px;font-size:14px}footer nav a{colo
     <p class="k">What is inside</p>
     <h2>One system, four parts.</h2>
     <div>
-      <div class="part"><p class="k">MACHINE</p><p>A day plan in twelve seconds, a block timer that asks what pulled you out, a ledger in three taps, and your own planning-fallacy ratio.</p></div>
-      <div class="part"><p class="k">CRAFT</p><p>What is stopping you, classified into the four reasons the research names, with the move for each — against a task on today&#39;s plan, never a generic one.</p></div>
-      <div class="part"><p class="k">HEAD</p><p>The morning picture with the obstacle in it, the evening window, the reset after a lost day, who you are in your own voice. Never shown to anyone, never used to train anything.</p></div>
-      <div class="part"><p class="k">COURSE</p><p>Every lesson filed next to the tool it teaches, and the lesson cards that bring the right one back when your own numbers say so.</p></div>
+      <div class="part"><p class="k">Every day</p><ul><li>A day plan in 12 seconds</li><li>A block timer that asks what pulled you out</li><li>A three-tap ledger at night</li><li>How long things really take you, against your guess</li></ul></div>
+      <div class="part"><p class="k">The skills</p><ul><li>Why you put it off, from four reasons the research names</li><li>The move for each reason</li><li>Always on a real task from today’s plan</li></ul></div>
+      <div class="part"><p class="k">Your head</p><ul><li>A morning picture of the day, and what could stop it</li><li>An evening window to close the day</li><li>A reset after a lost day</li><li>Never shown to anyone, never used to train anything</li></ul></div>
+      <div class="part"><p class="k">The course</p><ul><li>Every lesson next to the tool it teaches</li><li>Lesson cards that come back when your numbers say so</li></ul></div>
     </div>
   </section>
 

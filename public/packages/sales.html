@@ -64,6 +64,9 @@ p{margin:0}.lede{font-size:17px;line-height:1.55;color:var(--mute)}
 .us b{color:var(--kicker)}.us p{font-family:var(--serif);font-size:20px;line-height:1.4}
 .part{padding:16px 0;border-top:1px solid var(--rule2);display:flex;flex-direction:column;gap:6px}
 .part .k{letter-spacing:.16em}.part p{font-size:15px;line-height:1.53;color:var(--mute)}
+.part ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+.part li{position:relative;padding-left:18px;font-size:15.5px;line-height:1.45;color:var(--mute)}
+.part li::before{content:"";position:absolute;left:2px;top:.58em;width:6px;height:6px;border-radius:50%;background:var(--accent)}
 .door{padding:18px;border-radius:20px;background:var(--card);border:1px solid var(--rule);display:flex;flex-direction:column;gap:6px}
 .door b{font-size:17px;line-height:1.4}.door p{font-size:15px;line-height:1.53;color:var(--mute)}
 .safety{padding:16px 18px;border-radius:16px;border:1px solid var(--line);font-size:14.5px;line-height:1.55;color:var(--mute)}
@@ -131,10 +134,10 @@ footer nav{display:flex;flex-wrap:wrap;gap:16px;font-size:14px}footer nav a{colo
     <div class="offer">
       <span class="pill buy">18% less than in the app</span>
       <div class="price buy"><b>£5.42</b><span>a month</span></div>
-      <p class="billed buy">Billed £64.99 once a year.</p>
+      <p class="billed buy">Billed £64.99 once a year — £1.25 a week.</p>
       <a class="cta buy" href="#plans" data-preview>Join Sales</a>
       <a class="second buy" href="#plans" data-preview>Or pay £12.99 month to month</a>
-      <ul class="trust buy"><li>Full refund within 14 days</li><li>Apple Pay and cards</li><li>Secure checkout by Stripe</li></ul>
+      <ul class="trust buy"><li>Full refund within 14 days</li><li>Cancel any time</li><li>Apple Pay and cards</li><li>Secure checkout by Stripe</li></ul>
       <div class="android-only note">
         <p>Your Key is on iPhone for now.</p>
         <a class="ghost" href="mailto:hello@yourkey.app?subject=Android%3A%20the%20Sales%20package">Email me when it is on Android</a>
@@ -185,10 +188,10 @@ footer nav{display:flex;flex-wrap:wrap;gap:16px;font-size:14px}footer nav a{colo
     <p class="k">What is inside</p>
     <h2>One system, four parts.</h2>
     <div>
-      <div class="part"><p class="k">MACHINE</p><p>A pipeline that shows what is going cold, a log that takes one tap, and one number for today.</p></div>
-      <div class="part"><p class="k">CRAFT</p><p>Objections, discovery, the closes, your story bank — in your own words and your own numbers.</p></div>
-      <div class="part"><p class="k">HEAD</p><p>Call reluctance, the reset after a bad one, the identity underneath. Never shown to an admin, never used to train anything.</p></div>
-      <div class="part"><p class="k">COURSE</p><p>Thirteen modules, sixty-three lessons, each one sitting next to the tool it teaches.</p></div>
+      <div class="part"><p class="k">Every day</p><ul><li>Your pipeline, with what is going cold</li><li>A call log that takes one tap</li><li>One number for today</li></ul></div>
+      <div class="part"><p class="k">The skills</p><ul><li>Objections, questions and the close</li><li>Your story bank, in your own words and numbers</li></ul></div>
+      <div class="part"><p class="k">Your head</p><ul><li>Call reluctance, trained like the craft</li><li>The reset after a bad call</li><li>Never shown to an admin, never used to train anything</li></ul></div>
+      <div class="part"><p class="k">The course</p><ul><li>13 modules and 63 lessons</li><li>Each lesson next to the tool it teaches</li></ul></div>
     </div>
   </section>
 

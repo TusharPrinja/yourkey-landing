@@ -64,6 +64,9 @@ p{margin:0}.lede{font-size:17px;line-height:1.55;color:var(--mute)}
 .us b{color:var(--kicker)}.us p{font-family:var(--serif);font-size:20px;line-height:1.4}
 .part{padding:16px 0;border-top:1px solid var(--rule2);display:flex;flex-direction:column;gap:6px}
 .part .k{letter-spacing:.16em}.part p{font-size:15px;line-height:1.53;color:var(--mute)}
+.part ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+.part li{position:relative;padding-left:18px;font-size:15.5px;line-height:1.45;color:var(--mute)}
+.part li::before{content:"";position:absolute;left:2px;top:.58em;width:6px;height:6px;border-radius:50%;background:var(--accent)}
 .door{padding:18px;border-radius:20px;background:var(--card);border:1px solid var(--rule);display:flex;flex-direction:column;gap:6px}
 .door b{font-size:17px;line-height:1.4}.door p{font-size:15px;line-height:1.53;color:var(--mute)}
 .safety{padding:16px 18px;border-radius:16px;border:1px solid var(--line);font-size:14.5px;line-height:1.55;color:var(--mute)}
@@ -131,10 +134,10 @@ footer nav{display:flex;flex-wrap:wrap;gap:16px;font-size:14px}footer nav a{colo
     <div class="offer">
       <span class="pill buy">18% less than in the app</span>
       <div class="price buy"><b>£5.42</b><span>a month</span></div>
-      <p class="billed buy">Billed £64.99 once a year.</p>
+      <p class="billed buy">Billed £64.99 once a year — £1.25 a week.</p>
       <a class="cta buy" href="#plans" data-preview>Join Communication</a>
       <a class="second buy" href="#plans" data-preview>Or pay £12.99 month to month</a>
-      <ul class="trust buy"><li>Full refund within 14 days</li><li>Apple Pay and cards</li><li>Secure checkout by Stripe</li></ul>
+      <ul class="trust buy"><li>Full refund within 14 days</li><li>Cancel any time</li><li>Apple Pay and cards</li><li>Secure checkout by Stripe</li></ul>
       <div class="android-only note">
         <p>Your Key is on iPhone for now.</p>
         <a class="ghost" href="mailto:hello@yourkey.app?subject=Android%3A%20the%20Communication%20package">Email me when it is on Android</a>
@@ -185,10 +188,10 @@ footer nav{display:flex;flex-wrap:wrap;gap:16px;font-size:14px}footer nav a{colo
     <p class="k">What is inside</p>
     <h2>One system, four parts.</h2>
     <div>
-      <div class="part"><p class="k">MACHINE</p><p>A ledger in three taps — turns toward, repairs, one honest line — a before-card for the conversation that matters, and the seven-minute replay after the one that went wrong.</p></div>
-      <div class="part"><p class="k">CRAFT</p><p>The sentence in I-form, checked as you type. The apology with its six parts in the order that was measured. The ask, the no, the listening drill, your own pattern map.</p></div>
-      <div class="part"><p class="k">HEAD</p><p>Inner speech, the picture before with the obstacle in it, the evening window with the revision, the reset after a fight. Nothing about anyone is shared, ever.</p></div>
-      <div class="part"><p class="k">COURSE</p><p>Every lesson filed next to the tool it teaches, and the lesson cards that bring the right one back when your own ledger says so.</p></div>
+      <div class="part"><p class="k">Every day</p><ul><li>A three-tap ledger: turns toward, repairs, one honest line</li><li>A card to write before the talk that matters</li><li>A seven-minute replay after one that went wrong</li></ul></div>
+      <div class="part"><p class="k">The skills</p><ul><li>The I-sentence, checked as you type</li><li>The apology: six parts, in the order that was measured</li><li>The ask, the no, and a listening drill</li><li>Your own pattern map</li></ul></div>
+      <div class="part"><p class="k">Your head</p><ul><li>Inner speech for the hard moment</li><li>The picture before, and what could stop it</li><li>A reset after a fight</li><li>Nothing about anyone is ever shared</li></ul></div>
+      <div class="part"><p class="k">The course</p><ul><li>Every lesson next to the tool it teaches</li><li>Lesson cards that come back when your ledger says so</li></ul></div>
     </div>
   </section>
 
