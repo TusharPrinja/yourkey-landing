@@ -12,7 +12,7 @@
  */
 
 export const PRIVACY_POLICY = `PRIVACY POLICY
-Last updated: August 2026
+Last updated: September 2026
 
 Your Key is operated by Your Key App Ltd, a company registered in England and Wales (company number 17047088, registered office: 1 Stevenson Road, Hedgerley, Slough SL2 3YD, United Kingdom). Your Key App Ltd is the data controller for the personal data described in this policy.
 
@@ -27,7 +27,7 @@ When you use Your Key, we collect the following information:
   - Usage data: information about how you use the App, including features accessed and session frequency, to help us improve the service.
   - Device information: basic technical data such as your device platform and operating system version.
 
-We do not collect payment card details. All billing is handled directly by Apple (App Store) or Google (Play Store).
+We do not collect payment card details. Billing in the App is handled directly by Apple (App Store) or Google (Play Store). If you buy a package on our website, the payment is taken by Link, a Stripe service, and we receive the email address you paid with and a record of the purchase (see section 4).
 
 2. HOW WE USE YOUR INFORMATION
 
@@ -37,9 +37,9 @@ We use your information to: provide, operate, and maintain Your Key service; per
 
 Our core infrastructure runs on Microsoft Azure in the United Kingdom (UK South region): Azure Cosmos DB stores your account and app data, and Azure Functions provides sign-in and the services the app calls. Your personalised audio is generated and stored on your device. Cloudflare R2 delivers downloadable model files and Academy videos that contain no personal data.
 
-Most AI writing and voice generation runs entirely on your device. The paid-plan Downstream tool is the sole cloud-AI exception: when you use it, the goal and context entered for that request pass through our authenticated service to Microsoft Azure OpenAI Service. Section four explains that limited flow. Some additional processing takes place outside the UK through our error-monitoring and subscription providers (Sentry and RevenueCat). The safeguards described below apply to those transfers.
+Most AI writing and voice generation runs entirely on your device. The paid-plan Downstream tool is the sole cloud-AI exception: when you use it, the goal and context entered for that request pass through our authenticated service to Microsoft Azure OpenAI Service. Section four explains that limited flow. Some additional processing takes place outside the UK through our error-monitoring, subscription and website-payment providers (Sentry, RevenueCat and Stripe). The safeguards described below apply to those transfers.
 
-Where personal data is transferred outside the UK/EEA, we rely on recognised safeguards: our processors (Microsoft, Cloudflare, Sentry, RevenueCat) are certified under the EU–US / UK–US Data Privacy Framework and/or process data under Standard Contractual Clauses and the UK International Data Transfer Addendum as part of their standard data-processing terms. Copies of the relevant mechanisms are available from each processor, or from us on request.
+Where personal data is transferred outside the UK/EEA, we rely on recognised safeguards: our processors (Microsoft, Cloudflare, Sentry, RevenueCat, Stripe) are certified under the EU–US / UK–US Data Privacy Framework and/or process data under Standard Contractual Clauses and the UK International Data Transfer Addendum as part of their standard data-processing terms. Copies of the relevant mechanisms are available from each processor, or from us on request.
 
 4. THIRD-PARTY PROCESSORS
 
@@ -53,7 +53,9 @@ We use the following third-party services to operate Your Key:
 
   Cloudflare R2 (Content Delivery): Cloudflare R2 delivers the App's downloadable content to your device — the AI model pack and the Academy course videos. These downloads carry no personal identifiers and nothing you have written. Your personalised audio is generated and stored on your device, not in R2. Cloudflare is governed by their Privacy Policy (cloudflare.com/privacypolicy).
 
-  RevenueCat (Subscription Management): If you subscribe to a paid plan, RevenueCat processes subscription events, entitlements, and purchase receipts on our behalf. RevenueCat receives your anonymised user ID (not your email or display name) and subscription status, solely to keep your paid entitlements in sync across your devices. RevenueCat is governed by their Privacy Policy (revenuecat.com/privacy).
+  RevenueCat (Subscription Management): If you subscribe to a paid plan, RevenueCat processes subscription events, entitlements, and purchase receipts on our behalf. For purchases in the App, RevenueCat receives your anonymised user ID (not your email or display name) and subscription status, solely to keep your paid entitlements in sync across your devices. For a package bought on our website, RevenueCat also receives the email address you enter at checkout, which it uses to send you the link that unlocks the package in the App. RevenueCat is governed by their Privacy Policy (revenuecat.com/privacy).
+
+  Stripe and Link (Website Payments): If you buy a package on our website, it is sold through Link, a Stripe service, and Stripe acts as merchant of record. Stripe receives what you enter at checkout, such as your email address, card details and billing country, and uses it to take the payment, send your receipts, run your subscription and prevent fraud, under its own privacy policy (link.com/privacy and stripe.com/privacy). We receive the email address you paid with and the purchase record (the package, plan, amount and status), and use them to give you the package, answer your questions and make refunds. We never see your full card details.
 
   Sentry (Error Monitoring): When the app encounters a crash or unexpected error, Sentry receives a stack trace, device model, operating system version, and app version so we can diagnose and fix the issue. We configure Sentry so that it does NOT receive your email, display name, goals, or any content you have entered into the App (identifying details and console content are stripped or disabled before sending). Error data is retained for a limited period. Sentry is governed by their Privacy Policy (sentry.io/privacy).
 
@@ -61,7 +63,7 @@ We use the following third-party services to operate Your Key:
 
 We retain your account data for as long as your account remains active. If you request deletion of your account and associated data, we will process your request and delete all personal data within 30 days. In practice, the in-app "Delete Account" flow completes the cascade within ~60 seconds and you will receive a receipt ID for your records. You may keep this receipt ID and email hello@yourkey.app if you have any questions about your deletion.
 
-For accounting compliance (UK Companies Act 2006), we retain anonymised financial records (transaction timestamps, amounts, product SKU — with no UID, email, or device identifiers) for the legally required period (currently 6 years). All other data is permanently deleted.
+For accounting compliance (UK Companies Act 2006), we retain anonymised financial records (transaction timestamps, amounts, product SKU — with no UID, email, or device identifiers) for the legally required period (currently 6 years). All other data is permanently deleted. Stripe keeps its own records of website purchases under its own legal duties and privacy policy; deleting your account does not remove those or cancel a website purchase.
 
 6. YOUR RIGHTS (UK GDPR / EU GDPR)
 
@@ -98,7 +100,7 @@ hello@yourkey.app
 If you have any questions about this Privacy Policy, wish to exercise your data rights, or want to request account deletion, please contact us at the email address above.`;
 
 export const TERMS_OF_SERVICE = `TERMS OF SERVICE
-Last updated: August 2026
+Last updated: September 2026
 
 1. ACCEPTANCE OF TERMS
 
@@ -122,9 +124,11 @@ You are responsible for maintaining the confidentiality of your account credenti
 
 4. SUBSCRIPTIONS & BILLING
 
-Your Key offers a free tier and paid subscriptions. Current prices, billing periods, annual options, household options, and any eligible introductory offers are displayed in the App before purchase.
+Your Key offers a free tier and paid subscriptions. Current prices, billing periods, annual options, household options, and any eligible introductory offers are displayed in the App, or on our website for packages bought there, before purchase.
 
-Paid subscriptions renew automatically until cancelled. Subscriptions are billed through the applicable app store and are subject to its billing terms. You may cancel in your device's subscription settings; cancellation takes effect at the end of the current billing period. Nothing in these terms affects your non-waivable statutory rights or refund rights available through the app store.
+Paid subscriptions renew automatically until cancelled. Subscriptions bought in the App are billed through the applicable app store and are subject to its billing terms. You may cancel them in your device's subscription settings; cancellation takes effect at the end of the current billing period. Nothing in these terms affects your non-waivable statutory rights or refund rights available through the app store.
+
+Packages bought on our website (yourkey.app) are sold through Link, a Stripe service. Stripe acts as merchant of record for these purchases: it takes the payment, sends your receipts, and its own terms apply to the payment. The charge appears on your statement as LINK.COM* YOURKEY. The price is charged when you buy and then at the start of each billing period, until you cancel; there is no free trial on the website. You may cancel at any time in the Recurring section of your Link account at link.com, or from the Packages tab in the App; cancellation takes effect at the end of the current billing period. Deleting your Your Key account does not cancel a website purchase. If you ask within 14 days of your first payment for a package, we will refund that payment in full: email hello@yourkey.app. This is in addition to your statutory rights.
 
 5. ACCEPTABLE USE
 
