@@ -23,6 +23,7 @@ When you use Your Key, we collect the following information:
   - Account information: your email address and display name when you create an account.
   - Goal data: the goals, intentions, and descriptions you enter into the App. This content is central to the service and is used to generate your personalised AI content.
   - Inner-work data (sensitive by nature): the goals and reflections you write can touch on your health, your relationships, your finances, and how you feel about yourself — for example, The Reprogramming asks you to describe a limiting belief, a memory connected to it, and how you would rewrite it. Because this may reveal sensitive information (including information about your health or emotional life), we ask for your explicit, separate consent — shown to you in the App before this content is processed, and kept apart from your acceptance of these terms — as our lawful basis for processing it (Article 9 UK & EU GDPR). It is used solely to run the features for you, is never used for advertising or profiling, and is deleted with your account. You can withdraw this consent at any time by deleting your account (Profile → Delete Account), which erases all of your data.
+  - Package data (sensitive where it concerns your health): what you save inside a package, such as the people and conversations in Communication or the plans in Time. In the free Quitting package this includes the habit you are changing, whether you are stopping or cutting down, the urges and slips you log, your plans and reasons, and the people you list. That is information about your health, so we process it only with the explicit permission you give separately from our Terms, only to run the package for you, and never for advertising, profiling or sale. It is stored in your account in the United Kingdom and deleted when you delete your account.
   - Voice recordings: features such as Subliminal Mode, the Night Session, and the Deep Track invite you to record your own voice. These recordings are stored ON YOUR DEVICE ONLY — they are never uploaded to our servers, and deleting the App deletes them.
   - Usage data: information about how you use the App, including features accessed and session frequency, to help us improve the service.
   - Device information: basic technical data such as your device platform and operating system version.
@@ -136,7 +137,7 @@ You agree to use the App lawfully and to respect its security, content, infrastr
 
 6. INTELLECTUAL PROPERTY
 
-App content, branding, design, educational material, configuration, and functionality belong to Your Key App Ltd or its licensors and are protected by applicable law. AI-generated content is provided for your personal use and may not be commercially reproduced or redistributed without permission.
+App content, branding, design, educational material, configuration, and functionality belong to Your Key App Ltd or its licensors and are protected by applicable law. The packages teach methods in our own words and name no teacher. Our free seminars credit the teachers, authors and researchers whose ideas they discuss; book titles and method names mentioned there are trade marks of their owners, used only to identify their work. None of those people, their estates or their publishers has reviewed, endorsed, sponsored or is affiliated with Your Key. AI-generated content is provided for your personal use and may not be commercially reproduced or redistributed without permission.
 
 7. ON-DEVICE MODELS AND THIRD-PARTY TERMS
 
@@ -153,6 +154,8 @@ Where the App or its store materials quote a named historical author, the quotat
 9. PRACTICE SAFETY
 
 Your Key is not a substitute for professional care. Health-adjacent practices are intended to sit alongside appropriate care. Consult a qualified professional for advice relevant to your circumstances.
+
+The Quitting package is a free self-help tool for adults who have decided to change a habit. It is not a medical device and not treatment: it does not diagnose, treat or monitor any medical or mental health condition, it does not manage withdrawal, and it does not replace a doctor, pharmacist or specialist service. Stopping some substances suddenly, including alcohol after heavy daily drinking and benzodiazepines, can be dangerous; speak to a doctor or a local service before you change how much you use. If you are in danger, call your local emergency number.
 
 Practise breathwork in a safe setting. Avoid breath-retention practices while driving, standing, or in or near water. Seek professional guidance first where a health condition may make the practice unsuitable.
 
