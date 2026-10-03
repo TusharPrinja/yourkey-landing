@@ -12,7 +12,7 @@
  */
 
 export const PRIVACY_POLICY = `PRIVACY POLICY
-Last updated: September 2026
+Last updated: October 2026
 
 Your Key is operated by Your Key App Ltd, a company registered in England and Wales (company number 17047088, registered office: 1 Stevenson Road, Hedgerley, Slough SL2 3YD, United Kingdom). Your Key App Ltd is the data controller for the personal data described in this policy.
 
@@ -51,6 +51,8 @@ We use the following third-party services to operate Your Key:
   ON-DEVICE AI (Content Generation & Voice): Your affirmations, visualisation scripts, guidance and spoken audio are written and voiced by AI models that run on your phone. The models are downloaded to your device once, and this content is then processed locally.
 
   DOWNSTREAM CLOUD-AI EXCEPTION: The Downstream (a paid-plan tool that builds a practical action plan around your goal) sends the text needed for that request — the goal and context you enter into that tool — to our own authenticated service, which passes it to Microsoft Azure OpenAI Service for processing. Microsoft processes it under the Azure OpenAI data-protection terms: it is not used to train AI models and is not shared with OpenAI the company. We do not send your name or email address with the request. Content entered elsewhere in the App remains outside this request. Microsoft Azure is governed by the Microsoft Privacy Statement (privacy.microsoft.com).
+
+  WIKIPEDIA LOOKUPS: When you ask the Mastermind or the Invisible Council something, the App may look up the topic, a word or two such as "drone racing", on Wikipedia, to quote a fact rather than guess one. Only that topic is sent, never your goal, your name or what you wrote. Wikipedia (the Wikimedia Foundation, in the United States) receives the topic and your device's internet address, as with any website visit. Wikimedia is governed by its Privacy Policy (foundation.wikimedia.org/wiki/Policy:Privacy_policy).
 
   Cloudflare R2 (Content Delivery): Cloudflare R2 delivers the App's downloadable content to your device — the AI model pack and the Academy course videos. These downloads carry no personal identifiers and nothing you have written. Your personalised audio is generated and stored on your device, not in R2. Cloudflare is governed by their Privacy Policy (cloudflare.com/privacypolicy).
 
