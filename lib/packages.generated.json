@@ -1,0 +1,84 @@
+{
+  "$note": "GENERATED from yourkey-app (lib/web/packagePages.ts, lib/packageCards.ts, lib/packageForWho.ts) by scripts/web/package-pages.ts --cards. Do not edit here: change the app and regenerate.",
+  "prices": {
+    "appMonthly": "£15.99",
+    "appYearly": "£79.99",
+    "webMonthly": "£12.99",
+    "webYearly": "£64.99",
+    "webYearlyPerMonth": "£5.42"
+  },
+  "paid": [
+    {
+      "id": "sales",
+      "name": "Sales Mastery",
+      "headline": "Sell with a plan and a steady mind.",
+      "forWho": "Whether you've never sold or you sell for a living.",
+      "sub": "It runs your sales week — your numbers, your objections, your calls or your posts, and your subconscious mind. Inside Your Key, the free iPhone app.",
+      "inside": [
+        "Your pipeline, or your posts and what each one brought",
+        "Objections and doubts answered, on a call or on the page",
+        "The reset after a bad call or a quiet day"
+      ],
+      "accent": "#6FC5D6",
+      "kicker": "#8ED3E0",
+      "href": "/sales"
+    },
+    {
+      "id": "time",
+      "name": "Time Mastery",
+      "headline": "Plan the day around the task that matters.",
+      "forWho": "Whether you've never planned a day or you plan every one.",
+      "sub": "It runs your week — your hours, your key task, your blocks, and your subconscious mind. For a job, shifts, study, caring, a side project, the weeks between jobs, or retirement. Inside Your Key, the free iPhone app.",
+      "inside": [
+        "A day plan in 12 seconds",
+        "Why you put it off, from four reasons the research names",
+        "A reset after a lost day"
+      ],
+      "accent": "#B8A6F2",
+      "kicker": "#C8BAF6",
+      "href": "/time"
+    },
+    {
+      "id": "communication",
+      "name": "Communication Mastery",
+      "headline": "Say it without blame. Repair after a fight.",
+      "forWho": "Whether hard conversations are hard for you or you want to master them.",
+      "sub": "It runs your relationships — what you say, what you hear, what you repair, and your subconscious mind. Inside Your Key, the free iPhone app.",
+      "inside": [
+        "A plan to write before the talk that matters",
+        "The apology: six parts, the strongest first, as a study ranked them",
+        "A reset after a fight"
+      ],
+      "accent": "#E8A0B4",
+      "kicker": "#EFB6C6",
+      "href": "/communication"
+    },
+    {
+      "id": "leadership",
+      "name": "Leadership Mastery",
+      "headline": "Lead a team, a family, or yourself.",
+      "forWho": "Whether you've never led anyone or you've led for years.",
+      "sub": "Your people, the decisions you keep putting off, the leader traits one a week, and your subconscious mind. At work, at home, among friends or in a club. Inside Your Key, the free iPhone app.",
+      "inside": [
+        "The people you lead, and what you owe each one",
+        "A decision card for the one you keep moving",
+        "Eleven traits of a leader, one a week"
+      ],
+      "accent": "#A9C48A",
+      "kicker": "#BBD1A0",
+      "href": "/leadership"
+    }
+  ],
+  "free": {
+    "id": "quitting",
+    "name": "Quitting Addictions",
+    "headline": "For stopping something, or cutting down.",
+    "forWho": "Whether you're thinking about it, ready, or already stopped.",
+    "inside": [
+      "A map of where it catches you, and a plan for each",
+      "A timer for the moment an urge comes",
+      "The way to the people who can do more"
+    ],
+    "price": "Free — always"
+  }
+}

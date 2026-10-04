@@ -1,23 +1,19 @@
 import type { MetadataRoute } from "next";
 
-/**
- * app/sitemap.ts — Next.js App Router convention, served at /sitemap.xml.
- * Lists every public marketing route so search engines can discover and
- * index the full 6-page (+legal) IA. Static site, so a plain array is
- * enough — no need to generate this from a CMS or database.
- */
+/** app/sitemap.ts — every public page, served at /sitemap.xml (rebuilt 2026-10-04). */
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://yourkey.app";
   const now = new Date();
-
+  const page = (path: string, priority: number, changeFrequency: "weekly" | "monthly" | "yearly" = "monthly") =>
+    ({ url: `${base}${path}`, lastModified: now, changeFrequency, priority });
   return [
-    { url: `${base}/`, lastModified: now, changeFrequency: "weekly", priority: 1 },
-    { url: `${base}/seminar`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
-    { url: `${base}/tools`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
-    { url: `${base}/mastermind`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${base}/pricing`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${base}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${base}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${base}/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+    page("/", 1, "weekly"),
+    page("/packages", 0.9, "weekly"),
+    page("/tools", 0.8),
+    page("/pricing", 0.8),
+    page("/support", 0.7),
+    page("/about", 0.6),
+    page("/privacy", 0.3, "yearly"),
+    page("/terms", 0.3, "yearly"),
   ];
 }

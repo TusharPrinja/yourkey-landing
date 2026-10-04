@@ -1,461 +1,149 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  SiteNav,
-  SiteFooter,
-  DownloadBadges,
-  MentorDisclaimer,
-} from "@/components/site";
+import { AppStoreButton, ComingTag, Faq, FreeCard, Kicker, PackageCard, Page, Section } from "@/components/site";
+import { FREE_PACKAGE, PAID_PACKAGES, PACKAGE_PRICES, PRACTICE, PRIVACY_PLAINLY, RESULTS, SITE, TOOLKIT } from "@/lib/site";
 
 /**
- * yourkey.app — permanent brand home. Rebuilt 2026-07-07 (shared-chrome pass).
+ * yourkey.app — the home page (rebuilt 2026-10-04 to the app's own design and words).
  *
- * Register: the temple, not the SaaS page. Deep navy, ornate gold, ceremony
- * language — the same aesthetic as the app itself.
- *
- * Content verified against the shipped app (2026-07-07):
- *  - Formula T = R / f(C·E·g) — canon per the filmed seminar M1.2
- *  - 11-module FILMED seminar (71 lessons) wired via Bunny + The Examination
- *  - Tool list current: The Magnet + Vibration Raiser + Habit Forge +
- *    The Prescription + Practice Depth in; AI Coach deleted (absorbed into
- *    the Mastermind Council, 2026-05-22)
- *
- * Act-as-if-live: the app IS live in every line of copy. Download CTAs run
- * through the shared DownloadBadges component (href="#" — the one seam to
- * swap on launch day).
+ * Everything here is what the app does today, in the words of its App Store listing and its
+ * package pages. Nothing on this page promises the reader a result: Your Key is a practice, and
+ * the page says so in the same sentence the listing uses.
  */
 export default function Home() {
   return (
-    <>
-      <SiteNav />
-      <main className="relative flex flex-col">
-        {/* ─── Hero ───────────────────────────────────────────────────────── */}
-        <section className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-6 py-24 text-center">
-          <div className="aurora-glow pointer-events-none absolute inset-0 -z-10" />
-
-          {/* The Key — the brand IS the object */}
-          <div className="mb-10">
-            <Image
-              src="/app-icon.png"
-              alt="Your Key"
-              width={150}
-              height={150}
-              priority
-              className="drop-shadow-[0_0_40px_rgba(212,175,55,0.35)]"
-            />
-          </div>
-
-          <p className="mb-6 font-sans text-sm uppercase tracking-[0.4em] text-[var(--color-gold)]">
-            Your Key
-          </p>
-
-          <h1 className="mb-6 max-w-4xl font-display text-4xl font-medium leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-            The door was never locked.
-          </h1>
-
-          <p className="mb-8 max-w-2xl text-base leading-relaxed text-[var(--color-text-secondary)] sm:text-lg md:text-xl">
-            A filmed manifestation seminar, twenty-two daily practice tools,
-            and twelve canon mentors — engineered around one formula:{" "}
-            <span className="font-mono text-white">T&nbsp;=&nbsp;R&nbsp;/&nbsp;f(C·E·g)</span>.
-          </p>
-
-          <div className="mb-4">
-            <DownloadBadges />
-          </div>
-
-          <a
-            href="#seminar"
-            aria-label="Scroll down"
-            className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-3 text-[var(--color-text-dim)] transition hover:text-[var(--color-gold)]"
-          >
-            <span className="text-[10px] uppercase tracking-[0.3em]">Enter</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="animate-bounce"
-            >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </a>
-        </section>
-
-        {/* ─── The Seminar — the crown jewel ─────────────────────────────── */}
-        <section id="seminar" className="relative px-6 py-24 sm:py-32">
-          <div className="mx-auto max-w-5xl text-center">
-            <p className="mb-4 text-sm uppercase tracking-[0.4em] text-[var(--color-gold)]">
-              The Academy
+    <Page>
+      {/* ─── The one sentence ─────────────────────────────────────────────────────────────── */}
+      <section className="glow px-4 pb-16 pt-16 sm:px-6 sm:pb-24 sm:pt-28">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="flex flex-col gap-6">
+            <Kicker>Your Key · on iPhone</Kicker>
+            <h1 className="taught text-[42px] leading-[1.06] sm:text-[64px]">
+              Your goal, spoken back to you as already real.
+            </h1>
+            <p className="max-w-xl text-[18px] leading-8 text-[var(--color-soft)]">
+              Write your goal in your own words. Your Key builds a daily practice around it: a guided
+              visualisation, affirmations written for it, and identity work, morning and night. Free to
+              start, and private on your phone.
             </p>
-            <h2 className="mb-6 font-display text-3xl font-medium leading-tight text-white sm:text-4xl md:text-5xl">
-              A full seminar. Filmed. Inside the app.
-            </h2>
-            <p className="mx-auto mb-14 max-w-3xl text-base leading-relaxed text-[var(--color-text-secondary)] sm:text-lg">
-              Not slides. Not a voice-over. Eleven modules taught face-to-camera
-              at the whiteboard — from the Law of Attraction&apos;s mechanics,
-              through six doors into the subconscious, to the single word the
-              entire canon rests on. Then <span className="text-white">The
-              Examination</span>: concept-level tests that seal each module, and
-              a Final that proves the teaching lives in you.
-            </p>
-
-            <div className="grid gap-6 text-left sm:grid-cols-3">
-              <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-8">
-                <p className="mb-2 font-display text-4xl text-[var(--color-gold)]">11</p>
-                <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                  modules — foundations, the formula, the subconscious engine
-                  room, aligned action, wealth, health, relationships, mistakes,
-                  contradictions… and the closing.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-8">
-                <p className="mb-2 font-display text-4xl text-[var(--color-gold)]">71</p>
-                <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                  filmed lessons, each one grounded in the mentors&apos; own
-                  books and peer-reviewed psychology — and each one pointing at
-                  a tool you can open the same minute.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-8">
-                <p className="mb-2 font-display text-4xl text-[var(--color-gold)]">1</p>
-                <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                  Final Examination. Earn all eleven module seals to face it.
-                  Pass it, and you haven&apos;t watched a seminar — you&apos;ve
-                  absorbed one.
-                </p>
-              </div>
+            <div className="flex flex-wrap items-center gap-4">
+              <AppStoreButton />
+              <Link href="/packages" className="text-[15px] font-semibold text-[var(--color-amethyst)] underline-offset-4 hover:underline">
+                See the five packages →
+              </Link>
             </div>
           </div>
-        </section>
-
-        {/* ─── 3 Pillars ──────────────────────────────────────────────────── */}
-        <section id="why" className="relative px-6 py-24 sm:py-32">
-          <div className="mx-auto max-w-6xl">
-            <div className="mb-16 text-center">
-              <p className="mb-4 text-sm uppercase tracking-[0.4em] text-[var(--color-gold)]">
-                Why Your Key
-              </p>
-              <h2 className="font-display text-3xl font-medium leading-tight text-white sm:text-4xl md:text-5xl">
-                Three pillars no other app combines.
-              </h2>
-            </div>
-
-            <div className="grid gap-8 md:grid-cols-3">
-              <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-8 transition hover:border-[var(--color-gold)]/30 hover:bg-[var(--color-card-hover)]">
-                <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-gold)]/10 text-xl font-display text-[var(--color-gold)]">
-                  01
-                </div>
-                <h3 className="mb-4 font-display text-2xl font-medium text-white">
-                  12 Canon Mentors
-                </h3>
-                <p className="mb-4 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                  A century of published teaching — from the pioneers who first
-                  named the Law of Attraction to the modern masters of goal
-                  achievement and the subconscious mind.
-                </p>
-                <p className="text-sm leading-relaxed text-[var(--color-text-dim)]">
-                  Not name-dropped — their published concepts are structurally
-                  embedded in every tool, every lesson, every word the app
-                  speaks to you.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-8 transition hover:border-[var(--color-gold)]/30 hover:bg-[var(--color-card-hover)]">
-                <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-gold)]/10 text-xl font-display text-[var(--color-gold)]">
-                  02
-                </div>
-                <h3 className="mb-4 font-display text-2xl font-medium text-white">
-                  Built on a formula
-                </h3>
-                <p className="mb-4 font-mono text-base text-[var(--color-gold)]">
-                  T = R / f(C·E·g)
-                </p>
-                <p className="mb-4 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                  Time-to-manifest equals{" "}
-                  <span className="text-white">Resistance</span> divided by the
-                  function of <span className="text-white">Consistency</span> of
-                  practice, in elevated <span className="text-white">Emotion</span>,
-                  held in <span className="text-white">gratitude</span>.
-                </p>
-                <p className="text-sm leading-relaxed text-[var(--color-text-dim)]">
-                  Every tool in the app moves one of those variables in your
-                  favour. Nothing is decoration.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-8 transition hover:border-[var(--color-gold)]/30 hover:bg-[var(--color-card-hover)]">
-                <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-gold)]/10 text-xl font-display text-[var(--color-gold)]">
-                  03
-                </div>
-                <h3 className="mb-4 font-display text-2xl font-medium text-white">
-                  The Key itself
-                </h3>
-                <p className="mb-4 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                  Your streak lives inside a giant ornate key. Practise and it
-                  glows. Miss days and it rusts — one turn restores the shine.
-                  Thirty days forges the 30th Turning: a hallmark no one
-                  else&apos;s key carries.
-                </p>
-                <p className="text-sm leading-relaxed text-[var(--color-text-dim)]">
-                  No leaderboards. No points. The Key is the avatar — and it
-                  remembers.
-                </p>
-              </div>
-            </div>
+          <div className="relative mx-auto flex aspect-square w-full max-w-[220px] items-center justify-center sm:max-w-[380px]">
+            <div aria-hidden className="absolute inset-0 rounded-full" style={{ background: "radial-gradient(circle, rgba(154,134,255,0.30) 0%, transparent 65%)" }} />
+            <Image src="/app-icon.png" alt="The Your Key app icon" width={220} height={220} priority className="relative w-[130px] rounded-[30px] shadow-[0_30px_80px_rgba(0,0,0,0.5)] sm:w-[220px] sm:rounded-[48px]" />
           </div>
-
-          {/* Mid-page CTA nudge — the hero and final section bracket the
-              page, but three sections in a row (Academy, Pillars, and the
-              upcoming gamification block) had no download prompt between
-              them. This closes that gap without repeating the full hero. */}
-          <div className="mt-16 flex justify-center">
-            <DownloadBadges />
-          </div>
-        </section>
-
-        {/* ─── The Key Remembers — gamification ──────────────────────────── */}
-        <section className="relative px-6 py-24 sm:py-32">
-          <div className="mx-auto max-w-5xl">
-            <div className="rounded-2xl border border-[var(--color-gold)]/20 bg-[var(--color-card)] p-8 sm:p-12">
-              <div className="grid gap-10 md:grid-cols-[auto_1fr] md:items-center">
-                <div className="flex justify-center md:justify-start">
-                  <Image
-                    src="/app-icon.png"
-                    alt="The Key"
-                    width={96}
-                    height={96}
-                    className="drop-shadow-[0_0_30px_rgba(212,175,55,0.3)]"
-                  />
-                </div>
-                <div>
-                  <p className="mb-4 text-sm uppercase tracking-[0.4em] text-[var(--color-gold)]">
-                    The Key remembers
-                  </p>
-                  <h2 className="mb-6 font-display text-3xl font-medium leading-tight text-white sm:text-4xl">
-                    Your streak isn&apos;t a number. It&apos;s an object.
-                  </h2>
-                  <p className="mb-4 text-base leading-relaxed text-[var(--color-text-secondary)]">
-                    There is no leaderboard, because this was never a
-                    competition. There is a giant ornate key, and it is
-                    yours alone. Every practice turns it — the metal warms,
-                    the engravings catch the light. Neglect it and it rusts;
-                    one honest turn brings the shine straight back.
-                  </p>
-                  <p className="text-base leading-relaxed text-[var(--color-text-secondary)]">
-                    Thirty consecutive turnings forge the{" "}
-                    <span className="text-white">30th Turning</span>. Reach
-                    sixty-six — the number behaviour science ties to a habit
-                    becoming automatic — and you enter{" "}
-                    <span className="text-white">Elite Week</span>, the{" "}
-                    <span className="text-white">66th Turning</span>. No one
-                    else&apos;s key looks like yours. That&apos;s the point.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ─── Founding Keepers teaser ────────────────────────────────────── */}
-        <section className="relative px-6 pb-24">
-          <div className="mx-auto max-w-5xl">
-            <Link
-              href="/pricing"
-              className="group block overflow-hidden rounded-2xl border border-[var(--color-gold)]/30 bg-gradient-to-br from-[#0D1133] via-[#1F1A08] to-[#050308] p-8 transition hover:border-[var(--color-gold)]/60 sm:p-10"
-            >
-              <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
-                <div>
-                  <p className="mb-2 text-sm uppercase tracking-[0.3em] text-[var(--color-gold)]">
-                    🗝 Founding Keepers — the early-supporter rate, locked while you stay
-                  </p>
-                  <h2 className="font-display text-2xl font-medium text-white sm:text-3xl">
-                    The Inner Circle. You don&apos;t get more of the app —
-                    you get inducted into it.
-                  </h2>
-                </div>
-                <span className="inline-flex flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-[var(--color-gold)] px-6 py-3 text-sm font-semibold text-[var(--color-background)] transition group-hover:bg-[var(--color-gold-muted)]">
-                  See the offer
-                </span>
-              </div>
-            </Link>
-          </div>
-        </section>
-
-        {/* ─── What's Inside — the tools ─────────────────────────────────── */}
-        <section className="relative px-6 py-24 sm:py-32">
-          <div className="mx-auto max-w-6xl">
-            <div className="mb-16 text-center">
-              <p className="mb-4 text-sm uppercase tracking-[0.4em] text-[var(--color-gold)]">
-                What&apos;s inside
-              </p>
-              <h2 className="font-display text-3xl font-medium leading-tight text-white sm:text-4xl md:text-5xl">
-                Twenty-two tools, every one purposeful.
-                <br />
-                <span className="text-[var(--color-gold)]">None overlap.</span>
-              </h2>
-            </div>
-
-            <div className="mb-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              <ToolCard
-                title="The Magnet"
-                body="The keystone practice — visualisation, spoken affirmation, scripting, body state and gratitude compounded into one daily session. Five channels into the subconscious at once."
-              />
-              <ToolCard
-                title="Guided Visualization"
-                body="Sensory-immersive scripts grounded in Wattles, personalised to your exact goal. Binaural underlay settles the brain into a receptive state."
-              />
-              <ToolCard
-                title="Daily Affirmations"
-                body="Personalised affirmations matched to your goal — narrated, or recorded in your own voice. Classic autosuggestion, made daily."
-              />
-              <ToolCard
-                title="Mastermind Council"
-                body="The mastermind principle on demand. Bring any block or question — twelve schools of teaching answer it, one clear guiding voice applying their published concepts."
-              />
-              <ToolCard
-                title="Vibration Raiser"
-                body="A pre-practice ritual that lifts your emotional state up the scale before the real work — because the broadcast matters more than the words."
-              />
-              <ToolCard
-                title="Subliminal Mode"
-                body="Custom subliminal scripts for deep subconscious uptake. Plays under your music while you work, walk, or fall asleep."
-              />
-              <ToolCard
-                title="Dream Programming"
-                body="Goddard's state-akin-to-sleep, engineered. Programme the night shift — your subconscious works while you rest."
-              />
-              <ToolCard
-                title="Revision"
-                body="Rewrite the day in imagination before sleep — Goddard's revision technique with audio in your voice or narrated."
-              />
-              <ToolCard
-                title="Identity Blueprint"
-                body="You attract what you ARE. A day-by-day programme that rebuilds the identity your goal belongs to — for wealth, health, or love."
-              />
-            </div>
-
-            <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-8">
-              <p className="mb-4 text-sm uppercase tracking-[0.3em] text-[var(--color-gold)]">
-                And the rest of the ring
-              </p>
-              <div className="grid gap-x-6 gap-y-3 text-sm text-[var(--color-text-secondary)] sm:grid-cols-2 md:grid-cols-3">
-                <span>Future Self Letter</span>
-                <span>Camera Mirror</span>
-                <span>Vision Board</span>
-                <span>Scripting</span>
-                <span>Gratitude Journal</span>
-                <span>369 Method</span>
-                <span>Breathwork</span>
-                <span>EFT Tapping</span>
-                <span>The Downstream</span>
-                <span>Habit Forge</span>
-                <span>The Prescription</span>
-                <span>Practice Depth</span>
-                <span>Evidence Library</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ─── How It Works ──────────────────────────────────────────────── */}
-        <section className="relative px-6 py-24 sm:py-32">
-          <div className="mx-auto max-w-5xl">
-            <div className="mb-16 text-center">
-              <p className="mb-4 text-sm uppercase tracking-[0.4em] text-[var(--color-gold)]">
-                How it works
-              </p>
-              <h2 className="font-display text-3xl font-medium leading-tight text-white sm:text-4xl md:text-5xl">
-                Three steps. Daily. Forever.
-              </h2>
-            </div>
-
-            <div className="space-y-12">
-              <Step
-                number="1"
-                title="Forge your goal"
-                body="A guided ceremony walks you through the questions Hill insisted on a century ago — what, exactly, and why. Vague goals go nowhere. Yours becomes precise enough to practise with real clarity."
-              />
-              <Step
-                number="2"
-                title="Turn the Key daily"
-                body="Open the app. The morning, midday and evening Turnings each recommend the right practice for the hour. Three to ten minutes — every tool personalised to your goal, every practice turning the Key."
-              />
-              <Step
-                number="3"
-                title="Shrink the T"
-                body="As Resistance drops and Consistency, Emotion and gratitude rise, the formula is designed to shrink your time-to-manifest. The seminar teaches why. The tools give you the daily practice. The Key remembers."
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* ─── Final CTA ──────────────────────────────────────────────────── */}
-        <section className="relative px-6 py-24 sm:py-32">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="mb-6 font-display text-3xl font-medium leading-tight text-white sm:text-4xl">
-              The door was never locked.
-            </h2>
-            <p className="mb-10 text-base leading-relaxed text-[var(--color-text-secondary)] sm:text-lg">
-              Your Key is free to practise, forever — the seminar, The
-              Examination, and twenty-plus tools included. Download it and
-              turn the Key today.
-            </p>
-            <DownloadBadges />
-          </div>
-        </section>
-
-        {/* ─── Mentor disclaimer ──────────────────────────────────────────── */}
-        <div className="px-6 pb-16">
-          <MentorDisclaimer />
         </div>
-      </main>
-      <SiteFooter />
-    </>
+      </section>
+
+      {/* ─── How it works ─────────────────────────────────────────────────────────────────── */}
+      <Section kicker="How it works" title="Three steps, then every day." wide>
+        <ol className="grid gap-4 md:grid-cols-3">
+          {[
+            { n: "1", h: "Say what you want", b: "Your goal, in your own words. The whole practice is written around it, so it never reads like somebody else's." },
+            { n: "2", h: "Hear it as already real", b: "A guided scene spoken aloud, affirmations in the present tense, and lines you can record in your own voice." },
+            { n: "3", h: "Live it, day by day", b: "Identity work for seven, twenty-one or sixty-six days, and the tools for the habits that carry a goal." },
+          ].map((s) => (
+            <li key={s.n} className="glass flex flex-col gap-3 p-6">
+              <span className="num text-[30px] text-[var(--color-amethyst)]">{s.n}</span>
+              <h3 className="text-[19px] font-bold">{s.h}</h3>
+              <p className="text-[15px] leading-6 text-[var(--color-soft)]">{s.b}</p>
+            </li>
+          ))}
+        </ol>
+      </Section>
+
+      {/* ─── The free practice ───────────────────────────────────────────────────────────── */}
+      <Section
+        id="practice"
+        kicker="The practice"
+        title="What you get, free."
+        lede="The core of Your Key costs nothing. Growth and Elite add longer sessions, higher limits and the longer programmes."
+        wide
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          {PRACTICE.map((p) => (
+            <div key={p.name} className="glass flex flex-col gap-2 p-6">
+              <h3 className="text-[18px] font-bold">{p.name}</h3>
+              <p className="text-[15px] leading-6 text-[var(--color-soft)]">{p.body}</p>
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-col gap-3">
+          <p className="kicker text-[var(--color-faint)]">And the toolkit</p>
+          <ul className="flex flex-wrap gap-2">
+            {TOOLKIT.map((t) => (
+              <li key={t} className="rounded-full border border-[var(--glass-border-hi)] px-3.5 py-1.5 text-[14px] text-[var(--color-soft)]">{t}</li>
+            ))}
+          </ul>
+          <Link href="/tools" className="text-[15px] font-semibold text-[var(--color-amethyst)] underline-offset-4 hover:underline">
+            Everything in the practice →
+          </Link>
+        </div>
+      </Section>
+
+      {/* ─── The packages ─────────────────────────────────────────────────────────────────── */}
+      <Section
+        kicker="The packages"
+        title="Five skills, each its own world inside the app."
+        lede={
+          <>
+            Sales, time, communication and leadership, each its own subscription at {PACKAGE_PRICES.appMonthly} a month in the
+            app, with a free week for new subscribers, or {PACKAGE_PRICES.webMonthly} a month on this website. Quitting is
+            free, always. For a complete beginner and for somebody who has done it for years.
+          </>
+        }
+        wide
+      >
+        <div className="flex items-center gap-3"><ComingTag /></div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {PAID_PACKAGES.map((p) => <PackageCard key={p.id} p={p} />)}
+          <FreeCard p={FREE_PACKAGE} />
+        </div>
+        <Link href="/packages" className="text-[15px] font-semibold text-[var(--color-amethyst)] underline-offset-4 hover:underline">
+          Who each package is for →
+        </Link>
+      </Section>
+
+      {/* ─── Privacy ──────────────────────────────────────────────────────────────────────── */}
+      <Section kicker="Privacy, plainly" title="Your practice stays yours.">
+        <div className="glass p-6 sm:p-8">
+          <p className="text-[16px] leading-7 text-[var(--color-soft)]">{PRIVACY_PLAINLY}</p>
+          <Link href="/privacy" className="mt-4 inline-block text-[15px] font-semibold text-[var(--color-amethyst)] underline-offset-4 hover:underline">
+            Read the privacy policy →
+          </Link>
+        </div>
+      </Section>
+
+      {/* ─── Questions ────────────────────────────────────────────────────────────────────── */}
+      <Section kicker="Questions" title="Before you download.">
+        <Faq
+          items={[
+            { q: "Is it free?", a: "Yes. The core practice is free, with usage limits on some tools. Growth, Elite and Inner Circle are optional subscriptions, shown with their prices in the app before you buy." },
+            { q: "Do the packages cost extra?", a: <>Each paid package is its own subscription, {PACKAGE_PRICES.appMonthly} a month or {PACKAGE_PRICES.appYearly} a year in the app, with a free week for new subscribers, or {PACKAGE_PRICES.webMonthly} a month or {PACKAGE_PRICES.webYearly} a year on this website. Quitting is free. Inner Circle includes all four. <Link className="text-[var(--color-amethyst)] underline" href="/pricing">See pricing</Link>.</> },
+            { q: "Which phones is it on?", a: "iPhone, from the App Store." },
+            { q: "Is this therapy, or medical advice?", a: RESULTS },
+            { q: "How do I cancel?", a: <>In your iPhone's subscription settings, or from the Packages tab in the app. <Link className="text-[var(--color-amethyst)] underline" href="/support#cancel">Every way to cancel</Link>.</> },
+          ]}
+        />
+      </Section>
+
+      {/* ─── Closing ──────────────────────────────────────────────────────────────────────── */}
+      <section className="glow border-t border-[var(--hair)] px-4 py-20 sm:px-6 sm:py-28" style={{ ["--glow" as string]: "rgba(154,134,255,0.18)" }}>
+        <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
+          <Image src="/app-icon.png" alt="" width={72} height={72} className="rounded-[18px]" />
+          <h2 className="taught text-[34px] leading-[1.15] sm:text-[46px]">Start with your goal tonight.</h2>
+          <AppStoreButton />
+          <p className="max-w-2xl text-[13px] leading-5 text-[var(--color-faint)]">{RESULTS}</p>
+        </div>
+      </section>
+    </Page>
   );
 }
 
-/* ─── Reusable section sub-components ───────────────────────────────────── */
-
-function ToolCard({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-6 transition hover:border-[var(--color-gold)]/30 hover:bg-[var(--color-card-hover)]">
-      <h3 className="mb-3 font-display text-xl font-medium text-white">
-        {title}
-      </h3>
-      <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
-        {body}
-      </p>
-    </div>
-  );
-}
-
-function Step({
-  number,
-  title,
-  body,
-}: {
-  number: string;
-  title: string;
-  body: string;
-}) {
-  return (
-    <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-      <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full border border-[var(--color-gold)]/30 bg-[var(--color-gold)]/10 font-display text-2xl text-[var(--color-gold)]">
-        {number}
-      </div>
-      <div className="flex-1">
-        <h3 className="mb-3 font-display text-2xl font-medium text-white sm:text-3xl">
-          {title}
-        </h3>
-        <p className="text-base leading-relaxed text-[var(--color-text-secondary)]">
-          {body}
-        </p>
-      </div>
-    </div>
-  );
-}
+export const dynamic = "force-static";
+export const metadata = { alternates: { canonical: SITE.url } };

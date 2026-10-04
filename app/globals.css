@@ -1,53 +1,128 @@
 @import "tailwindcss";
 
-/* ─── Your Key brand palette ─────────────────────────────────────────────────
-   Pulled directly from manifest-app/constants/theme.ts so the website reads
-   visually identical to the app — zero brand jump when users move between
-   yourkey.app and the iOS/Android app. */
+/* ─── Your Key, the website — the app's own design system (rebuilt 2026-10-04) ───────────────────
+   Every value here is the app's: yourkey-app/constants/packages/tokens.json (round 13, studio v2).
+   Ground is aubergine-dark, ink is warm white, the core accent is amethyst, and gold means earned or
+   paid and nothing else (Inner Circle only). Each package keeps its own accent, as in the app, so a
+   card here looks like the world it opens. Type is the app's: Manrope for what you read quickly,
+   Fraunces for the taught voice, Space Grotesk for numbers and kickers. */
 
 @theme inline {
-  /* Backgrounds */
-  --color-background: #0A0E27;       /* deep midnight blue — page background */
-  --color-card: #131736;             /* cards, sections */
-  --color-card-hover: #1A2040;       /* card hover state */
-  --color-secondary: #1E2247;        /* navy depth */
+  --color-recessed: #0E0A14;
+  --color-void: #120E19;
+  --color-raised: #1A1426;
+  --color-sheet: #161020;
 
-  /* Brand accents */
-  --color-gold: #D4AF37;             /* warm luxury gold — primary CTA */
-  --color-gold-muted: #B8963E;       /* gold hover */
-  --color-gold-dim: #8B6914;         /* subtle gold for dim accents */
-  --color-purple: #7C3AED;           /* aurora purple */
+  --color-ink: #F2F0EC;
+  --color-soft: rgba(242, 240, 236, 0.72);
+  --color-mute: rgba(242, 240, 236, 0.58);
+  --color-faint: rgba(242, 240, 236, 0.40);
 
-  /* Text */
-  --color-foreground: #FFFFFF;       /* primary text */
-  --color-text-secondary: #8892B0;   /* secondary text */
-  --color-text-dim: #4A5568;         /* dim text / metadata */
+  --color-amethyst: #D9C9F5;
+  --color-amethyst-deep: #9A86FF;
+  --color-gold: #C9A227;
 
-  /* Typography */
-  --font-sans: var(--font-inter);
-  --font-display: var(--font-playfair);
+  --color-sales: #4FD3E6;
+  --color-time: #B8A6F2;
+  --color-communication: #E8A0B4;
+  --color-leadership: #A9C48A;
+  --color-quitting: #7ED6C3;
+
+  --font-sans: var(--font-manrope);
+  --font-serif: var(--font-fraunces);
+  --font-num: var(--font-space-grotesk);
+}
+
+:root {
+  color-scheme: dark;
+  --hair: rgba(242, 240, 236, 0.10);
+  --glass: rgba(255, 255, 255, 0.045);
+  --glass-hi: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-hi: rgba(255, 255, 255, 0.14);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--color-background);
-  color: var(--color-foreground);
+  background: var(--color-void);
+  color: var(--color-ink);
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Temple glow behind the hero — warm gold-first (2026-07-06 rebuild: the
-   app's Key is gold; purple recedes to a whisper of depth at the edges). */
-.aurora-glow {
-  background: radial-gradient(
-    ellipse at top,
-    rgba(212, 175, 55, 0.14) 0%,
-    rgba(124, 58, 237, 0.06) 40%,
-    transparent 70%
-  );
+::selection {
+  background: rgba(217, 201, 245, 0.28);
 }
 
-/* Smooth scroll for anchor links (when we add nav later) */
-html {
-  scroll-behavior: smooth;
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--color-amethyst);
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+/* The app's kicker: Space Grotesk, small, wide, uppercase. */
+.kicker {
+  font-family: var(--font-num), system-ui, sans-serif;
+  font-size: 12px;
+  line-height: 15px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* The taught voice: Fraunces, never bold. */
+.taught {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+/* Glass on the dark, as the app draws its cards and grouped rows. */
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 22px;
+}
+.glass-hover {
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+.glass-hover:hover {
+  background: var(--glass-hi);
+  border-color: var(--glass-border-hi);
+}
+
+/* A soft light behind a hero, in the page's own accent. */
+.glow {
+  background: radial-gradient(ellipse 70% 55% at 50% 0%, var(--glow, rgba(154, 134, 255, 0.24)) 0%, transparent 70%);
+}
+
+.num {
+  font-family: var(--font-num), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+details > summary {
+  list-style: none;
+  cursor: pointer;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
 }

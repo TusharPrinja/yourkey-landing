@@ -1,203 +1,71 @@
 import type { Metadata } from "next";
-import {
-  SiteNav,
-  SiteFooter,
-  DownloadBadges,
-  MentorDisclaimer,
-} from "@/components/site";
+import Link from "next/link";
+import { AppStoreButton, Page, PageHead, Section } from "@/components/site";
+import { RESULTS, SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "About — Your Key",
+  title: "About",
   description:
-    "The story behind Your Key: a solo British founder, years inside the canon and peer-reviewed psychology, a formula, an 11-module seminar, and every tool built around it.",
+    "Your Key is an iPhone app for a daily practice built around your own goal, made in the UK by Your Key App Ltd. What it is, how it is made, and how to reach us.",
+  alternates: { canonical: "https://yourkey.app/about" },
 };
 
-const CANON = [
-  "Wallace Wattles",
-  "James Allen",
-  "Napoleon Hill",
-  "Neville Goddard",
-  "Earl Nightingale",
-  "Joseph Murphy",
-  "Bob Proctor",
-  "Abraham-Hicks",
-  "William Walker Atkinson",
-  "Charles Haanel",
-  "Jim Rohn",
-  "Brian Tracy",
+const BELIEFS: { h: string; b: string }[] = [
+  {
+    h: "Your goal, in your words",
+    b: "A practice works better when it sounds like you. So it starts from the sentence you write, and every visualisation, affirmation and identity day is built around it.",
+  },
+  {
+    h: "Written before you read it",
+    b: "The five packages are written in full and checked before they ship: no line is made up on the spot, a figure carries its source, and nothing promises you a result.",
+  },
+  {
+    h: "For everybody",
+    b: "Each package asks where you are starting from and who you are in it, so a complete beginner and somebody who has done it for years both find their own way in.",
+  },
+  {
+    h: "Private by default",
+    b: "Your own-voice recordings stay on your phone. What you save is stored so your account works across sessions, and it is never sold or shared with advertisers.",
+  },
 ];
 
 export default function AboutPage() {
   return (
-    <main className="relative flex flex-col">
-      <SiteNav />
+    <Page>
+      <PageHead
+        kicker="About"
+        title="A daily practice, built around what you want."
+        lede="Your Key is an iPhone app. You write your goal in your own words, and it gives you a practice for every day around it, with five packages for the skills that carry a goal: selling, time, communication, leadership, and stopping what holds you back."
+      />
 
-      {/* ─── Hero ───────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden px-6 py-24 text-center sm:py-32">
-        <div className="aurora-glow pointer-events-none absolute inset-0 -z-10" />
-        <p className="mb-4 text-sm uppercase tracking-[0.4em] text-[var(--color-gold)]">
-          About
-        </p>
-        <h1 className="mx-auto mb-6 max-w-3xl font-display text-4xl font-medium leading-tight text-white sm:text-5xl md:text-6xl">
-          One person, one formula, one door.
-        </h1>
-        <p className="mx-auto max-w-2xl text-base leading-relaxed text-[var(--color-text-secondary)] sm:text-lg">
-          Your Key wasn&apos;t built by a company. I built it — one person,
-          because I couldn&apos;t find a single place that treated
-          manifestation as something rigorous. So I decided to become that
-          place.
-        </p>
-      </section>
+      <Section kicker="What we believe" title="Four things that decide how it is made." wide>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {BELIEFS.map((x) => (
+            <div key={x.h} className="glass flex flex-col gap-2 p-6">
+              <h3 className="text-[18px] font-bold">{x.h}</h3>
+              <p className="text-[15px] leading-6 text-[var(--color-soft)]">{x.b}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
 
-      {/* ─── The story ──────────────────────────────────────────────────── */}
-      <section className="relative px-6 py-16 sm:py-20">
-        <div className="mx-auto max-w-3xl">
-          <p className="mb-4 text-sm uppercase tracking-[0.4em] text-[var(--color-gold)]">
-            The story
+      <Section kicker="The company" title="Who we are.">
+        <div className="glass flex flex-col gap-3 p-6 sm:p-8 text-[16px] leading-7 text-[var(--color-soft)]">
+          <p>
+            Your Key is made in the UK by {SITE.company}. Write to us at{" "}
+            <a className="font-semibold text-[var(--color-amethyst)]" href={`mailto:${SITE.contact}`}>{SITE.contact}</a>.
           </p>
-          <h2 className="mb-8 font-display text-3xl font-medium leading-tight text-white sm:text-4xl">
-            A word from me, before you go in.
-          </h2>
-          <div className="space-y-6 text-base leading-relaxed text-[var(--color-text-secondary)] sm:text-lg">
-            <p>
-              I&apos;m Tushar. I&apos;m a young British founder, and I spent
-              years living inside two worlds that rarely speak to each other:
-              the full canon of manifestation — Wattles, Allen, Hill, Goddard,
-              Nightingale, Murphy, Proctor, Abraham-Hicks, Atkinson, Haanel,
-              Rohn, Tracy — and the peer-reviewed psychology of habit, belief
-              and emotional state. Most people treat those two worlds as
-              enemies. I treated them as two descriptions of the same
-              mechanism, and I refused to let either one go.
-            </p>
-            <p>
-              Out of that came my formula — <span className="font-mono text-white">T&nbsp;=&nbsp;R&nbsp;/&nbsp;f(C·E·g)</span> —
-              a plain statement of what actually shortens the distance between
-              wanting something and having it. Not a slogan. Something I could
-              build a curriculum on, and then build software on top of the
-              curriculum.
-            </p>
-            <p>
-              So I filmed the seminar myself — eleven modules, face to camera,
-              no slides to hide behind — and then I engineered every tool in
-              the app as a direct extension of a specific lesson inside it.
-              Nothing in Your Key exists because a roadmap said to build it.
-              Every tool exists because a lesson demanded a practice.
-            </p>
-            <p>
-              I&apos;ll be honest about why I really built it: love. For
-              myself, for my family, for anyone who was ever told their
-              ambition was too big for where they started. The seminar is free
-              — in the app, and on YouTube — because I don&apos;t charge for
-              knowledge. The app is where the full version lives, with the
-              tools attached.
-            </p>
-            <p className="text-white">
-              I&apos;ll see you inside. — Tushar
-            </p>
-          </div>
+          <p>{RESULTS}</p>
+          <p>
+            <Link className="text-[var(--color-amethyst)] underline" href="/privacy">Privacy policy</Link>
+            {" · "}
+            <Link className="text-[var(--color-amethyst)] underline" href="/terms">Terms</Link>
+            {" · "}
+            <Link className="text-[var(--color-amethyst)] underline" href="/support">Support</Link>
+          </p>
         </div>
-      </section>
-
-      {/* ─── The philosophy ─────────────────────────────────────────────── */}
-      <section className="relative px-6 py-16 sm:py-20">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-14 text-center">
-            <p className="mb-4 text-sm uppercase tracking-[0.4em] text-[var(--color-gold)]">
-              The philosophy
-            </p>
-            <h2 className="font-display text-3xl font-medium leading-tight text-white sm:text-4xl">
-              Three convictions the whole app is built on.
-            </h2>
-          </div>
-
-          <div className="grid gap-6 sm:grid-cols-3">
-            <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-8">
-              <h3 className="mb-4 font-display text-xl font-medium text-white">
-                You attract what you ARE
-              </h3>
-              <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                Not what you wish for. Not what you visualise once and forget.
-                Identity is upstream of circumstance — so the app is built to
-                change who you are becoming, not just what you are asking for.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-8">
-              <h3 className="mb-4 font-display text-xl font-medium text-white">
-                Practice over consumption
-              </h3>
-              <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                Watching a video changes nothing. Reading a book changes
-                nothing on its own. The seminar teaches the mechanism — the
-                tools are where the mechanism is actually practised, daily,
-                until it becomes who you are.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-white/5 bg-[var(--color-card)] p-8">
-              <h3 className="mb-4 font-display text-xl font-medium text-white">
-                No leaderboards
-              </h3>
-              <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                There is no ranking against strangers. The only competition
-                built into Your Key is against the person you were yesterday —
-                measured honestly, by the Key in your own hand.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── The canon ──────────────────────────────────────────────────── */}
-      <section className="relative px-6 py-16 sm:py-20">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-12 text-center">
-            <p className="mb-4 text-sm uppercase tracking-[0.4em] text-[var(--color-gold)]">
-              The canon
-            </p>
-            <h2 className="mb-6 font-display text-3xl font-medium leading-tight text-white sm:text-4xl">
-              Twelve teachers. One tradition.
-            </h2>
-            <p className="mx-auto max-w-2xl text-base leading-relaxed text-[var(--color-text-secondary)]">
-              Every lesson, every tool, and the Mastermind Council all draw
-              from the same twelve names — never invented, never paraphrased
-              beyond recognition, always attributed.
-            </p>
-          </div>
-
-          <div className="mb-10 grid gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {CANON.map((name) => (
-              <div
-                key={name}
-                className="rounded-xl border border-white/5 bg-[var(--color-card)] px-5 py-4 text-center text-sm text-[var(--color-text-secondary)]"
-              >
-                {name}
-              </div>
-            ))}
-          </div>
-
-          <MentorDisclaimer />
-        </div>
-      </section>
-
-      {/* ─── Contact + Download ─────────────────────────────────────────── */}
-      <section className="relative px-6 py-24 text-center sm:py-32">
-        <p className="mb-4 text-sm uppercase tracking-[0.4em] text-[var(--color-gold)]">
-          Get in touch
-        </p>
-        <h2 className="mb-6 font-display text-3xl font-medium leading-tight text-white sm:text-4xl">
-          Questions, feedback, anything at all.
-        </h2>
-        <p className="mb-10 text-base text-[var(--color-text-secondary)] sm:text-lg">
-          <a
-            href="mailto:hello@yourkey.app"
-            className="text-[var(--color-gold)] transition hover:opacity-80"
-          >
-            hello@yourkey.app
-          </a>
-        </p>
-        <DownloadBadges />
-      </section>
-
-      <SiteFooter />
-    </main>
+        <AppStoreButton />
+      </Section>
+    </Page>
   );
 }

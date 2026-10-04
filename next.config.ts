@@ -12,6 +12,14 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return PACKAGE_PAGES.map((id) => ({ source: `/${id}`, destination: `/packages/${id}.html` }));
   },
+  /* The July site's /seminar and /mastermind described a seminar and an AI council the app no longer
+     has under those names (rebuilt 2026-10-04). Old links land on what is true today. */
+  async redirects() {
+    return [
+      { source: "/seminar", destination: "/packages", permanent: true },
+      { source: "/mastermind", destination: "/tools", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;
