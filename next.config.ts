@@ -7,10 +7,16 @@ import type { NextConfig } from "next";
  * Until the production purchase link is set in the app repo, they are previews: no checkout, noindex.
  */
 const PACKAGE_PAGES = ["sales", "time", "communication", "leadership"];
+/**
+ * Since 2026-10-13 the same generator writes the join page (the buyer sets up their Your Key account,
+ * then the checkout opens keyed to it; app/api/account/route.ts makes the account) and the page the
+ * checkout returns to, which says how to sign in on the iPhone.
+ */
+const ACCOUNT_PAGES = ["join", "welcome"];
 
 const nextConfig: NextConfig = {
   async rewrites() {
-    return PACKAGE_PAGES.map((id) => ({ source: `/${id}`, destination: `/packages/${id}.html` }));
+    return [...PACKAGE_PAGES, ...ACCOUNT_PAGES].map((id) => ({ source: `/${id}`, destination: `/packages/${id}.html` }));
   },
   /* The July site's /seminar and /mastermind described a seminar and an AI council the app no longer
      has under those names (rebuilt 2026-10-04). Old links land on what is true today. */

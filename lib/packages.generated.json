@@ -19,8 +19,14 @@
         "Objections and doubts answered, on a call or on the page",
         "The reset after a bad call or a quiet day"
       ],
-      "accent": "#6FC5D6",
-      "kicker": "#8ED3E0",
+      "accent": "#4FD3E6",
+      "accent2": "#5AA9FF",
+      "kicker": "#86E1EE",
+      "onAccent": "#03131A",
+      "deep": "#2F6BF0",
+      "glow": "rgba(47,107,240,0.30)",
+      "mark": "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='32' d='M352 144h112v112'/%3E%3Cpath d='M48 368l121.37-121.37a32 32 0 0145.26 0l50.74 50.74a32 32 0 0045.26 0L448 160' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='32'/%3E%3C/svg%3E\")",
+      "screen": "/packages/screens/sales-index.webp",
       "href": "/sales"
     },
     {
@@ -35,7 +41,13 @@
         "A reset after a lost day"
       ],
       "accent": "#B8A6F2",
-      "kicker": "#C8BAF6",
+      "accent2": "#9A86FF",
+      "kicker": "#CDBFF8",
+      "onAccent": "#120E19",
+      "deep": "#6A4DF5",
+      "glow": "rgba(106,77,245,0.28)",
+      "mark": "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208 208-93.13 208-208S370.87 48 256 48zm96 240h-96a16 16 0 01-16-16V128a16 16 0 0132 0v128h80a16 16 0 010 32z'/%3E%3C/svg%3E\")",
+      "screen": "/packages/screens/time-index.webp",
       "href": "/time"
     },
     {
@@ -50,7 +62,13 @@
         "A reset after a fight"
       ],
       "accent": "#E8A0B4",
-      "kicker": "#EFB6C6",
+      "accent2": "#FF9486",
+      "kicker": "#F7BCCB",
+      "onAccent": "#1A0B10",
+      "deep": "#F0607A",
+      "glow": "rgba(240,96,122,0.22)",
+      "mark": "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M60.44 389.17c0 .07 0 .2-.08.38.03-.12.05-.25.08-.38zM439.9 405.6a26.77 26.77 0 01-9.59-2l-56.78-20.13-.42-.17a9.88 9.88 0 00-3.91-.76 10.32 10.32 0 00-3.62.66c-1.38.52-13.81 5.19-26.85 8.77-7.07 1.94-31.68 8.27-51.43 8.27-50.48 0-97.68-19.4-132.89-54.63A183.38 183.38 0 01100.3 215.1a175.9 175.9 0 014.06-37.58c8.79-40.62 32.07-77.57 65.55-104A194.76 194.76 0 01290.3 32c52.21 0 100.86 20 137 56.18 34.16 34.27 52.88 79.33 52.73 126.87a177.86 177.86 0 01-30.3 99.15l-.19.28-.74 1c-.17.23-.34.45-.5.68l-.15.27a21.63 21.63 0 00-1.08 2.09l15.74 55.94a26.42 26.42 0 011.12 7.11 24 24 0 01-24.03 24.03z'/%3E%3Cpath d='M299.87 425.39a15.74 15.74 0 00-10.29-8.1c-5.78-1.53-12.52-1.27-17.67-1.65a201.78 201.78 0 01-128.82-58.75A199.21 199.21 0 0186.4 244.16C85 234.42 85 232 85 232a16 16 0 00-28-10.58s-7.88 8.58-11.6 17.19a162.09 162.09 0 0011 150.06C59 393 59 395 58.42 399.5c-2.73 14.11-7.51 39-10 51.91a24 24 0 008 22.92l.46.39A24.34 24.34 0 0072 480a23.42 23.42 0 009-1.79l53.51-20.65a8.05 8.05 0 015.72 0c21.07 7.84 43 12 63.78 12a176 176 0 0074.91-16.66c5.46-2.56 14-5.34 19-11.12a15 15 0 001.95-16.39z'/%3E%3C/svg%3E\")",
+      "screen": "/packages/screens/communication-index.webp",
       "href": "/communication"
     },
     {
@@ -65,7 +83,13 @@
         "Eleven traits of a leader, one a week"
       ],
       "accent": "#A9C48A",
-      "kicker": "#BBD1A0",
+      "accent2": "#6FCF9E",
+      "kicker": "#C2D8A8",
+      "onAccent": "#0D140A",
+      "deep": "#2FA873",
+      "glow": "rgba(47,168,115,0.22)",
+      "mark": "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Ccircle cx='256' cy='256' r='24'/%3E%3Cpath d='M256 48C141.31 48 48 141.31 48 256s93.31 208 208 208 208-93.31 208-208S370.69 48 256 48zm105.07 113.33l-46.88 117.2a64 64 0 01-35.66 35.66l-117.2 46.88a8 8 0 01-10.4-10.4l46.88-117.2a64 64 0 0135.66-35.66l117.2-46.88a8 8 0 0110.4 10.4z'/%3E%3C/svg%3E\")",
+      "screen": "/packages/screens/leadership-index.webp",
       "href": "/leadership"
     }
   ],
@@ -76,9 +100,17 @@
     "forWho": "Whether you're thinking about it, ready, or already stopped.",
     "inside": [
       "A map of where it catches you, and a plan for each",
-      "A timer for the moment an urge comes",
+      "A spoken picture for the moment an urge comes",
       "The way to the people who can do more"
     ],
-    "price": "Free — always"
+    "price": "Free — always",
+    "accent": "#7ED6C3",
+    "accent2": "#6DB7F2",
+    "kicker": "#9FE2D3",
+    "onAccent": "#07140F",
+    "deep": "#3A8FD8",
+    "glow": "rgba(58,143,216,0.24)",
+    "mark": "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M161.35 242a16 16 0 0122.62-.68c73.63 69.36 147.51 111.56 234.45 133.07 11.73-32 12.77-67.22 2.64-101.58-13.44-45.59-44.74-85.31-90.49-114.86-40.84-26.38-81.66-33.25-121.15-39.89-49.82-8.38-96.88-16.3-141.79-63.85-5-5.26-11.81-7.37-18.32-5.66-7.44 2-12.43 7.88-14.82 17.6-5.6 22.75-2 86.51 13.75 153.82 25.29 108.14 65.65 162.86 95.06 189.73 38 34.69 87.62 53.9 136.93 53.9a186 186 0 0027.77-2.04c41.71-6.32 76.43-27.27 96-57.75-89.49-23.28-165.94-67.55-242-139.16a16 16 0 01-.65-22.65zM467.43 384.19c-16.83-2.59-33.13-5.84-49-9.77a157.71 157.71 0 01-12.13 25.68c-.73 1.25-1.5 2.49-2.29 3.71a584.21 584.21 0 0058.56 12 16 16 0 104.87-31.62z'/%3E%3C/svg%3E\")",
+    "screen": "/packages/screens/quitting-index.webp"
   }
 }

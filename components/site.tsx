@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { SITE, type PaidPackage } from "@/lib/site";
+import { SITE, type PaidPackage, FREE_PACKAGE } from "@/lib/site";
 
 /**
  * Shared site chrome and parts (rebuilt 2026-10-04 to the app's design: aubergine ground, glass,
@@ -136,11 +136,35 @@ export function ComingTag() {
   );
 }
 
+/**
+ * A package as its own world, as the app's Packages tab draws it (2026-10-14): its light from the top
+ * corner, its tile, its own colours, and its real Today screen rising from the bottom of the card. Every
+ * value comes from the app (lib/packages.generated.json, from yourkey-app's tokens).
+ */
+function worldStyle(p: { accent: string; accent2: string; kicker: string; onAccent: string; deep: string; glow: string; mark: string }) {
+  return {
+    ["--a" as string]: p.accent, ["--a2" as string]: p.accent2, ["--k" as string]: p.kicker, ["--on" as string]: p.onAccent,
+    ["--deep" as string]: p.deep, ["--glow" as string]: p.glow, ["--mark" as string]: p.mark,
+  };
+}
+
+function WorldPhone({ src }: { src: string }) {
+  return (
+    <div className="world-phone" aria-hidden>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <div className="world-frame"><img src={src} alt="" width={402} height={874} loading="lazy" decoding="async" /></div>
+    </div>
+  );
+}
+
 export function PackageCard({ p }: { p: PaidPackage }) {
   return (
-    <Link href={p.href} className="glass glass-hover group flex flex-col gap-4 p-6" style={{ ["--a" as string]: p.accent }}>
+    <Link href={p.href} className="world glass glass-hover group" style={worldStyle(p)}>
       {/* The grid this sits in carries the one "In the next update" tag, so the card does not repeat it. */}
-      <p className="kicker" style={{ color: p.kicker }}>{p.name}</p>
+      <div className="flex items-center gap-3">
+        <span className="world-tile" aria-hidden />
+        <p className="kicker" style={{ color: p.kicker }}>{p.name}</p>
+      </div>
       <h3 className="taught text-[24px] leading-[1.25]">{p.headline}</h3>
       <p className="text-[14.5px] leading-6" style={{ color: p.kicker }}>{p.forWho}</p>
       <ul className="flex flex-col gap-2 border-t border-[var(--hair)] pt-4">
@@ -151,9 +175,10 @@ export function PackageCard({ p }: { p: PaidPackage }) {
           </li>
         ))}
       </ul>
-      <span className="mt-auto text-[14px] font-semibold" style={{ color: p.kicker }}>
+      <span className="text-[14px] font-semibold" style={{ color: p.kicker }}>
         See inside {p.name} →
       </span>
+      <WorldPhone src={p.screen} />
     </Link>
   );
 }
@@ -199,26 +224,30 @@ export function PageHead({ kicker, title, lede, children }: { kicker: string; ti
 }
 
 /** Quitting, which costs nothing and never will, on the same footing as the four. */
-export function FreeCard({ p }: { p: { name: string; headline: string; forWho: string; inside: string[]; price: string } }) {
+export function FreeCard({ p }: { p: typeof FREE_PACKAGE }) {
   return (
-    <div className="glass flex flex-col gap-4 p-6" style={{ borderColor: "rgba(126,214,195,0.28)" }}>
+    <div className="world glass" style={{ ...worldStyle(p), borderColor: "rgba(126,214,195,0.28)" }}>
       <div className="flex items-center justify-between gap-3">
-        <p className="kicker" style={{ color: "var(--color-quitting)" }}>{p.name}</p>
-        <span className="kicker rounded-full px-2.5 py-1 text-[10.5px]" style={{ background: "rgba(126,214,195,0.14)", color: "var(--color-quitting)" }}>
+        <div className="flex items-center gap-3">
+          <span className="world-tile" aria-hidden />
+          <p className="kicker" style={{ color: p.kicker }}>{p.name}</p>
+        </div>
+        <span className="kicker rounded-full px-2.5 py-1 text-[10.5px]" style={{ background: "rgba(126,214,195,0.14)", color: p.kicker }}>
           Free
         </span>
       </div>
       <h3 className="taught text-[24px] leading-[1.25]">{p.headline}</h3>
-      <p className="text-[14.5px] leading-6" style={{ color: "var(--color-quitting)" }}>{p.forWho}</p>
+      <p className="text-[14.5px] leading-6" style={{ color: p.kicker }}>{p.forWho}</p>
       <ul className="flex flex-col gap-2 border-t border-[var(--hair)] pt-4">
         {p.inside.map((line) => (
           <li key={line} className="flex gap-2.5 text-[14.5px] leading-6 text-[var(--color-soft)]">
-            <span aria-hidden className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: "var(--color-quitting)" }} />
+            <span aria-hidden className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: p.accent }} />
             {line}
           </li>
         ))}
       </ul>
-      <span className="mt-auto text-[14px] font-semibold" style={{ color: "var(--color-quitting)" }}>{p.price}, in the app</span>
+      <span className="text-[14px] font-semibold" style={{ color: p.kicker }}>{p.price}, in the app</span>
+      <WorldPhone src={p.screen} />
     </div>
   );
 }
