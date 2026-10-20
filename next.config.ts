@@ -14,9 +14,16 @@ const PACKAGE_PAGES = ["sales", "time", "communication", "leadership"];
  */
 const ACCOUNT_PAGES = ["join", "welcome"];
 
+/**
+ * The Studio (2026-10-20): Tushar's private recorder for filming the seminars on his iPhone, the words on
+ * its screen and every kept take straight to his Google Drive. public/studio/index.html holds no scripts
+ * (they are pasted in and stay on his phone) and asks Google only for drive.file.
+ */
+const STUDIO = { source: "/studio", destination: "/studio/index.html" };
+
 const nextConfig: NextConfig = {
   async rewrites() {
-    return [...PACKAGE_PAGES, ...ACCOUNT_PAGES].map((id) => ({ source: `/${id}`, destination: `/packages/${id}.html` }));
+    return [...[...PACKAGE_PAGES, ...ACCOUNT_PAGES].map((id) => ({ source: `/${id}`, destination: `/packages/${id}.html` })), STUDIO];
   },
   /* The July site's /seminar and /mastermind described a seminar and an AI council the app no longer
      has under those names (rebuilt 2026-10-04). Old links land on what is true today. */

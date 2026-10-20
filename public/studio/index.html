@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#050607">
+<title>Your Key Studio</title>
+<!--
+  Your Key Studio (20 October 2026): Tushar films the seminars on his iPhone with the words on its own
+  screen, beside the front camera, and every take he keeps goes straight to his Google Drive, never to
+  the camera roll.
+
+  Private by design. This page holds no scripts: they are pasted in from his private teleprompter page
+  and kept on his phone only (IndexedDB). Takes go from the phone to his Drive over HTTPS and nowhere
+  else. Google sign-in asks only for drive.file, so the page sees the files it made and nothing else in
+  his Drive, and the Google project is in test mode with his account as its only user.
+
+  The flow: pick a lesson, tap Record, a countdown, the words roll at his pace, and it stops by itself
+  two seconds after the last word. He watches the take, marks the start and the end, and sends it, or
+  takes it again; a retake never leaves the phone. The marks travel with the file (its name, description
+  and appProperties), and the edit cuts there at full quality.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a slate. Lists on a light ground for picking; the camera is black glass, the words in a band
+   at the top beside the lens, one big red button. */
+:root {
+  --bg: #f1f2ef; --surface: #ffffff; --fg: #15171a; --muted: #586067; --line: #d7dad8; --chip: #e5e8e5;
+  --tally: #c42d2a; --good: #1b7448;
+  --glass: #050607; --glass-fg: #f2f1ec; --glass-dim: #9aa1a8; --glass-line: #24282c; --guide: #e5484d;
+  --band: rgba(5, 6, 7, 0.78); --on-accent: #ffffff;
+  --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --read: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0e1012; --surface: #161a1d; --fg: #eceeee; --muted: #9ba2a8; --line: #2a2f33; --chip: #1f2428;
+    --tally: #f0524f; --good: #45bf82; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--fg); font-family: var(--read); font-size: 16px; line-height: 1.5;
+  -webkit-text-size-adjust: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 3px solid var(--tally); outline-offset: 2px; }
+
+.page { max-width: 760px; margin: 0 auto; display: grid; gap: 18px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: max(20px, env(safe-area-inset-top, 0px)) max(48px, env(safe-area-inset-bottom, 0px)); }
+.clapper { height: 12px; border-radius: 3px; border: 1px solid var(--fg);
+  background: repeating-linear-gradient(-45deg, var(--fg) 0 12px, var(--surface) 12px 24px); }
+h1 { margin: 6px 0 0; font-family: var(--display); font-weight: 700; font-size: clamp(32px, 8vw, 46px); line-height: 1;
+  text-transform: uppercase; letter-spacing: 0.01em; }
+h2 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 21px; letter-spacing: 0.06em; text-transform: uppercase; }
+.lede { margin: 0; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 10px; }
+.state { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.state.ok { color: var(--good); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn { border: 1px solid var(--fg); background: var(--surface); border-radius: 6px; padding: 9px 14px; font-weight: 700; }
+.btn.primary { background: var(--fg); color: var(--bg); }
+.btn.red { background: var(--tally); border-color: var(--tally); color: var(--on-accent); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+.link { background: none; border: 0; padding: 0; color: var(--muted); text-decoration: underline; }
+textarea.paste { width: 100%; min-height: 84px; border: 1px dashed var(--muted); border-radius: 6px; padding: 10px;
+  background: var(--bg); resize: vertical; }
+input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 9px 10px; background: var(--bg); }
+.note { font-size: 14px; color: var(--muted); margin: 0; }
+
+.sems { display: flex; flex-wrap: wrap; gap: 8px; }
+.sem { flex: 1 1 120px; min-width: 0; text-align: left; display: grid; gap: 2px; padding: 8px 10px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 6px; }
+.sem b { font-family: var(--display); font-weight: 600; font-size: clamp(16px, 4.6vw, 19px); letter-spacing: 0.04em; text-transform: uppercase; overflow-wrap: anywhere; }
+.sem span { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.sem[aria-selected="true"] { border-color: var(--fg); box-shadow: inset 0 -3px 0 var(--fg); }
+.settings { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; padding: 10px 12px; background: var(--chip); border-radius: 6px; }
+.settings label { display: inline-flex; gap: 6px; align-items: center; font-size: 14px; }
+.settings select { border: 1px solid var(--line); border-radius: 4px; background: var(--surface); padding: 3px 6px; }
+.lessons { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.lesson { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 2px 10px; align-items: baseline; padding: 11px 2px;
+  border-bottom: 1px solid var(--line); width: 100%; text-align: left; background: none; border-left: 0; border-right: 0; border-top: 0; }
+.lesson .id { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.lesson .t { min-width: 0; }
+.lesson .m { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+.lesson.done .t::after { content: " ✓"; color: var(--good); font-weight: 700; }
+.lesson .takes { grid-column: 2 / 4; font-size: 13px; color: var(--good); }
+
+/* The camera: black glass, the words at the top by the lens. */
+.cam { position: fixed; inset: 0; background: var(--glass); color: var(--glass-fg); z-index: 10; overflow: hidden; }
+.cam video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+.band { position: absolute; left: 0; right: 0; top: 0; background: var(--band); overflow: hidden;
+  padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px)); }
+.band .inner { will-change: transform; font-family: var(--read); font-weight: 700; line-height: 1.32; }
+.band .inner p { margin: 0 0 0.7em; }
+.band .mark { position: absolute; left: 0; width: 10px; height: 4px; background: var(--guide); border-radius: 0 2px 2px 0; }
+.bar { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 12px; justify-content: space-between;
+  padding: 10px max(18px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
+  background: linear-gradient(to top, rgba(5, 6, 7, 0.85), rgba(5, 6, 7, 0)); }
+.bar .who { min-width: 0; font-size: 14px; color: var(--glass-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar .who b { color: var(--glass-fg); font-family: var(--mono); font-weight: 500; margin-right: 6px; }
+.glassbtn { border: 1px solid var(--glass-line); background: rgba(20, 24, 27, 0.85); color: var(--glass-fg); border-radius: 6px; padding: 8px 12px; }
+.rec { width: 64px; height: 64px; border-radius: 50%; border: 4px solid var(--glass-fg); background: var(--tally); flex: none; }
+.rec.on { border-radius: 14px; width: 56px; height: 56px; }
+.timer { font-family: var(--mono); font-size: 15px; font-variant-numeric: tabular-nums; min-width: 56px; text-align: right; }
+.timer.live::before { content: "● "; color: var(--guide); }
+.count { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--display); font-weight: 700;
+  font-size: min(42vw, 42vh); color: var(--glass-fg); text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6); pointer-events: none; }
+.turn { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; background: rgba(5, 6, 7, 0.9);
+  font-family: var(--display); font-size: 28px; letter-spacing: 0.04em; text-transform: uppercase; }
+.camerr { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; background: var(--glass); }
+
+/* The review: the take, the two marks, and the choice. */
+.review video { width: 100%; max-height: 52vh; background: #000; border-radius: 6px; display: block; }
+.rv-side { display: grid; gap: 14px; align-content: start; min-width: 0; }
+/* Sideways on a phone: the take on the left, the marks and the choice beside it, nothing below the fold. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .review { max-width: none; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; padding-block: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-bottom, 0px)); }
+  .review video { max-height: calc(100vh - 24px); }
+  .rv-side { gap: 10px; }
+  .rv-side .note { display: none; }
+}
+.trim { display: grid; gap: 8px; }
+.trim label { display: grid; grid-template-columns: 54px minmax(0, 1fr) 64px; gap: 10px; align-items: center; font-size: 14px; }
+.trim input[type="range"] { width: 100%; }
+.trim output { font-family: var(--mono); font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; }
+.progress { height: 8px; background: var(--chip); border-radius: 4px; overflow: hidden; }
+.progress i { display: block; height: 100%; width: 0; background: var(--good); transition: width 0.2s; }
+@media (prefers-reduced-motion: reduce) { .progress i { transition: none; } }
+</style>
+</head>
+<body>
+
+<div class="page" id="setup" hidden>
+  <div class="clapper" aria-hidden="true"></div>
+  <h1>Your Key Studio</h1>
+  <p class="lede">Film on this phone with your words beside the camera. Every take you keep goes straight to your Google Drive, never to your camera roll.</p>
+
+  <section class="card" aria-labelledby="s1">
+    <h2 id="s1">1 · Your scripts</h2>
+    <p class="state" id="scriptsState">Not here yet.</p>
+    <p class="note">On your teleprompter page, tap <b>Copy the scripts for the Studio</b>. Then tap the box below and choose Paste. They stay on this phone only.</p>
+    <textarea class="paste" id="pasteBox" placeholder="Tap here, then Paste" aria-label="Paste the scripts here"></textarea>
+    <div class="row"><label class="link" for="scriptFile">Or load the scripts from a file</label><input type="file" id="scriptFile" accept="application/json,.json" hidden></div>
+  </section>
+
+  <section class="card" aria-labelledby="s2">
+    <h2 id="s2">2 · Your Google Drive</h2>
+    <p class="state" id="googleState">Not signed in.</p>
+    <p class="note">Paste the client ID from your Google project once. The Studio asks Google only to add files to your Drive, and it can see only the files it made.</p>
+    <input type="text" id="clientId" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="….apps.googleusercontent.com" aria-label="Google client ID">
+    <div class="row"><button class="btn" id="signIn" type="button">Sign in with Google</button></div>
+  </section>
+
+  <div class="row"><button class="btn primary" id="toLessons" type="button" disabled>Open the lessons</button></div>
+</div>
+
+<div class="page" id="home" hidden>
+  <div class="clapper" aria-hidden="true"></div>
+  <h1>Your Key Studio</h1>
+  <p class="lede" id="homeLede">Pick a lesson, turn the phone sideways, and tap Record.</p>
+  <nav class="sems" id="sems" role="tablist" aria-label="Seminar"></nav>
+  <section class="settings" aria-label="Settings">
+    <label>Words a minute <select id="wpm"></select></label>
+    <label>Words <select id="size"><option value="34">Big</option><option value="44">Bigger</option><option value="56">Biggest</option><option value="70">Huge</option></select></label>
+    <label>Countdown <select id="countdown"><option value="3">3 s</option><option value="5">5 s</option><option value="8">8 s</option><option value="10">10 s</option></select></label>
+    <label><input type="checkbox" id="autostop"> Stop by itself when the words end</label>
+  </section>
+  <p class="note" id="driveNote"></p>
+  <ol class="lessons" id="list"></ol>
+  <div class="row"><button class="link" id="toSetup" type="button">Scripts and Google</button></div>
+</div>
+
+<div class="cam" id="camera" hidden>
+  <video id="preview" playsinline muted autoplay></video>
+  <div class="band" id="band" role="region" aria-label="Your words"><div class="mark" id="mark"></div><div class="inner" id="words"></div></div>
+  <div class="count" id="count" hidden></div>
+  <div class="bar">
+    <button class="glassbtn" id="camBack" type="button">Lessons</button>
+    <div class="who" id="who"></div>
+    <span class="timer" id="timer">0:00</span>
+    <button class="rec" id="rec" type="button" aria-label="Record"></button>
+  </div>
+  <div class="turn" id="turn" hidden>Turn the phone sideways to film</div>
+  <div class="camerr" id="camerr" hidden></div>
+</div>
+
+<div class="page review" id="review" hidden>
+  <div class="rv-video"><video id="take" playsinline controls></video></div>
+  <div class="rv-side">
+    <h2 id="reviewTitle">The take</h2>
+    <div class="trim" aria-label="Trim">
+      <label>Start <input type="range" id="tStart" min="0" step="any" value="0"><output id="oStart">0:00.0</output></label>
+      <label>End <input type="range" id="tEnd" min="0" step="any" value="0"><output id="oEnd">0:00.0</output></label>
+      <div class="row">
+        <button class="btn" id="startHere" type="button">Start here</button>
+        <button class="btn" id="endHere" type="button">End here</button>
+        <button class="btn" id="playTrim" type="button">Play the trimmed take</button>
+      </div>
+      <p class="note">Your start and end go with the take, and the edit cuts there at full quality.</p>
+    </div>
+    <div class="row">
+      <button class="btn primary" id="send" type="button">Send to Drive</button>
+      <button class="btn red" id="retake" type="button">Retake</button>
+      <button class="link" id="toList" type="button">Lessons</button>
+    </div>
+    <div class="progress" id="progress" hidden><i id="progressBar"></i></div>
+    <p class="state" id="sendState" aria-live="polite"></p>
+  </div>
+</div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const NAMES = { sales: 'Sales', time: 'Time', communication: 'Communication', leadership: 'Leadership', quitting: 'Quitting' };
+  const PREFIX = { sales: 'S', time: 'T', communication: 'C', leadership: 'L', quitting: 'Q' };
+  const SCOPE = 'https://www.googleapis.com/auth/drive.file';
+  const ROOT_FOLDER = 'Your Key seminars';
+  const CHUNK = 8 * 1024 * 1024; // a multiple of 256 KiB, as Drive's resumable upload asks
+  const HOLD_AFTER_WORDS = 2000;
+
+  // ── small stores ────────────────────────────────────────────────────────
+  const local = {
+    get(k, d) { try { const v = localStorage.getItem(`studio:${k}`); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(`studio:${k}`, JSON.stringify(v)); } catch (e) { /* storage off */ } },
+    del(k) { try { localStorage.removeItem(`studio:${k}`); } catch (e) { /* storage off */ } },
+  };
+  const idb = {
+    open() {
+      return new Promise((resolve, reject) => {
+        const r = indexedDB.open('studio', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('kv');
+        r.onsuccess = () => resolve(r.result);
+        r.onerror = () => reject(r.error);
+      });
+    },
+    async get(k) {
+      const db = await idb.open();
+      return new Promise((resolve, reject) => { const r = db.transaction('kv').objectStore('kv').get(k); r.onsuccess = () => resolve(r.result); r.onerror = () => reject(r.error); });
+    },
+    async set(k, v) {
+      const db = await idb.open();
+      return new Promise((resolve, reject) => { const t = db.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = () => resolve(); t.onerror = () => reject(t.error); });
+    },
+  };
+
+  // ── state ───────────────────────────────────────────────────────────────
+  const state = {
+    scripts: null, sem: local.get('sem', 'sales'), token: null, tokenUntil: 0,
+    folders: local.get('folders', {}), takes: {}, lesson: null, blob: null, duration: 0,
+    settings: { wpm: 190, size: 44, countdown: 5, autostop: true, ...local.get('settings', {}) },
+  };
+  const wordsOf = (text) => text.replace(/[—–-]/g, ' ').split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
+  const fmt = (s) => { s = Math.max(0, s || 0); const m = Math.floor(s / 60); return `${m}:${(s - m * 60).toFixed(1).padStart(4, '0')}`; };
+  const fmtShort = (s) => { s = Math.max(0, Math.round(s || 0)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+  const padId = (id) => id.replace(/^([A-Z])(\d+)\.(\d+)$/, (_, p, m, l) => `${p}${m.padStart(2, '0')}.${l.padStart(2, '0')}`);
+
+  function show(id) {
+    for (const s of ['setup', 'home', 'camera', 'review']) $(s).hidden = s !== id;
+    // The camera stays on through the review, so a retake starts at once; it goes off at the lists.
+    if (id === 'home' || id === 'setup') stopCamera();
+    window.scrollTo(0, 0);
+  }
+
+  // ── 1. scripts, pasted from the teleprompter page and kept on this phone ──
+  function takeScripts(text) {
+    let json;
+    try { json = JSON.parse(text); } catch (e) { $('scriptsState').textContent = 'That wasn’t the scripts. Copy them again from the teleprompter page, then paste here.'; return false; }
+    const ok = json && typeof json === 'object' && Object.keys(NAMES).every((k) => Array.isArray(json[k]));
+    if (!ok) { $('scriptsState').textContent = 'That wasn’t the scripts. Copy them again from the teleprompter page, then paste here.'; return false; }
+    for (const lessons of Object.values(json)) for (const l of lessons) {
+      l.text = l.clips.map((c) => c.said.join('\n\n')).join('\n\n');
+      l.words = wordsOf(l.text);
+    }
+    state.scripts = json;
+    idb.set('scripts', text).catch(() => { $('scriptsState').textContent = 'The scripts are here for now, but this phone wouldn’t keep them. Paste again next time.'; });
+    renderSetup();
+    return true;
+  }
+  $('pasteBox').addEventListener('paste', (e) => {
+    const text = e.clipboardData && e.clipboardData.getData('text');
+    if (!text) return;
+    e.preventDefault();
+    $('pasteBox').value = '';
+    takeScripts(text);
+  });
+  $('pasteBox').addEventListener('input', () => {
+    // A paste the browser put straight into the box: take it once it is a whole JSON object.
+    const v = $('pasteBox').value.trim();
+    if (v.startsWith('{') && v.endsWith('}') && takeScripts(v)) $('pasteBox').value = '';
+  });
+  $('scriptFile').addEventListener('change', async () => {
+    const f = $('scriptFile').files[0];
+    if (f) takeScripts(await f.text());
+  });
+
+  // ── 2. Google: drive.file only, a token for the session ─────────────────
+  $('clientId').value = local.get('clientId', '');
+  $('clientId').addEventListener('change', () => { local.set('clientId', $('clientId').value.trim()); renderSetup(); });
+  let tokenClient = null;
+  let tokenWaiters = [];
+  function ensureTokenClient() {
+    const id = $('clientId').value.trim() || local.get('clientId', '');
+    if (!id || !(window.google && google.accounts && google.accounts.oauth2)) return null;
+    if (tokenClient && tokenClient._id === id) return tokenClient;
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: id, scope: SCOPE,
+      callback: (r) => {
+        const waiters = tokenWaiters; tokenWaiters = [];
+        if (r && r.access_token) {
+          state.token = r.access_token; state.tokenUntil = Date.now() + (Number(r.expires_in) || 3600) * 1000 - 60000;
+          waiters.forEach((w) => w.resolve(state.token));
+        } else waiters.forEach((w) => w.reject(new Error((r && r.error) || 'Google said no')));
+        renderSetup(); renderHome();
+      },
+      error_callback: (e) => { const waiters = tokenWaiters; tokenWaiters = []; waiters.forEach((w) => w.reject(new Error((e && e.type) || 'Google sign-in closed'))); renderSetup(); },
+    });
+    tokenClient._id = id;
+    return tokenClient;
+  }
+  /** A token, asking Google (from a tap) when there is none or it has run out. */
+  function signIn() {
+    const c = ensureTokenClient();
+    if (!c) return Promise.reject(new Error('Paste the client ID first, and check you’re online.'));
+    return new Promise((resolve, reject) => { tokenWaiters.push({ resolve, reject }); c.requestAccessToken({ prompt: state.token ? '' : 'consent' }); });
+  }
+  const signedIn = () => !!state.token && Date.now() < state.tokenUntil;
+  $('signIn').addEventListener('click', () => { local.set('clientId', $('clientId').value.trim()); signIn().catch((e) => { $('googleState').textContent = e.message; }); });
+
+  async function api(url, opts = {}) {
+    if (!signedIn()) throw Object.assign(new Error('Sign in with Google again.'), { auth: true });
+    const r = await fetch(url, { ...opts, headers: { Authorization: `Bearer ${state.token}`, ...(opts.headers || {}) } });
+    if (r.status === 401) { state.token = null; throw Object.assign(new Error('Sign in with Google again.'), { auth: true }); }
+    if (!r.ok) throw new Error(`Google Drive said ${r.status}.`);
+    return r.json();
+  }
+  const q = (s) => encodeURIComponent(s);
+  async function folder(name, parent) {
+    const key = parent ? `${parent}/${name}` : name;
+    if (state.folders[key]) return state.folders[key];
+    const query = `name='${name.replace(/'/g, "\\'")}' and mimeType='application/vnd.google-apps.folder' and trashed=false${parent ? ` and '${parent}' in parents` : ''}`;
+    const found = await api(`https://www.googleapis.com/drive/v3/files?q=${q(query)}&fields=files(id)&spaces=drive`);
+    let id = found.files && found.files[0] && found.files[0].id;
+    if (!id) {
+      const made = await api('https://www.googleapis.com/drive/v3/files?fields=id', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, mimeType: 'application/vnd.google-apps.folder', ...(parent ? { parents: [parent] } : {}) }),
+      });
+      id = made.id;
+    }
+    state.folders[key] = id; local.set('folders', state.folders);
+    return id;
+  }
+  const semFolder = async (sem) => folder(NAMES[sem], await folder(ROOT_FOLDER));
+  async function loadTakes(sem, again = true) {
+    let parent;
+    try { parent = await semFolder(sem); await api(`https://www.googleapis.com/drive/v3/files/${parent}?fields=id,trashed`).then((f) => { if (f.trashed) throw new Error('gone'); }); }
+    catch (e) {
+      // A folder moved to the bin or deleted in Drive: forget it and make it again.
+      if (e.auth || !again) throw e;
+      state.folders = {}; local.del('folders');
+      return loadTakes(sem, false);
+    }
+    const files = [];
+    let page = '';
+    do {
+      const r = await api(`https://www.googleapis.com/drive/v3/files?q=${q(`'${parent}' in parents and trashed=false`)}&fields=nextPageToken,files(id,name,appProperties)&pageSize=1000${page ? `&pageToken=${page}` : ''}`);
+      files.push(...(r.files || [])); page = r.nextPageToken || '';
+    } while (page);
+    const byLesson = {};
+    for (const f of files) { const id = f.appProperties && f.appProperties.lesson; if (id) (byLesson[id] = byLesson[id] || []).push(f); }
+    state.takes[sem] = byLesson;
+    return byLesson;
+  }
+
+  // ── setup and home ──────────────────────────────────────────────────────
+  function renderSetup() {
+    const n = state.scripts ? Object.values(state.scripts).reduce((a, l) => a + l.length, 0) : 0;
+    $('scriptsState').textContent = state.scripts ? `${n} lessons, on this phone.` : $('scriptsState').textContent;
+    $('scriptsState').classList.toggle('ok', !!state.scripts);
+    $('googleState').textContent = signedIn() ? 'Signed in. Takes go to “Your Key seminars” in your Drive.' : 'Not signed in.';
+    $('googleState').classList.toggle('ok', signedIn());
+    $('toLessons').disabled = !state.scripts;
+  }
+  $('toLessons').addEventListener('click', () => { show('home'); renderHome(); });
+  $('toSetup').addEventListener('click', () => { show('setup'); renderSetup(); });
+
+  const wpmSel = $('wpm');
+  for (let w = 150; w <= 230; w += 10) wpmSel.append(new Option(String(w), String(w)));
+  function syncSettings() {
+    wpmSel.value = String(state.settings.wpm); $('size').value = String(state.settings.size);
+    $('countdown').value = String(state.settings.countdown); $('autostop').checked = !!state.settings.autostop;
+  }
+  for (const [id, key, num] of [['wpm', 'wpm', true], ['size', 'size', true], ['countdown', 'countdown', true]]) {
+    $(id).addEventListener('change', () => { state.settings[key] = num ? Number($(id).value) : $(id).value; local.set('settings', state.settings); renderHome(); });
+  }
+  $('autostop').addEventListener('change', () => { state.settings.autostop = $('autostop').checked; local.set('settings', state.settings); });
+
+  function renderHome() {
+    if (!state.scripts || $('home').hidden) return;
+    const sems = $('sems'); sems.replaceChildren();
+    for (const key of Object.keys(NAMES)) {
+      const lessons = state.scripts[key] || [];
+      const takes = state.takes[key] || {};
+      const filmed = lessons.filter((l) => takes[l.id]).length;
+      const b = document.createElement('button');
+      b.className = 'sem'; b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(key === state.sem));
+      b.innerHTML = `<b>${NAMES[key]}</b><span>${state.takes[key] ? `${filmed} of ${lessons.length} filmed` : `${lessons.length} lessons`}</span>`;
+      b.addEventListener('click', () => { state.sem = key; local.set('sem', key); renderHome(); refreshTakes(); });
+      sems.append(b);
+    }
+    $('driveNote').textContent = signedIn() ? '' : 'Not signed in to Google, so a take can’t be sent yet. Scripts and Google is at the bottom.';
+    const list = $('list'); list.replaceChildren();
+    const takes = state.takes[state.sem] || {};
+    for (const l of state.scripts[state.sem] || []) {
+      const li = document.createElement('li');
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = `lesson${takes[l.id] ? ' done' : ''}`;
+      const mins = l.words / state.settings.wpm;
+      b.innerHTML = `<span class="id">${l.id}</span><span class="t"></span><span class="m">${mins < 1 ? `${Math.round(mins * 60)} s` : `${mins.toFixed(1)} min`}</span>`;
+      b.querySelector('.t').textContent = l.title;
+      if (takes[l.id]) { const t = document.createElement('span'); t.className = 'takes'; t.textContent = `${takes[l.id].length} ${takes[l.id].length === 1 ? 'take' : 'takes'} in Drive`; b.append(t); }
+      b.addEventListener('click', () => openLesson(l));
+      li.append(b); list.append(li);
+    }
+  }
+  async function refreshTakes() {
+    if (!signedIn()) return;
+    try { await loadTakes(state.sem); renderHome(); } catch (e) { $('driveNote').textContent = e.message; }
+  }
+
+  // ── the camera and the words ────────────────────────────────────────────
+  let stream = null, recorder = null, chunks = [], startedAt = 0, tick = 0, wake = null, roll = null, holdTimer = 0;
+  async function startCamera() {
+    if (stream) return stream;
+    $('camerr').hidden = true;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } },
+        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+      });
+      $('preview').srcObject = stream;
+      return stream;
+    } catch (e) {
+      $('camerr').hidden = false;
+      $('camerr').textContent = 'The camera didn’t open. In Settings, let Safari use the camera and microphone for this site, then come back.';
+      throw e;
+    }
+  }
+  function stopCamera() {
+    if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; }
+    $('preview').srcObject = null;
+  }
+  async function lockScreen() { try { wake = await navigator.wakeLock.request('screen'); } catch (e) { wake = null; } }
+  function unlockScreen() { try { wake && wake.release(); } catch (e) { /* gone */ } wake = null; }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && !$('camera').hidden) lockScreen(); });
+
+  const portrait = () => window.innerHeight > window.innerWidth;
+  function checkTurn() { $('turn').hidden = !portrait() || (recorder && recorder.state === 'recording'); layoutWords(); }
+  window.addEventListener('resize', checkTurn);
+
+  function layoutWords() {
+    if (!state.lesson) return;
+    const band = $('band'); const inner = $('words');
+    const size = state.settings.size;
+    inner.style.fontSize = `${size}px`;
+    const lineH = size * 1.32;
+    const lines = window.innerHeight < 500 ? 2.6 : 3.6;
+    band.style.height = `${Math.round(lineH * lines + 16)}px`;
+    band.style.paddingTop = `${Math.round(lineH * 0.6)}px`;
+    $('mark').style.top = `${Math.round(lineH * 0.6 + lineH / 2 - 2)}px`;
+    if (roll) roll.total = Math.max(1, inner.scrollHeight - lineH);
+  }
+  function openLesson(l) {
+    state.lesson = l;
+    $('who').innerHTML = `<b>${l.id}</b>`; $('who').append(document.createTextNode(l.title));
+    const inner = $('words'); inner.replaceChildren();
+    for (const c of l.clips) for (const p of c.said) { const el = document.createElement('p'); el.textContent = p; inner.append(el); }
+    inner.style.transform = 'translateY(0)';
+    $('timer').textContent = '0:00'; $('timer').classList.remove('live'); $('rec').classList.remove('on'); $('rec').setAttribute('aria-label', 'Record');
+    roll = { pos: 0, total: 1, playing: false, last: 0, raf: 0, done: false };
+    show('camera'); checkTurn(); layoutWords();
+    startCamera().catch(() => {});
+    lockScreen();
+  }
+  function rollStep(t) {
+    if (!roll || !roll.playing) return;
+    const dt = roll.last ? (t - roll.last) / 1000 : 0; roll.last = t;
+    const seconds = (state.lesson.words / state.settings.wpm) * 60;
+    roll.pos = Math.min(roll.total, roll.pos + (roll.total / Math.max(1, seconds)) * dt);
+    $('words').style.transform = `translateY(${-roll.pos}px)`;
+    if (roll.pos >= roll.total && !roll.done) { roll.done = true; roll.playing = false; wordsEnded(); return; }
+    roll.raf = requestAnimationFrame(rollStep);
+  }
+  function playRoll() { if (!roll || roll.done) return; roll.playing = true; roll.last = 0; roll.raf = requestAnimationFrame(rollStep); }
+  function pauseRoll() { if (!roll) return; roll.playing = false; cancelAnimationFrame(roll.raf); }
+  $('band').addEventListener('click', () => { if (!roll || !recorder || recorder.state !== 'recording') return; roll.playing ? pauseRoll() : playRoll(); });
+  function wordsEnded() { if (state.settings.autostop && recorder && recorder.state === 'recording') holdTimer = setTimeout(stopRecording, HOLD_AFTER_WORDS); }
+
+  function pickType() {
+    const want = ['video/mp4;codecs="avc1.640028,mp4a.40.2"', 'video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm'];
+    return want.find((t) => window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
+  }
+  async function countdown(n) {
+    const c = $('count'); c.hidden = false;
+    for (let i = n; i > 0; i--) { c.textContent = String(i); await new Promise((r) => setTimeout(r, 1000)); if (!state.counting) break; }
+    c.hidden = true;
+  }
+  async function startRecording() {
+    if (portrait()) { checkTurn(); return; }
+    let s;
+    try { s = await startCamera(); } catch (e) { return; }
+    state.counting = true;
+    await countdown(state.settings.countdown);
+    if (!state.counting) return;
+    state.counting = false;
+    const type = pickType();
+    chunks = [];
+    try {
+      recorder = new MediaRecorder(s, { ...(type ? { mimeType: type } : {}), videoBitsPerSecond: 8000000, audioBitsPerSecond: 160000 });
+    } catch (e) {
+      $('camerr').hidden = false; $('camerr').textContent = 'This phone wouldn’t record here. Update iOS, then try again.'; return;
+    }
+    recorder.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+    recorder.onstop = finishTake;
+    recorder.start(1000);
+    startedAt = performance.now();
+    $('rec').classList.add('on'); $('rec').setAttribute('aria-label', 'Stop'); $('timer').classList.add('live');
+    tick = setInterval(() => { $('timer').textContent = fmtShort((performance.now() - startedAt) / 1000); }, 250);
+    roll.pos = 0; roll.done = false; $('words').style.transform = 'translateY(0)'; layoutWords(); playRoll();
+  }
+  function stopRecording() {
+    clearTimeout(holdTimer); clearInterval(tick); pauseRoll();
+    if (recorder && recorder.state === 'recording') { state.elapsed = (performance.now() - startedAt) / 1000; recorder.stop(); }
+  }
+  $('rec').addEventListener('click', () => {
+    if (state.counting) { state.counting = false; $('count').hidden = true; return; }
+    if (recorder && recorder.state === 'recording') stopRecording(); else startRecording();
+  });
+  $('camBack').addEventListener('click', () => {
+    state.counting = false;
+    if (recorder && recorder.state === 'recording') { recorder.onstop = null; recorder.stop(); clearInterval(tick); }
+    pauseRoll(); unlockScreen(); show('home'); renderHome();
+  });
+
+  // ── the review: watch it, mark it, send it or take it again ─────────────
+  function finishTake() {
+    unlockScreen();
+    const type = (recorder && recorder.mimeType) || pickType() || 'video/mp4';
+    state.blob = new Blob(chunks, { type });
+    chunks = []; recorder = null;
+    const v = $('take');
+    if (v.src) URL.revokeObjectURL(v.src);
+    v.src = URL.createObjectURL(state.blob);
+    state.duration = state.elapsed || 0;
+    state.marked = false;
+    v.onloadedmetadata = () => {
+      if (Number.isFinite(v.duration) && v.duration > 0) state.duration = v.duration;
+      if (!state.marked) setMarks(0, state.duration); else for (const id of ['tStart', 'tEnd']) $(id).max = String(state.duration);
+    };
+    setMarks(0, state.duration);
+    const n = ((state.takes[state.sem] || {})[state.lesson.id] || []).length + 1;
+    state.takeNo = n;
+    $('reviewTitle').textContent = `${state.lesson.id} · take ${n} · ${fmtShort(state.duration)}`;
+    $('sendState').textContent = signedIn() ? '' : 'Not signed in to Google: Send will ask you to sign in.';
+    $('progress').hidden = true; $('send').disabled = false; $('retake').disabled = false;
+    show('review');
+  }
+  function setMarks(a, b) {
+    for (const id of ['tStart', 'tEnd']) $(id).max = String(Math.max(0.1, state.duration));
+    $('tStart').value = String(a); $('tEnd').value = String(b); showMarks();
+  }
+  function showMarks() {
+    let a = Number($('tStart').value), b = Number($('tEnd').value);
+    if (a > b - 0.5) { a = Math.max(0, b - 0.5); $('tStart').value = String(a); }
+    $('oStart').textContent = fmt(a); $('oEnd').textContent = fmt(b);
+  }
+  $('tStart').addEventListener('input', () => { state.marked = true; showMarks(); $('take').currentTime = Number($('tStart').value); });
+  $('tEnd').addEventListener('input', () => { state.marked = true; showMarks(); $('take').currentTime = Number($('tEnd').value); });
+  $('startHere').addEventListener('click', () => { state.marked = true; $('tStart').value = String($('take').currentTime); showMarks(); });
+  $('endHere').addEventListener('click', () => { state.marked = true; $('tEnd').value = String($('take').currentTime); showMarks(); });
+  let stopAt = 0;
+  $('playTrim').addEventListener('click', () => { const v = $('take'); v.currentTime = Number($('tStart').value); stopAt = Number($('tEnd').value); v.play(); });
+  $('take').addEventListener('timeupdate', () => { const v = $('take'); if (stopAt && v.currentTime >= stopAt) { v.pause(); stopAt = 0; } });
+
+  function discard() { const v = $('take'); v.pause(); if (v.src) URL.revokeObjectURL(v.src); v.removeAttribute('src'); state.blob = null; }
+  $('retake').addEventListener('click', () => { const l = state.lesson; discard(); openLesson(l); });
+  $('toList').addEventListener('click', () => {
+    if (state.blob && !$('toList').dataset.sure) { $('toList').dataset.sure = '1'; $('toList').textContent = 'Tap again to throw this take away'; return; }
+    delete $('toList').dataset.sure; $('toList').textContent = 'Lessons'; discard(); show('home'); renderHome();
+  });
+
+  /** One resumable upload, in 8 MiB pieces, picking up where it stopped if the connection drops. */
+  function put(session, blob, from, onProgress) {
+    return new Promise((resolve, reject) => {
+      const to = Math.min(blob.size, from + CHUNK);
+      const x = new XMLHttpRequest();
+      x.open('PUT', session);
+      x.setRequestHeader('Content-Range', `bytes ${from}-${to - 1}/${blob.size}`);
+      x.upload.onprogress = (e) => onProgress(from + e.loaded);
+      x.onload = () => {
+        if (x.status === 200 || x.status === 201) resolve({ done: true, file: JSON.parse(x.responseText || '{}') });
+        else if (x.status === 308) { const r = x.getResponseHeader('Range'); resolve({ done: false, next: r ? Number(r.split('-')[1]) + 1 : to }); }
+        else reject(Object.assign(new Error(`Google Drive said ${x.status}.`), { status: x.status }));
+      };
+      x.onerror = () => reject(Object.assign(new Error('The connection dropped.'), { network: true }));
+      x.send(blob.slice(from, to));
+    });
+  }
+  async function send() {
+    if (!state.blob) return;
+    $('send').disabled = true; $('retake').disabled = true;
+    try {
+      if (!signedIn()) await signIn();
+      $('sendState').textContent = 'Finding your folder…';
+      const parent = await semFolder(state.sem);
+      const takes = await loadTakes(state.sem);
+      const n = (takes[state.lesson.id] || []).length + 1;
+      const a = Number($('tStart').value), b = Number($('tEnd').value);
+      const ext = state.blob.type.includes('webm') ? 'webm' : 'mp4';
+      const meta = {
+        name: `${padId(state.lesson.id)} take ${n}.${ext}`,
+        parents: [parent],
+        description: `${state.lesson.id} · ${state.lesson.title}\nTake ${n}. Start ${fmt(a)}, end ${fmt(b)}, of ${fmt(state.duration)}.`,
+        appProperties: { lesson: state.lesson.id, seminar: state.sem, take: String(n), trimStart: a.toFixed(2), trimEnd: b.toFixed(2), duration: state.duration.toFixed(2), recorded: new Date().toISOString() },
+      };
+      const start = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${state.token}`, 'Content-Type': 'application/json; charset=UTF-8', 'X-Upload-Content-Type': state.blob.type, 'X-Upload-Content-Length': String(state.blob.size) },
+        body: JSON.stringify(meta),
+      });
+      if (start.status === 401) { state.token = null; throw new Error('Sign in with Google again, then tap Send.'); }
+      const session = start.ok && start.headers.get('Location');
+      if (!session) throw new Error(`Google Drive said ${start.status}.`);
+      $('progress').hidden = false;
+      const progress = (sent) => { const p = Math.min(100, (sent / state.blob.size) * 100); $('progressBar').style.width = `${p}%`; $('sendState').textContent = `Sending ${meta.name}… ${Math.floor(p)}%`; };
+      let from = 0, tries = 0, file = null;
+      while (!file) {
+        try {
+          const r = await put(session, state.blob, from, progress);
+          tries = 0;
+          if (r.done) file = r.file; else from = r.next;
+        } catch (e) {
+          if (++tries > 6) throw e;
+          $('sendState').textContent = 'The connection dropped. Trying again…';
+          await new Promise((res) => setTimeout(res, 1500 * tries));
+          const check = await new Promise((resolve) => {
+            const x = new XMLHttpRequest(); x.open('PUT', session); x.setRequestHeader('Content-Range', `bytes */${state.blob.size}`);
+            x.onload = () => resolve(x); x.onerror = () => resolve(null); x.send();
+          });
+          if (check && (check.status === 200 || check.status === 201)) file = JSON.parse(check.responseText || '{}');
+          else if (check && check.status === 308) { const range = check.getResponseHeader('Range'); from = range ? Number(range.split('-')[1]) + 1 : 0; }
+        }
+      }
+      $('progressBar').style.width = '100%';
+      $('sendState').textContent = `In your Drive: ${ROOT_FOLDER} › ${NAMES[state.sem]} › ${meta.name}`;
+      $('sendState').classList.add('ok');
+      (state.takes[state.sem][state.lesson.id] = state.takes[state.sem][state.lesson.id] || []).push({ id: file.id, name: meta.name, appProperties: meta.appProperties });
+      discard();
+      setTimeout(() => { $('sendState').classList.remove('ok'); show('home'); renderHome(); }, 1800);
+    } catch (e) {
+      $('sendState').textContent = `${e.message} The take is still here: tap Send to try again.`;
+      $('send').disabled = false; $('retake').disabled = false;
+    }
+  }
+  $('send').addEventListener('click', send);
+
+  // ── start ───────────────────────────────────────────────────────────────
+  syncSettings();
+  idb.get('scripts').then((text) => { if (text) takeScripts(text); }).catch(() => {}).finally(() => {
+    if (state.scripts) { show('home'); renderHome(); } else { show('setup'); renderSetup(); }
+  });
+  window.addEventListener('beforeunload', (e) => { if (state.blob || (recorder && recorder.state === 'recording')) { e.preventDefault(); e.returnValue = ''; } });
+})();
+</script>
+</body>
+</html>
