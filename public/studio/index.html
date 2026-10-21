@@ -26,6 +26,11 @@
   October: on his first take the words ran along the top while the lens was on the side, and his eyes
   showed it). The picture of him sits beside the words, the whole frame as it is recorded, with the name
   of the microphone in use.
+
+  The sound is turned up before it is recorded, with a bar that moves as he talks and a word on each take
+  (21 October: the page got the iPhone's microphone raw and his take was too quiet to hear). The words
+  start at 210 a minute, and slower and faster sit beside the timer, during a take too (he reads faster
+  than 190).
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -141,14 +146,35 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
 .cam.lens-left .count { right: auto; width: var(--col); }
 .cam.lens-right .count { left: auto; width: var(--col); }
 .cam.side .count { bottom: calc(50% + var(--zone, 36px)); font-size: min(32vh, 22vw); }
-.camtop { position: absolute; top: max(10px, env(safe-area-inset-top, 0px)); display: none; align-items: center; justify-content: space-between; gap: 10px; }
+.camtop { position: absolute; top: max(10px, env(safe-area-inset-top, 0px)); display: none; flex-direction: column; gap: 8px; }
 .cam.side .camtop { display: flex; }
 .cam.lens-left .camtop { left: calc(var(--col) + 14px); right: max(14px, env(safe-area-inset-right, 0px)); }
-.cam.lens-right .camtop { left: max(14px, env(safe-area-inset-left, 0px)); right: calc(var(--col) + 14px); flex-direction: row-reverse; }
+.cam.lens-right .camtop { left: max(14px, env(safe-area-inset-left, 0px)); right: calc(var(--col) + 14px); }
 .cam.live .camtop { display: none; }
+.camrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.cam.lens-right .camrow { flex-direction: row-reverse; }
 .mic { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--glass-dim);
   padding: 6px 10px; background: rgba(20, 24, 27, 0.7); border-radius: 6px; }
 .camtop .glassbtn { flex: none; }
+/* The sound: a bar that moves with his voice, the white line where speech should reach, and the boost. */
+.sound { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: rgba(20, 24, 27, 0.7); border-radius: 6px; }
+.meter { position: relative; flex: 1 1 auto; min-width: 60px; height: 10px; border-radius: 5px; background: rgba(242, 241, 236, 0.16); overflow: hidden; }
+.meter i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--glass-dim); }
+.meter.good i { background: #45bf82; }
+.meter.loud i { background: var(--guide); }
+.meter b { position: absolute; top: 0; bottom: 0; left: 80%; width: 2px; background: var(--glass-fg); }
+.boost { font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; min-width: 8.6em; text-align: center; }
+.glassbtn.sq { width: 36px; height: 32px; padding: 0; font-size: 20px; line-height: 1; }
+.glassbtn:disabled { opacity: 0.4; }
+.cam.side video { top: 108px; height: calc(100% - 108px); object-position: 50% 0; }
+/* The speed, in the bar: slower and faster while he reads. While live, Lessons (which would throw the
+   take away) and the title give way to it. */
+.speed { display: flex; align-items: center; gap: 6px; flex: none; }
+.speed span { font-family: var(--mono); font-size: 13px; min-width: 5.6em; text-align: center; font-variant-numeric: tabular-nums; }
+.cam.live #camBack, .cam.live .who { display: none; }
+/* Until a take starts the timer only says 0:00, so it gives its room to the lesson's number. */
+.cam:not(.live) .timer { display: none; }
+.cam.side .who .t { display: none; }
 
 /* The review: the take, the two marks, and the choice. */
 .review video { width: 100%; max-height: 52vh; background: #000; border-radius: 6px; display: block; }
@@ -205,6 +231,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     <label>Words <select id="size"><option value="34">Big</option><option value="44">Bigger</option><option value="56">Biggest</option><option value="70">Huge</option></select></label>
     <label>Countdown <select id="countdown"><option value="3">3 s</option><option value="5">5 s</option><option value="8">8 s</option><option value="10">10 s</option></select></label>
     <label><input type="checkbox" id="autostop"> Stop by itself when the words end</label>
+    <label><input type="checkbox" id="plain"> Plain sound, no boost (only if a take plays silent)</label>
   </section>
   <p class="note" id="driveNote"></p>
   <ol class="lessons" id="list"></ol>
@@ -216,12 +243,25 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   <div class="band" id="band" role="region" aria-label="Your words"><div class="mark" id="mark"></div><div class="inner" id="words"></div></div>
   <div class="count" id="count" hidden></div>
   <div class="camtop">
-    <span class="mic" id="mic"></span>
-    <button class="glassbtn" id="swap" type="button" aria-label="Move the words to the other side">⇄ Switch sides</button>
+    <div class="camrow">
+      <span class="mic" id="mic"></span>
+      <button class="glassbtn" id="swap" type="button" aria-label="Move the words to the other side">⇄ Switch sides</button>
+    </div>
+    <div class="sound" id="sound" hidden>
+      <span class="meter" id="meter" aria-hidden="true"><i id="meterBar"></i><b></b></span>
+      <button class="glassbtn sq" id="boostDown" type="button" aria-label="Microphone quieter">−</button>
+      <span class="boost" id="boostLabel" aria-live="polite"></span>
+      <button class="glassbtn sq" id="boostUp" type="button" aria-label="Microphone louder">+</button>
+    </div>
   </div>
   <div class="bar">
     <button class="glassbtn" id="camBack" type="button">Lessons</button>
     <div class="who" id="who"></div>
+    <div class="speed">
+      <button class="glassbtn sq" id="slower" type="button" aria-label="Words slower">−</button>
+      <span id="speedLabel" aria-live="polite"></span>
+      <button class="glassbtn sq" id="faster" type="button" aria-label="Words faster">+</button>
+    </div>
     <span class="timer" id="timer">0:00</span>
     <button class="rec" id="rec" type="button" aria-label="Record"></button>
   </div>
@@ -233,6 +273,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   <div class="rv-video"><video id="take" playsinline controls></video></div>
   <div class="rv-side">
     <h2 id="reviewTitle">The take</h2>
+    <p class="state" id="soundState" aria-live="polite"></p>
     <div class="trim" aria-label="Trim">
       <label>Start <input type="range" id="tStart" min="0" step="any" value="0"><output id="oStart">0:00.0</output></label>
       <label>End <input type="range" id="tEnd" min="0" step="any" value="0"><output id="oEnd">0:00.0</output></label>
@@ -291,10 +332,14 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   };
 
   // ── state ───────────────────────────────────────────────────────────────
+  // He reads at about 208 words a minute (his first take, 21 October) and found 190 too slow, so the words
+  // start at 210, and a phone still on the old 190 moves up to it once.
+  const saved = local.get('settings', {});
+  if (!saved.paced) { saved.wpm = Math.max(Number(saved.wpm) || 0, 210); saved.paced = true; }
   const state = {
     scripts: null, sem: local.get('sem', 'sales'), token: null, tokenUntil: 0,
     folders: local.get('folders', {}), takes: {}, lesson: null, blob: null, duration: 0,
-    settings: { wpm: 190, size: 44, countdown: 5, autostop: true, ...local.get('settings', {}) },
+    settings: { wpm: 210, size: 44, countdown: 5, autostop: true, ...saved },
   };
   const wordsOf = (text) => text.replace(/[—–-]/g, ' ').split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
   const fmt = (s) => { s = Math.max(0, s || 0); const m = Math.floor(s / 60); return `${m}:${(s - m * 60).toFixed(1).padStart(4, '0')}`; };
@@ -303,8 +348,10 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
 
   function show(id) {
     for (const s of ['setup', 'home', 'camera', 'review']) $(s).hidden = s !== id;
-    // The camera stays on through the review, so a retake starts at once; it goes off at the lists.
-    if (id === 'home' || id === 'setup') stopCamera();
+    // The camera and the microphone go off away from the camera screen. At the review that matters: with
+    // its microphone open an iPhone can route sound as for a call, and closed, the take plays through the
+    // loudspeaker like any video. A retake opens them again.
+    if (id !== 'camera') { stopCamera(); restSound(); }
     window.scrollTo(0, 0);
   }
 
@@ -431,16 +478,29 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   $('toLessons').addEventListener('click', () => { show('home'); renderHome(); });
   $('toSetup').addEventListener('click', () => { show('setup'); renderSetup(); });
 
+  const SPEED = { min: 150, max: 260, step: 10 };
   const wpmSel = $('wpm');
-  for (let w = 150; w <= 230; w += 10) wpmSel.append(new Option(String(w), String(w)));
+  for (let w = SPEED.min; w <= SPEED.max; w += SPEED.step) wpmSel.append(new Option(String(w), String(w)));
   function syncSettings() {
     wpmSel.value = String(state.settings.wpm); $('size').value = String(state.settings.size);
     $('countdown').value = String(state.settings.countdown); $('autostop').checked = !!state.settings.autostop;
+    $('plain').checked = !!state.settings.plain;
+    $('speedLabel').textContent = `Speed ${state.settings.wpm}`;
+    $('slower').disabled = state.settings.wpm <= SPEED.min; $('faster').disabled = state.settings.wpm >= SPEED.max;
   }
+  /** Slower or faster, from the camera screen, during a take too: the words keep their place and roll at the
+   *  new speed from that moment, and the next take starts at it. */
+  function setSpeed(wpm) {
+    state.settings.wpm = Math.min(SPEED.max, Math.max(SPEED.min, wpm));
+    local.set('settings', state.settings); syncSettings();
+  }
+  $('slower').addEventListener('click', () => setSpeed(state.settings.wpm - SPEED.step));
+  $('faster').addEventListener('click', () => setSpeed(state.settings.wpm + SPEED.step));
   for (const [id, key, num] of [['wpm', 'wpm', true], ['size', 'size', true], ['countdown', 'countdown', true]]) {
     $(id).addEventListener('change', () => { state.settings[key] = num ? Number($(id).value) : $(id).value; local.set('settings', state.settings); renderHome(); });
   }
   $('autostop').addEventListener('change', () => { state.settings.autostop = $('autostop').checked; local.set('settings', state.settings); });
+  $('plain').addEventListener('change', () => { state.settings.plain = $('plain').checked; local.set('settings', state.settings); });
 
   function renderHome() {
     if (!state.scripts || $('home').hidden) return;
@@ -488,6 +548,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       $('preview').srcObject = stream;
       const mic = stream.getAudioTracks()[0];
       $('mic').textContent = mic ? `Mic: ${mic.label || 'on'}` : 'No microphone';
+      wireSound(stream);
       inputs = await audioInputs();
       return stream;
     } catch (e) {
@@ -497,8 +558,132 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     }
   }
   function stopCamera() {
+    unwireSound();
     if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; }
     $('preview').srcObject = null;
+  }
+
+  // ── the sound: turned up before it is recorded, a bar to show it, a word on each take ──
+  /**
+   * A web page gets the microphone raw: his first take (21 October) came in at -47 LUFS, too quiet to hear
+   * at full volume, and only on the left side, the right side silent, so a phone's two speakers played
+   * him from one and headphones in one ear. So the sound is mixed to one voice, carried on both sides,
+   * and goes through a boost and a limiter (which catches a laugh or a shout before it can distort) on its
+   * way to the recording. A bar shows the level as he talks, and each take says whether it came out quiet,
+   * good or too loud. The boost is kept for each microphone by name: the iPhone's own starts at +24 dB; a
+   * microphone plugged in starts at none, since it sets its own level. "Plain sound" in the settings records
+   * the microphone exactly as it comes, as the Studio did before, in case a phone records the mixed sound
+   * silent.
+   */
+  const BOOSTS = [0, 6, 12, 18, 24, 30];
+  const sound = { ctx: null, src: null, split: null, mono: null, gain: null, limit: null, meter: null, dest: null, buf: null, raf: 0,
+    hold: -120, boost: 0, mixed: null, label: '', take: null, last: null, takeMixed: false, lastMixed: false };
+  const micKey = (label) => label || 'microphone';
+  const boostFor = (label) => {
+    const kept = local.get('boost', {});
+    if (typeof kept[micKey(label)] === 'number' && BOOSTS.includes(kept[micKey(label)])) return kept[micKey(label)];
+    return /iphone|ipad/i.test(label || '') ? 24 : 0;
+  };
+  function soundContext() {
+    if (sound.ctx) return sound.ctx;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    try { sound.ctx = AC ? new AC() : null; } catch (e) { sound.ctx = null; }
+    return sound.ctx;
+  }
+  /** On an iPhone, page sound starts only from a tap, so every tap towards the camera or a take wakes it. */
+  function wakeSound() { const c = soundContext(); if (c && c.state !== 'running') c.resume().catch(() => {}); }
+  /** Away from the camera it rests, so nothing of it is running while a take plays back. */
+  function restSound() { if (sound.ctx && sound.ctx.state === 'running') sound.ctx.suspend().catch(() => {}); }
+  const soundOn = () => !!(sound.ctx && sound.ctx.state === 'running' && sound.mixed);
+  function unwireSound() {
+    cancelAnimationFrame(sound.raf); sound.raf = 0;
+    for (const n of ['src', 'split', 'mono', 'gain', 'limit', 'meter', 'dest']) { try { if (sound[n]) sound[n].disconnect(); } catch (e) { /* gone */ } sound[n] = null; }
+    if (sound.mixed) sound.mixed.getAudioTracks().forEach((t) => t.stop());
+    sound.mixed = null;
+    $('sound').hidden = true;
+  }
+  function wireSound(s) {
+    unwireSound();
+    const track = s.getAudioTracks()[0];
+    sound.label = track ? track.label : '';
+    const ctx = soundContext();
+    if (!ctx || !track) return;
+    try {
+      sound.src = ctx.createMediaStreamSource(s);
+      // Both sides summed into one voice (a side with nothing on it adds nothing); the recording then
+      // carries that voice on both sides.
+      sound.split = ctx.createChannelSplitter(2);
+      sound.mono = ctx.createGain();
+      sound.mono.channelCount = 1; sound.mono.channelCountMode = 'explicit'; sound.mono.channelInterpretation = 'discrete';
+      sound.src.connect(sound.split);
+      sound.split.connect(sound.mono, 0); sound.split.connect(sound.mono, 1);
+      sound.gain = ctx.createGain();
+      sound.limit = ctx.createDynamicsCompressor();
+      sound.limit.threshold.value = -3; sound.limit.knee.value = 0; sound.limit.ratio.value = 20;
+      sound.limit.attack.value = 0.002; sound.limit.release.value = 0.15;
+      sound.meter = ctx.createAnalyser(); sound.meter.fftSize = 2048;
+      sound.buf = new Float32Array(sound.meter.fftSize);
+      sound.dest = ctx.createMediaStreamDestination();
+      sound.mono.connect(sound.gain); sound.gain.connect(sound.limit);
+      sound.limit.connect(sound.dest); sound.limit.connect(sound.meter);
+      sound.mixed = new MediaStream([...s.getVideoTracks(), ...sound.dest.stream.getAudioTracks()]);
+      setBoost(boostFor(sound.label), false);
+      $('sound').hidden = false;
+      meterLoop();
+    } catch (e) { unwireSound(); }
+  }
+  function setBoost(db, keep = true) {
+    sound.boost = db;
+    // With Plain sound the bar shows the microphone as it comes, since that is what is recorded.
+    const plain = !!state.settings.plain;
+    if (sound.gain) sound.gain.gain.value = plain ? 1 : Math.pow(10, db / 20);
+    $('boostLabel').textContent = plain ? 'Plain sound' : db ? `Mic boost +${db} dB` : 'Mic boost none';
+    $('boostDown').disabled = plain || db <= BOOSTS[0]; $('boostUp').disabled = plain || db >= BOOSTS[BOOSTS.length - 1];
+    if (keep) { const kept = local.get('boost', {}); kept[micKey(sound.label)] = db; local.set('boost', kept); }
+  }
+  const stepBoost = (by) => { wakeSound(); const i = Math.max(0, BOOSTS.indexOf(sound.boost)); setBoost(BOOSTS[Math.min(BOOSTS.length - 1, Math.max(0, i + by))]); };
+  $('boostDown').addEventListener('click', () => stepBoost(-1));
+  $('boostUp').addEventListener('click', () => stepBoost(1));
+  /** The bar: the loudest of the last moment, falling back slowly. Green from -24 dB, red near the top; the
+   *  white line, -12 dB, is where speech should reach. During a take it also keeps the take's numbers. */
+  function meterLoop() {
+    cancelAnimationFrame(sound.raf);
+    const step = () => {
+      if (!sound.meter) return;
+      sound.meter.getFloatTimeDomainData(sound.buf);
+      let peak = 0, sum = 0;
+      for (let i = 0; i < sound.buf.length; i++) { const v = sound.buf[i]; const a = v < 0 ? -v : v; if (a > peak) peak = a; sum += v * v; }
+      const db = peak > 0 ? 20 * Math.log10(peak) : -120;
+      sound.hold = Math.max(db, sound.hold - 0.5);
+      if (sound.take) noteTake(db, sum / sound.buf.length);
+      $('meterBar').style.width = `${Math.max(0, Math.min(100, ((sound.hold + 60) / 60) * 100))}%`;
+      $('meter').className = `meter${sound.hold > -3 ? ' loud' : sound.hold > -24 ? ' good' : ''}`;
+      sound.raf = requestAnimationFrame(step);
+    };
+    sound.raf = requestAnimationFrame(step);
+  }
+  // A take's sound: how loud its loudest tenth was (his speech, not the pauses), and how often the limiter
+  // had to catch a peak.
+  function noteTake(peakDb, meanSquare) {
+    const t = sound.take;
+    const rms = meanSquare > 0 ? 10 * Math.log10(meanSquare) : -120;
+    t.frames++;
+    if (peakDb > -1.5) t.caught++;
+    t.bins[Math.max(0, Math.min(t.bins.length - 1, Math.round(rms) + 120))]++;
+  }
+  function takeSaid() {
+    const t = sound.last, mixed = sound.lastMixed;
+    sound.last = null;
+    if (!state.settings.plain && !mixed) return 'Sound: this take missed the boost, so it may be quiet. Take it again.';
+    if (!t || t.frames < 30) return '';
+    let need = t.frames * 0.1, at = t.bins.length - 1;
+    for (; at > 0; at--) { need -= t.bins[at]; if (need <= 0) break; }
+    const loudest = at - 120;
+    if (loudest < -60) return 'Sound: nothing came through. Check the microphone, then take it again.';
+    if (loudest < -30 && state.settings.plain) return 'Sound: quiet, as Plain sound records it. The edit turns it up.';
+    if (loudest < -30) return 'Sound: quiet. On the camera screen, tap + by Mic boost before the next take.';
+    if (t.caught / t.frames > 0.01) return 'Sound: too loud in places. On the camera screen, tap − by Mic boost before the next take.';
+    return 'Sound: good.';
   }
   async function audioInputs() {
     try { return (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'audioinput').map((d) => d.deviceId).join(','); } catch (e) { return ''; }
@@ -582,14 +767,15 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   // Live (counting down or recording): nothing but the words and the button.
   const live = (on) => $('camera').classList.toggle('live', on);
   function openLesson(l) {
+    wakeSound();
     state.lesson = l;
-    $('who').innerHTML = `<b>${l.id}</b>`; $('who').append(document.createTextNode(l.title));
+    $('who').innerHTML = `<b>${l.id}</b><span class="t"></span>`; $('who').querySelector('.t').textContent = l.title;
     const inner = $('words'); inner.replaceChildren();
     for (const c of l.clips) for (const p of c.said) { const el = document.createElement('p'); el.textContent = p; inner.append(el); }
     inner.style.transform = 'translateY(0)';
     $('timer').textContent = '0:00'; $('timer').classList.remove('live'); $('rec').classList.remove('on'); $('rec').setAttribute('aria-label', 'Record');
     roll = { pos: 0, total: 1, playing: false, last: 0, raf: 0, done: false };
-    live(false);
+    live(false); syncSettings();
     show('camera'); checkTurn(); layoutWords();
     // The column's width comes from the letters as drawn, so lay it out again once the typeface is in.
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!roll.playing) layoutWords(); });
@@ -630,8 +816,11 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     state.counting = false;
     const type = pickType();
     chunks = [];
+    // The mixed, boosted sound while page sound is running; the microphone as it comes otherwise, or with
+    // Plain sound ticked.
+    const recorded = !state.settings.plain && soundOn() ? sound.mixed : s;
     try {
-      recorder = new MediaRecorder(s, { ...(type ? { mimeType: type } : {}), videoBitsPerSecond: 8000000, audioBitsPerSecond: 160000 });
+      recorder = new MediaRecorder(recorded, { ...(type ? { mimeType: type } : {}), videoBitsPerSecond: 8000000, audioBitsPerSecond: 160000 });
     } catch (e) {
       live(false);
       $('camerr').hidden = false; $('camerr').textContent = 'This phone wouldn’t record here. Update iOS, then try again.'; return;
@@ -639,6 +828,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     recorder.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
     recorder.onstop = finishTake;
     recorder.start(1000);
+    sound.take = { bins: new Uint32Array(141), frames: 0, caught: 0 };
+    sound.takeMixed = recorded === sound.mixed;
     startedAt = performance.now();
     $('rec').classList.add('on'); $('rec').setAttribute('aria-label', 'Stop'); $('timer').classList.add('live');
     tick = setInterval(() => { $('timer').textContent = fmtShort((performance.now() - startedAt) / 1000); }, 250);
@@ -646,15 +837,18 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   }
   function stopRecording() {
     clearTimeout(holdTimer); clearInterval(tick); pauseRoll(); live(false);
+    sound.last = sound.take; sound.lastMixed = sound.takeMixed; sound.take = null;
     if (recorder && recorder.state === 'recording') { state.elapsed = (performance.now() - startedAt) / 1000; recorder.stop(); }
   }
   $('rec').addEventListener('click', () => {
+    wakeSound();
     if (state.counting) { state.counting = false; $('count').hidden = true; live(false); return; }
     if (recorder && recorder.state === 'recording') stopRecording(); else startRecording();
   });
   $('camBack').addEventListener('click', () => {
     state.counting = false;
     if (recorder && recorder.state === 'recording') { recorder.onstop = null; recorder.stop(); clearInterval(tick); }
+    sound.take = null;
     pauseRoll(); live(false); unlockScreen(); show('home'); renderHome();
   });
 
@@ -677,6 +871,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     const n = ((state.takes[state.sem] || {})[state.lesson.id] || []).length + 1;
     state.takeNo = n;
     $('reviewTitle').textContent = `${state.lesson.id} · take ${n} · ${fmtShort(state.duration)}`;
+    $('soundState').textContent = takeSaid();
+    $('soundState').classList.toggle('ok', $('soundState').textContent === 'Sound: good.');
     $('sendState').textContent = signedIn() ? '' : 'Not signed in to Google: Send will ask you to sign in.';
     $('progress').hidden = true; $('send').disabled = false; $('retake').disabled = false;
     show('review');
