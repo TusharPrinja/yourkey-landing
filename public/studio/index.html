@@ -21,12 +21,17 @@
   two seconds after the last word. He watches the take, marks the start and the end, and sends it, or
   takes it again; a retake never leaves the phone. The marks travel with the file (its name, description
   and appProperties), and the edit cuts there at full quality.
+
+  Sideways, the words are a narrow column beside the lens with the line to read level with it (21
+  October: on his first take the words ran along the top while the lens was on the side, and his eyes
+  showed it). The picture of him sits beside the words, the whole frame as it is recorded, with the name
+  of the microphone in use.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: a slate. Lists on a light ground for picking; the camera is black glass, the words in a band
-   at the top beside the lens, one big red button. */
+/* Layout: a slate. Lists on a light ground for picking; the camera is black glass, the words in a narrow
+   column beside the lens, one big red button. */
 :root {
   --bg: #f1f2ef; --surface: #ffffff; --fg: #15171a; --muted: #586067; --line: #d7dad8; --chip: #e5e8e5;
   --tally: #c42d2a; --good: #1b7448;
@@ -96,7 +101,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
 .cam video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 .band { position: absolute; left: 0; right: 0; top: 0; background: var(--band); overflow: hidden;
   padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px)); }
-.band .inner { will-change: transform; font-family: var(--read); font-weight: 700; line-height: 1.32; }
+.band .inner { will-change: transform; font-family: var(--read); font-weight: 700; line-height: 1.32; overflow-wrap: break-word; }
 .band .inner p { margin: 0 0 0.7em; }
 .band .mark { position: absolute; left: 0; width: 10px; height: 4px; background: var(--guide); border-radius: 0 2px 2px 0; }
 .bar { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 12px; justify-content: space-between;
@@ -114,6 +119,36 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
 .turn { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; background: rgba(5, 6, 7, 0.9);
   font-family: var(--display); font-size: 28px; letter-spacing: 0.04em; text-transform: uppercase; }
 .camerr { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; background: var(--glass); }
+
+/* Sideways, an iPhone's front camera is at the end its top is turned to. The words become a column on
+   that side, about eighteen letters wide, so the eyes hardly travel, and the line to read sits in a lit
+   strip level with the lens. His picture fills the other side, the whole frame as it is recorded. */
+.cam.lens-left { --col: min(50vw, calc(var(--text, 360px) + max(8px, env(safe-area-inset-left, 0px)) + 14px)); }
+.cam.lens-right { --col: min(50vw, calc(var(--text, 360px) + max(8px, env(safe-area-inset-right, 0px)) + 14px)); }
+.cam.side .band { top: 0; bottom: 0; width: var(--col);
+  background: linear-gradient(to bottom, transparent calc(50% - var(--zone, 36px)), rgba(242, 241, 236, 0.13) calc(50% - var(--zone, 36px)),
+    rgba(242, 241, 236, 0.13) calc(50% + var(--zone, 36px)), transparent calc(50% + var(--zone, 36px))), var(--band); }
+.cam.lens-left .band { left: 0; right: auto; padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: 14px; }
+.cam.lens-right .band { left: auto; right: 0; padding-left: 14px; padding-right: max(8px, env(safe-area-inset-right, 0px)); }
+.cam.side .band .mark { width: 6px; border-radius: 2px; }
+.cam.lens-left .band .mark { left: max(0px, calc(max(8px, env(safe-area-inset-left, 0px)) - 9px)); }
+.cam.lens-right .band .mark { left: 4px; }
+.cam.side video { width: calc(100% - var(--col)); object-fit: contain; }
+.cam.lens-left video { left: var(--col); }
+.cam.lens-right video { left: 0; }
+.cam.lens-left .bar { left: var(--col); padding-left: 14px; }
+.cam.lens-right .bar { right: var(--col); padding-right: 14px; }
+.cam.lens-left .count { right: auto; width: var(--col); }
+.cam.lens-right .count { left: auto; width: var(--col); }
+.cam.side .count { bottom: calc(50% + var(--zone, 36px)); font-size: min(32vh, 22vw); }
+.camtop { position: absolute; top: max(10px, env(safe-area-inset-top, 0px)); display: none; align-items: center; justify-content: space-between; gap: 10px; }
+.cam.side .camtop { display: flex; }
+.cam.lens-left .camtop { left: calc(var(--col) + 14px); right: max(14px, env(safe-area-inset-right, 0px)); }
+.cam.lens-right .camtop { left: max(14px, env(safe-area-inset-left, 0px)); right: calc(var(--col) + 14px); flex-direction: row-reverse; }
+.cam.live .camtop { display: none; }
+.mic { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--glass-dim);
+  padding: 6px 10px; background: rgba(20, 24, 27, 0.7); border-radius: 6px; }
+.camtop .glassbtn { flex: none; }
 
 /* The review: the take, the two marks, and the choice. */
 .review video { width: 100%; max-height: 52vh; background: #000; border-radius: 6px; display: block; }
@@ -180,6 +215,10 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   <video id="preview" playsinline muted autoplay></video>
   <div class="band" id="band" role="region" aria-label="Your words"><div class="mark" id="mark"></div><div class="inner" id="words"></div></div>
   <div class="count" id="count" hidden></div>
+  <div class="camtop">
+    <span class="mic" id="mic"></span>
+    <button class="glassbtn" id="swap" type="button" aria-label="Move the words to the other side">⇄ Switch sides</button>
+  </div>
   <div class="bar">
     <button class="glassbtn" id="camBack" type="button">Lessons</button>
     <div class="who" id="who"></div>
@@ -437,7 +476,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   }
 
   // ── the camera and the words ────────────────────────────────────────────
-  let stream = null, recorder = null, chunks = [], startedAt = 0, tick = 0, wake = null, roll = null, holdTimer = 0;
+  let stream = null, recorder = null, chunks = [], startedAt = 0, tick = 0, wake = null, roll = null, holdTimer = 0, inputs = '';
   async function startCamera() {
     if (stream) return stream;
     $('camerr').hidden = true;
@@ -447,6 +486,9 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
         audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
       });
       $('preview').srcObject = stream;
+      const mic = stream.getAudioTracks()[0];
+      $('mic').textContent = mic ? `Mic: ${mic.label || 'on'}` : 'No microphone';
+      inputs = await audioInputs();
       return stream;
     } catch (e) {
       $('camerr').hidden = false;
@@ -458,6 +500,16 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; }
     $('preview').srcObject = null;
   }
+  async function audioInputs() {
+    try { return (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'audioinput').map((d) => d.deviceId).join(','); } catch (e) { return ''; }
+  }
+  // A microphone plugged in (or out) with the camera open: open it again, so the take uses what is plugged in.
+  if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) navigator.mediaDevices.addEventListener('devicechange', async () => {
+    if (!stream || state.counting || (recorder && recorder.state === 'recording')) return;
+    const now = await audioInputs();
+    if (now === inputs || !stream || state.counting || (recorder && recorder.state === 'recording')) return;
+    stopCamera(); startCamera().catch(() => {});
+  });
   async function lockScreen() { try { wake = await navigator.wakeLock.request('screen'); } catch (e) { wake = null; } }
   function unlockScreen() { try { wake && wake.release(); } catch (e) { /* gone */ } wake = null; }
   document.addEventListener('visibilitychange', () => { if (!document.hidden && !$('camera').hidden) lockScreen(); });
@@ -465,19 +517,70 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   const portrait = () => window.innerHeight > window.innerWidth;
   function checkTurn() { $('turn').hidden = !portrait() || (recorder && recorder.state === 'recording'); layoutWords(); }
   window.addEventListener('resize', checkTurn);
+  window.addEventListener('orientationchange', checkTurn);
+  if (screen.orientation && screen.orientation.addEventListener) screen.orientation.addEventListener('change', checkTurn);
+
+  /** Letters a line in the column beside the lens: about three words, so the eyes hardly travel. */
+  const LINE_LETTERS = 18;
+  const touch = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
+  /**
+   * Where the front camera is. Upright, at the top. Sideways, an iPhone's camera is at the end its top is
+   * turned to: turned left (angle 90), on the left; turned right (270, or -90 on an older iOS), on the
+   * right. A laptop's camera sits above its screen. Switch sides flips it, and this phone remembers.
+   */
+  function lensSide() {
+    if (portrait() || !touch) return 'top';
+    const o = screen.orientation;
+    const angle = o && typeof o.angle === 'number' ? o.angle : typeof window.orientation === 'number' ? window.orientation : 90;
+    const turnedRight = ((angle % 360) + 360) % 360 === 270;
+    return turnedRight !== !!state.settings.swap ? 'right' : 'left';
+  }
+  /** The width of an average letter of the words, as they are drawn now. */
+  function letterWidth() {
+    const sample = 'and so tonight you say the words out loud, the way you would say them to a friend';
+    const probe = document.createElement('span');
+    probe.textContent = sample;
+    probe.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden;white-space:nowrap';
+    $('words').append(probe);
+    const w = probe.getBoundingClientRect().width / sample.length;
+    probe.remove();
+    return w || state.settings.size * 0.55;
+  }
 
   function layoutWords() {
     if (!state.lesson) return;
-    const band = $('band'); const inner = $('words');
+    const cam = $('camera'), band = $('band'), inner = $('words'), mark = $('mark');
     const size = state.settings.size;
     inner.style.fontSize = `${size}px`;
     const lineH = size * 1.32;
-    const lines = window.innerHeight < 500 ? 2.6 : 3.6;
-    band.style.height = `${Math.round(lineH * lines + 16)}px`;
-    band.style.paddingTop = `${Math.round(lineH * 0.6)}px`;
-    $('mark').style.top = `${Math.round(lineH * 0.6 + lineH / 2 - 2)}px`;
+    const side = lensSide();
+    cam.classList.toggle('side', side !== 'top');
+    cam.classList.toggle('lens-left', side === 'left');
+    cam.classList.toggle('lens-right', side === 'right');
+    if (side === 'top') {
+      const lines = window.innerHeight < 500 ? 2.6 : 3.6;
+      band.style.height = `${Math.round(lineH * lines + 16)}px`;
+      band.style.paddingTop = `${Math.round(lineH * 0.6)}px`;
+      mark.style.top = `${Math.round(lineH * 0.6 + lineH / 2 - 2)}px`;
+    } else {
+      // The column runs top to bottom; the line to read is the one level with the lens, halfway down.
+      cam.style.setProperty('--text', `${Math.round(letterWidth() * LINE_LETTERS)}px`);
+      cam.style.setProperty('--zone', `${Math.round(lineH * 0.62)}px`);
+      band.style.height = '';
+      const lens = band.clientHeight / 2;
+      band.style.paddingTop = `${Math.round(lens - lineH / 2)}px`;
+      mark.style.top = `${Math.round(lens - 2)}px`;
+    }
     if (roll) roll.total = Math.max(1, inner.scrollHeight - lineH);
   }
+  $('swap').addEventListener('click', () => {
+    state.settings.swap = !state.settings.swap; local.set('settings', state.settings);
+    const keep = roll && roll.total > 1 ? roll.pos / roll.total : 0;
+    layoutWords();
+    if (roll) { roll.pos = keep * roll.total; $('words').style.transform = `translateY(${-roll.pos}px)`; }
+  });
+  // Live (counting down or recording): nothing but the words and the button.
+  const live = (on) => $('camera').classList.toggle('live', on);
   function openLesson(l) {
     state.lesson = l;
     $('who').innerHTML = `<b>${l.id}</b>`; $('who').append(document.createTextNode(l.title));
@@ -486,7 +589,10 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     inner.style.transform = 'translateY(0)';
     $('timer').textContent = '0:00'; $('timer').classList.remove('live'); $('rec').classList.remove('on'); $('rec').setAttribute('aria-label', 'Record');
     roll = { pos: 0, total: 1, playing: false, last: 0, raf: 0, done: false };
+    live(false);
     show('camera'); checkTurn(); layoutWords();
+    // The column's width comes from the letters as drawn, so lay it out again once the typeface is in.
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!roll.playing) layoutWords(); });
     startCamera().catch(() => {});
     lockScreen();
   }
@@ -518,14 +624,16 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     let s;
     try { s = await startCamera(); } catch (e) { return; }
     state.counting = true;
+    live(true);
     await countdown(state.settings.countdown);
-    if (!state.counting) return;
+    if (!state.counting) { live(false); return; }
     state.counting = false;
     const type = pickType();
     chunks = [];
     try {
       recorder = new MediaRecorder(s, { ...(type ? { mimeType: type } : {}), videoBitsPerSecond: 8000000, audioBitsPerSecond: 160000 });
     } catch (e) {
+      live(false);
       $('camerr').hidden = false; $('camerr').textContent = 'This phone wouldn’t record here. Update iOS, then try again.'; return;
     }
     recorder.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
@@ -537,17 +645,17 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     roll.pos = 0; roll.done = false; $('words').style.transform = 'translateY(0)'; layoutWords(); playRoll();
   }
   function stopRecording() {
-    clearTimeout(holdTimer); clearInterval(tick); pauseRoll();
+    clearTimeout(holdTimer); clearInterval(tick); pauseRoll(); live(false);
     if (recorder && recorder.state === 'recording') { state.elapsed = (performance.now() - startedAt) / 1000; recorder.stop(); }
   }
   $('rec').addEventListener('click', () => {
-    if (state.counting) { state.counting = false; $('count').hidden = true; return; }
+    if (state.counting) { state.counting = false; $('count').hidden = true; live(false); return; }
     if (recorder && recorder.state === 'recording') stopRecording(); else startRecording();
   });
   $('camBack').addEventListener('click', () => {
     state.counting = false;
     if (recorder && recorder.state === 'recording') { recorder.onstop = null; recorder.stop(); clearInterval(tick); }
-    pauseRoll(); unlockScreen(); show('home'); renderHome();
+    pauseRoll(); live(false); unlockScreen(); show('home'); renderHome();
   });
 
   // ── the review: watch it, mark it, send it or take it again ─────────────
