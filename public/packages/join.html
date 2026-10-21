@@ -135,7 +135,7 @@ footer nav{display:flex;flex-wrap:wrap;gap:16px;font-size:14px}footer nav a{colo
     <a class="second" href="/communication">Communication Mastery</a>
     <a class="second" href="/leadership">Leadership Mastery</a>
   </section>
-  <div id="toast" class="toast" role="status">Preview: on launch day this sets up the account and opens the checkout.</div>
+  
 </main>
 <footer>
   <div class="fin">
@@ -145,7 +145,7 @@ footer nav{display:flex;flex-wrap:wrap;gap:16px;font-size:14px}footer nav a{colo
 </footer>
 <script>
 (function(){
-var LINK="",API="/api/account",IDS=["sales","time","communication","leadership"],KEY="yk.join";
+var LINK="https://pay.rev.cat/dcblvcnvtkgzzqro/",API="/api/account",IDS=["sales","time","communication","leadership"],KEY="yk.join";
 var checkoutUrl=function checkoutUrl(link,uid,email,id,plan){return link+encodeURIComponent(uid)+"?email="+encodeURIComponent(email)+"&package_id="+id+"_"+(plan==="yearly"?"annual":"monthly")+"&hide_back_button=true&skip_purchase_success=true"};
 var q=new URLSearchParams(location.search),id=q.get('package'),plan=q.get('plan')==='monthly'?'monthly':'yearly';
 function $(s){return document.querySelector(s)}function all(s){return Array.prototype.slice.call(document.querySelectorAll(s))}
