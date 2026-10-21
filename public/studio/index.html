@@ -110,6 +110,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px)); }
 .band .inner { will-change: transform; font-family: var(--read); font-weight: 700; line-height: 1.32; overflow-wrap: break-word; }
 .band .inner p { margin: 0 0 0.7em; }
+.band .inner .sent { display: block; }
+.band .inner .sent + .sent { margin-top: 0.28em; }
 .band .mark { position: absolute; left: 0; width: 10px; height: 4px; background: var(--guide); border-radius: 0 2px 2px 0; }
 .bar { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 12px; justify-content: space-between;
   padding: 10px max(18px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
@@ -920,7 +922,14 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     state.lesson = l;
     $('who').innerHTML = `<b>${l.id}</b><span class="t"></span>`; $('who').querySelector('.t').textContent = l.title;
     const inner = $('words'); inner.replaceChildren();
-    for (const c of l.clips) for (const p of c.said) { const el = document.createElement('p'); el.textContent = p; inner.append(el); }
+    // Each sentence starts on its own line, so where one ends shows before he reaches it (21 October: he
+    // sometimes read the end of a sentence as if it were the start of one).
+    const sentences = (p) => p.split(/(?<=[.?!…])\s+(?=[A-Z0-9"“‘'])/);
+    for (const c of l.clips) for (const p of c.said) {
+      const el = document.createElement('p');
+      for (const sentence of sentences(p)) { const sp = document.createElement('span'); sp.className = 'sent'; sp.textContent = sentence; el.append(sp); }
+      inner.append(el);
+    }
     inner.style.transform = 'translateY(0)';
     $('timer').textContent = '0:00'; $('timer').classList.remove('live'); $('rec').classList.remove('on'); $('rec').setAttribute('aria-label', 'Record');
     roll = { pos: 0, total: 1, playing: false, last: 0, raf: 0, done: false };
