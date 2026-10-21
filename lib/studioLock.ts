@@ -19,8 +19,9 @@
 import { createHash, pbkdf2, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 
-/** From his Studio Password page, 21 October 2026. Empty: the Studio is shut. */
-export const STUDIO_FINGERPRINT = "studio-v1$600000$wRGNVKwyKDc0QkkvOl-Fkw$Th2qxTtPTd17TXqNDvM1yVi6Q1_iuctsi8-GcaY7hXQ";
+/** His one fixed password's fingerprint, the password saved in his Passwords app (21 October 2026). Empty: the
+ *  Studio is shut. */
+export const STUDIO_FINGERPRINT = "studio-v1$600000$abZpmQufuJo-dTay_XEr0g$_mQrxjmKKCvQ6zgypbC_IAh7CYC2sLID2Chfk2XF1AQ";
 
 export const STUDIO_COOKIE = "yk_studio";
 /** One sign-in lasts the filming weeks on that phone. */
@@ -46,9 +47,15 @@ export function readFingerprint(text: string = STUDIO_FINGERPRINT): Fingerprint 
   return { rounds, salt, digest };
 }
 
+/** What was typed, the way the password is written: lower case, no spaces round it, the words joined by
+ *  single dashes. A phone's capital, a space for a dash or a long dash changes none of the words, so it
+ *  never makes the right password wrong. */
+export const tidy = (typed: string) =>
+  typed.trim().toLowerCase().replace(/[\s\u2010-\u2015\u2212_]+/g, "-").replace(/-{2,}/g, "-").replace(/^-+|-+$/g, "");
+
 /** The cookie for a typed password when it is the right one, else null. */
 export async function keyFor(typed: string, fingerprint: Fingerprint): Promise<string | null> {
-  const key = await derive(typed, fingerprint.salt, fingerprint.rounds, 32, "sha256");
+  const key = await derive(tidy(typed), fingerprint.salt, fingerprint.rounds, 32, "sha256");
   return timingSafeEqual(sha256(key), fingerprint.digest) ? `k1.${key.toString("base64url")}` : null;
 }
 
@@ -95,9 +102,13 @@ main { width: 100%; max-width: 380px; }
 h1 { margin: 0 0 8px; font-size: 30px; line-height: 1.15; }
 p { margin: 0 0 20px; color: var(--muted); }
 label { display: block; margin: 0 0 6px; font-weight: 700; }
-input[type=password] { width: 100%; height: 52px; padding: 0 14px; border: 1px solid var(--line); border-radius: 12px;
+.field { position: relative; }
+#password { width: 100%; height: 52px; padding: 0 76px 0 14px; border: 1px solid var(--line); border-radius: 12px;
   background: var(--surface); color: var(--fg); font: inherit; }
-input[type=password]:focus { outline: 2px solid var(--tally); outline-offset: 1px; }
+#password:focus { outline: 2px solid var(--tally); outline-offset: 1px; }
+.show { position: absolute; top: 6px; right: 6px; width: auto; height: 40px; margin: 0; padding: 0 14px;
+  background: transparent; color: var(--fg); border: 1px solid var(--line); border-radius: 9px; font-size: 15px; }
+.hint { margin: 8px 0 0; font-size: 15px; }
 button { width: 100%; height: 52px; margin-top: 14px; border: 0; border-radius: 12px; background: var(--tally); color: #fff;
   font: inherit; font-weight: 700; cursor: pointer; }
 .note { margin: 16px 0 0; color: var(--fg); }
@@ -112,9 +123,20 @@ button { width: 100%; height: 52px; margin-top: 14px; border: 0; border-radius: 
   ${canTry ? `<form method="post" action="/studio">
     <input class="away" type="text" name="username" autocomplete="username" value="Your Key Studio" tabindex="-1" aria-hidden="true" readonly>
     <label for="password">Password</label>
-    <input id="password" type="password" name="password" autocomplete="current-password" required autofocus>
+    <div class="field">
+      <input id="password" type="password" name="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" required autofocus>
+      <button type="button" class="show" id="show" aria-controls="password">Show</button>
+    </div>
+    <p class="hint">Five words joined by dashes.</p>
     <button type="submit">Open the Studio</button>
-  </form>` : ""}
+  </form>
+  <script>
+  document.getElementById("show").addEventListener("click", function () {
+    var box = document.getElementById("password"), hidden = box.type === "password";
+    box.type = hidden ? "text" : "password";
+    this.textContent = hidden ? "Hide" : "Show";
+  });
+  </script>` : ""}
   ${said ? `<p class="note" role="status">${said}</p>` : ""}
 </main>
 </body>
