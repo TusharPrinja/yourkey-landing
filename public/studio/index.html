@@ -639,9 +639,9 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   function setBoost(db, keep = true) {
     sound.boost = db;
     // With Plain sound the bar shows the microphone as it comes, since that is what is recorded.
-    const plain = !!state.settings.plain;
+    const plain = !!state.settings.plain || !state.settings.boostOK;
     if (sound.gain) sound.gain.gain.value = plain ? 1 : Math.pow(10, db / 20);
-    $('boostLabel').textContent = plain ? 'Plain sound' : db ? `Mic boost +${db} dB` : 'Mic boost none';
+    $('boostLabel').textContent = plain ? 'Mic as it comes' : db ? `Mic boost +${db} dB` : 'Mic boost none';
     $('boostDown').disabled = plain || db <= BOOSTS[0]; $('boostUp').disabled = plain || db >= BOOSTS[BOOSTS.length - 1];
     if (keep) { const kept = local.get('boost', {}); kept[micKey(sound.label)] = db; local.set('boost', kept); }
   }
@@ -679,13 +679,13 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   function takeSaid() {
     const t = sound.last, mixed = sound.lastMixed;
     sound.last = null;
-    if (!state.settings.plain && !mixed) return 'Sound: this take missed the boost, so it may be quiet. Take it again.';
+    if (!state.settings.plain && state.settings.boostOK && !mixed) return 'Sound: this take missed the boost, so it may be quiet. Take it again.';
     if (!t || t.frames < 30) return '';
     let need = t.frames * 0.1, at = t.bins.length - 1;
     for (; at > 0; at--) { need -= t.bins[at]; if (need <= 0) break; }
     const loudest = at - 120;
     if (loudest < -60) return 'Sound: nothing came through. Check the microphone, then take it again.';
-    if (loudest < -30 && state.settings.plain) return 'Sound: quiet, as Plain sound records it. The edit turns it up.';
+    if (loudest < -30 && (state.settings.plain || !mixed)) return 'Sound: quiet, recorded as the mic gives it. The edit turns it up.';
     if (loudest < -30) return 'Sound: quiet. On the camera screen, tap + by Mic boost before the next take.';
     if (t.caught / t.frames > 0.01) return 'Sound: too loud in places. On the camera screen, tap − by Mic boost before the next take.';
     return 'Sound: good.';
@@ -823,7 +823,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     chunks = [];
     // The mixed, boosted sound while page sound is running; the microphone as it comes otherwise, or with
     // Plain sound ticked.
-    const recorded = !state.settings.plain && soundOn() ? sound.mixed : s;
+    const recorded = !state.settings.plain && state.settings.boostOK && soundOn() ? sound.mixed : s;
     try {
       recorder = new MediaRecorder(recorded, { ...(type ? { mimeType: type } : {}), videoBitsPerSecond: 8000000, audioBitsPerSecond: 160000 });
     } catch (e) {
