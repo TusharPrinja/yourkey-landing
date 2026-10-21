@@ -28,7 +28,9 @@
   of the microphone in use.
 
   The sound is turned up before it is recorded, with a bar that moves as he talks and a word on each take
-  (21 October: the page got the iPhone's microphone raw and his take was too quiet to hear). The words
+  (21 October: the page got the iPhone's microphone raw and his take was too quiet to hear). A mic test
+  (his ask) records a few seconds both ways, plays them back and keeps the boost only where the phone
+  has shown it records it; until then takes record the microphone as it comes. The words
   start at 210 a minute and wait for him to start talking, and slower and faster sit beside the timer,
   during a take too (he reads faster than 190).
 -->
@@ -165,6 +167,13 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
 .meter b { position: absolute; top: 0; bottom: 0; left: 80%; width: 2px; background: var(--glass-fg); }
 .boost { font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; min-width: 8.6em; text-align: center; }
 .glassbtn.sq { width: 36px; height: 32px; padding: 0; font-size: 20px; line-height: 1; }
+.sound #micTest { flex: none; padding: 6px 10px; font-size: 14px; }
+.glassbtn.first { border-color: var(--guide); box-shadow: 0 0 0 2px rgba(229, 72, 77, 0.35); }
+.soundnote { display: grid; gap: 6px; padding: 8px 10px; background: rgba(5, 6, 7, 0.9); border-radius: 6px; font-size: 14px; line-height: 1.35; }
+.soundnote p { margin: 0; }
+.soundnote .fine { color: var(--glass-dim); font-family: var(--mono); font-size: 11px; line-height: 1.3; overflow-wrap: anywhere; }
+.soundnote .row { gap: 8px; }
+.glasslink { justify-self: start; background: none; border: 0; padding: 0; color: var(--glass-fg); text-decoration: underline; font-size: 14px; }
 .glassbtn:disabled { opacity: 0.4; }
 .cam.side video { top: 108px; height: calc(100% - 108px); object-position: 50% 0; }
 /* The speed, in the bar: slower and faster while he reads. While live, Lessons (which would throw the
@@ -256,7 +265,18 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       <button class="glassbtn sq" id="boostDown" type="button" aria-label="Microphone quieter">−</button>
       <span class="boost" id="boostLabel" aria-live="polite"></span>
       <button class="glassbtn sq" id="boostUp" type="button" aria-label="Microphone louder">+</button>
+      <button class="glassbtn" id="micTest" type="button">Test mic</button>
     </div>
+    <div class="soundnote" id="soundNote" hidden>
+      <p id="soundSaid" aria-live="polite"></p>
+      <div class="row" id="soundEars" hidden>
+        <button class="glassbtn" id="earsYes" type="button">I heard it clearly</button>
+        <button class="glassbtn" id="earsNo" type="button">Too quiet or nothing</button>
+      </div>
+      <button class="glasslink" id="soundAgain" type="button" hidden>Play it again</button>
+      <p class="fine" id="soundFine"></p>
+    </div>
+    <audio id="testPlay" playsinline></audio>
   </div>
   <div class="bar">
     <button class="glassbtn" id="camBack" type="button">Lessons</button>
@@ -355,7 +375,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     // The camera and the microphone go off away from the camera screen. At the review that matters: with
     // its microphone open an iPhone can route sound as for a call, and closed, the take plays through the
     // loudspeaker like any video. A retake opens them again.
-    if (id !== 'camera') { stopCamera(); restSound(); }
+    if (id !== 'camera') stopCamera();
     window.scrollTo(0, 0);
   }
 
@@ -588,30 +608,48 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     if (typeof kept[micKey(label)] === 'number' && BOOSTS.includes(kept[micKey(label)])) return kept[micKey(label)];
     return /iphone|ipad/i.test(label || '') ? 24 : 0;
   };
-  function soundContext() {
-    if (sound.ctx) return sound.ctx;
+  /**
+   * A new sound engine each time the camera opens, made once the camera and microphone are on, and closed
+   * when the camera goes off. His takes (21 October) came out raw: the engine had been made before the
+   * microphone opened, and an iPhone can hold such an engine still when its microphone switches on.
+   */
+  function newContext() {
+    closeContext();
     const AC = window.AudioContext || window.webkitAudioContext;
     try { sound.ctx = AC ? new AC() : null; } catch (e) { sound.ctx = null; }
+    if (sound.ctx) sound.ctx.resume().catch(() => {});
     return sound.ctx;
   }
-  /** On an iPhone, page sound starts only from a tap, so every tap towards the camera or a take wakes it. */
-  function wakeSound() { const c = soundContext(); if (c && c.state !== 'running') c.resume().catch(() => {}); }
-  /** Away from the camera it rests, so nothing of it is running while a take plays back. */
-  function restSound() { if (sound.ctx && sound.ctx.state === 'running') sound.ctx.suspend().catch(() => {}); }
+  function closeContext() {
+    if (sound.ctx) { try { sound.ctx.close().catch(() => {}); } catch (e) { /* gone */ } }
+    sound.ctx = null;
+  }
+  /** On an iPhone, page sound may start only from a tap, so every tap on the camera screen wakes it. */
+  function wakeSound() { if (sound.ctx && sound.ctx.state !== 'running') sound.ctx.resume().catch(() => {}); }
+  /** Wakes the engine and waits a moment for it to run. */
+  async function soundRunning(ms) {
+    if (!sound.ctx) return false;
+    if (sound.ctx.state !== 'running') {
+      try { await Promise.race([sound.ctx.resume(), new Promise((r) => setTimeout(r, ms))]); } catch (e) { /* refused */ }
+    }
+    return !!sound.ctx && sound.ctx.state === 'running';
+  }
   const soundOn = () => !!(sound.ctx && sound.ctx.state === 'running' && sound.mixed);
   function unwireSound() {
     cancelAnimationFrame(sound.raf); sound.raf = 0;
     for (const n of ['src', 'split', 'mono', 'gain', 'limit', 'meter', 'dest']) { try { if (sound[n]) sound[n].disconnect(); } catch (e) { /* gone */ } sound[n] = null; }
     if (sound.mixed) sound.mixed.getAudioTracks().forEach((t) => t.stop());
     sound.mixed = null;
+    closeContext();
     $('sound').hidden = true;
   }
   function wireSound(s) {
     unwireSound();
     const track = s.getAudioTracks()[0];
     sound.label = track ? track.label : '';
-    const ctx = soundContext();
-    if (!ctx || !track) return;
+    if (!track) return;
+    const ctx = newContext();
+    if (!ctx) return;
     try {
       sound.src = ctx.createMediaStreamSource(s);
       // Both sides summed into one voice (a side with nothing on it adds nothing); the recording then
@@ -632,16 +670,18 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       sound.limit.connect(sound.dest); sound.limit.connect(sound.meter);
       sound.mixed = new MediaStream([...s.getVideoTracks(), ...sound.dest.stream.getAudioTracks()]);
       setBoost(boostFor(sound.label), false);
-      $('sound').hidden = false;
+      $('sound').hidden = false; $('soundNote').hidden = true;
       meterLoop();
     } catch (e) { unwireSound(); }
   }
   function setBoost(db, keep = true) {
     sound.boost = db;
     // With Plain sound the bar shows the microphone as it comes, since that is what is recorded.
-    const plain = !!state.settings.plain || !state.settings.boostOK;
+    const plain = !!state.settings.plain || state.settings.boostOK !== true;
     if (sound.gain) sound.gain.gain.value = plain ? 1 : Math.pow(10, db / 20);
-    $('boostLabel').textContent = plain ? 'Mic as it comes' : db ? `Mic boost +${db} dB` : 'Mic boost none';
+    $('boostLabel').textContent = state.settings.plain ? 'Plain sound' : state.settings.boostOK === undefined ? 'Test the mic first'
+      : state.settings.boostOK === false ? 'Mic as it comes' : db ? `Mic boost +${db} dB` : 'Mic boost none';
+    $('micTest').classList.toggle('first', state.settings.boostOK === undefined && !state.settings.plain);
     $('boostDown').disabled = plain || db <= BOOSTS[0]; $('boostUp').disabled = plain || db >= BOOSTS[BOOSTS.length - 1];
     if (keep) { const kept = local.get('boost', {}); kept[micKey(sound.label)] = db; local.set('boost', kept); }
   }
@@ -676,6 +716,110 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     if (peakDb > -1.5) t.caught++;
     t.bins[Math.max(0, Math.min(t.bins.length - 1, Math.round(rms) + 120))]++;
   }
+  // ── the mic test: a few seconds recorded both ways, measured, played back ──
+  /**
+   * His ask (21 October): "Can we do a sort of mic test inside there so that we know?" He talks for three
+   * seconds; the Studio records that moment twice at once, as the microphone gives it and through the boost,
+   * reads what each recording actually holds, plays the better one back, and keeps the boost for his takes
+   * only if this phone recorded it on both sides. If a phone can't read its own recording, his ears decide.
+   * The small grey line is for Claude, should anything look wrong.
+   */
+  let testing = false;
+  const testNote = (said, fine) => { $('soundNote').hidden = false; $('soundSaid').textContent = said; if (fine !== undefined) $('soundFine').textContent = fine; };
+  function audioType() {
+    const want = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm'];
+    return want.find((t) => window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
+  }
+  function recordFor(from, ms) {
+    return new Promise((resolve, reject) => {
+      const parts = [];
+      let r;
+      try { const type = audioType(); r = new MediaRecorder(from, type ? { mimeType: type } : {}); } catch (e) { reject(e); return; }
+      r.ondataavailable = (e) => { if (e.data && e.data.size) parts.push(e.data); };
+      r.onstop = () => resolve(new Blob(parts, { type: r.mimeType || audioType() || 'audio/mp4' }));
+      r.onerror = (e) => reject((e && e.error) || e);
+      r.start();
+      setTimeout(() => { try { r.stop(); } catch (e) { reject(e); } }, ms);
+    });
+  }
+  /** Each side's level in a recording, at its loudest half second (his voice, not the pauses); one side
+   *  means mono, which plays on both. */
+  async function levelsOf(blob) {
+    const audio = await sound.ctx.decodeAudioData(await blob.arrayBuffer());
+    const sides = [];
+    for (let c = 0; c < Math.min(2, audio.numberOfChannels); c++) {
+      const d = audio.getChannelData(c);
+      const win = Math.max(1, Math.round(audio.sampleRate / 2));
+      let best = 0;
+      for (let i = 0; i + win <= d.length; i += Math.round(win / 4)) {
+        let sum = 0;
+        for (let j = i; j < i + win; j++) sum += d[j] * d[j];
+        best = Math.max(best, sum / win);
+      }
+      sides.push(best > 0 ? Math.round(10 * Math.log10(best)) : -120);
+    }
+    if (sides.length === 1) sides.push(sides[0]);
+    return sides;
+  }
+  const sidesSaid = (x) => (Array.isArray(x) ? `${x[0]}/${x[1]} dB` : x || 'none');
+  const heardIn = (x) => Array.isArray(x) && Math.max(...x) > -60;
+  const bothIn = (x) => Array.isArray(x) && Math.min(...x) > -60;
+  function playTest(blob) {
+    const a = $('testPlay');
+    if (a.src) URL.revokeObjectURL(a.src);
+    a.src = URL.createObjectURL(blob);
+    $('soundAgain').hidden = false;
+    a.play().catch(() => { $('soundAgain').textContent = 'Play it'; });
+  }
+  $('soundAgain').addEventListener('click', () => { const a = $('testPlay'); a.currentTime = 0; a.play().catch(() => {}); $('soundAgain').textContent = 'Play it again'; });
+  function decideBoost(ok, said) {
+    state.settings.boostOK = ok; local.set('settings', state.settings);
+    setBoost(sound.boost, false);
+    $('soundEars').hidden = true;
+    testNote(said);
+  }
+  $('earsYes').addEventListener('click', () => decideBoost(true, 'Your takes now record like the test you just heard.'));
+  $('earsNo').addEventListener('click', () => decideBoost(false, 'Takes record the mic as it comes, and the edit turns it up. Tell Claude what the grey line says.'));
+  async function micTest() {
+    if (testing || !stream) return;
+    testing = true;
+    $('soundEars').hidden = true; $('soundAgain').hidden = true; $('soundAgain').textContent = 'Play it again';
+    const running = await soundRunning(1000);
+    // The test runs the boost whatever the takes use now, since that is what it tests.
+    if (running && sound.gain) sound.gain.gain.value = Math.pow(10, sound.boost / 20);
+    const asItComes = new MediaStream(stream.getAudioTracks());
+    const boosted = running && sound.dest ? new MediaStream(sound.dest.stream.getAudioTracks()) : null;
+    let n = 3;
+    testNote(`Talk now, as you will in a take… ${n}`, '');
+    const count = setInterval(() => { n -= 1; if (n > 0) testNote(`Talk now, as you will in a take… ${n}`); }, 1000);
+    // Each recording on its own: one the phone refuses leaves the other to judge by.
+    let failed = '';
+    const settle = (p) => p.then((b) => b, (e) => { failed += ` · ${String((e && e.name) || e)}`; return null; });
+    const [raw, boost] = await Promise.all([settle(recordFor(asItComes, 3200)), boosted ? settle(recordFor(boosted, 3200)) : Promise.resolve(null)]);
+    clearInterval(count);
+    testNote('Reading the test…');
+    const read = async (b) => { if (!b) return null; try { return await levelsOf(b); } catch (e) { return 'unreadable'; } };
+    const rawSides = await read(raw), boostSides = await read(boost);
+    const mic = stream && stream.getAudioTracks()[0];
+    const set = mic && mic.getSettings ? mic.getSettings() : {};
+    $('soundFine').textContent = `engine ${sound.ctx ? sound.ctx.state : 'none'} ${sound.ctx ? sound.ctx.sampleRate : '?'} Hz · mic ${set.sampleRate || '?'} Hz ${set.channelCount || '?'} ch · as it comes ${sidesSaid(rawSides)} · boosted (+${sound.boost} dB) ${sidesSaid(boostSides)}${failed}`;
+    if (bothIn(boostSides)) {
+      decideBoost(true, `Mic test: loud and clear, on both sides. Your takes now record like this${sound.boost ? ` (boost +${sound.boost} dB)` : ''}.`);
+      playTest(boost);
+    } else if (boostSides === 'unreadable' && boost) {
+      testNote('Mic test: playing it back. Did you hear yourself clearly, at a normal volume?');
+      $('soundEars').hidden = false;
+      playTest(boost);
+    } else if (heardIn(rawSides) || rawSides === 'unreadable') {
+      decideBoost(false, 'Mic test: your phone gives the microphone quiet and on one side, and the boost didn’t record here. Takes record the mic as it comes, and the edit turns it up.');
+      if (raw) playTest(raw);
+    } else {
+      testNote('Mic test: no sound came through. In Safari, tap aA, then Website Settings, and allow the microphone. Then test again.');
+      setBoost(sound.boost, false);
+    }
+    testing = false;
+  }
+  $('micTest').addEventListener('click', () => { wakeSound(); micTest(); });
   function takeSaid() {
     const t = sound.last, mixed = sound.lastMixed;
     sound.last = null;
@@ -821,9 +965,11 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     state.counting = false;
     const type = pickType();
     chunks = [];
-    // The mixed, boosted sound while page sound is running; the microphone as it comes otherwise, or with
-    // Plain sound ticked.
-    const recorded = !state.settings.plain && state.settings.boostOK && soundOn() ? sound.mixed : s;
+    // The mixed, boosted sound once the mic test has shown this phone records it, and while the engine runs;
+    // the microphone as it comes otherwise, or with Plain sound ticked.
+    const boosting = !state.settings.plain && state.settings.boostOK === true;
+    if (boosting) await soundRunning(800);
+    const recorded = boosting && soundOn() ? sound.mixed : s;
     try {
       recorder = new MediaRecorder(recorded, { ...(type ? { mimeType: type } : {}), videoBitsPerSecond: 8000000, audioBitsPerSecond: 160000 });
     } catch (e) {
