@@ -29,8 +29,8 @@
 
   The sound is turned up before it is recorded, with a bar that moves as he talks and a word on each take
   (21 October: the page got the iPhone's microphone raw and his take was too quiet to hear). The words
-  start at 210 a minute, and slower and faster sit beside the timer, during a take too (he reads faster
-  than 190).
+  start at 210 a minute and wait for him to start talking, and slower and faster sit beside the timer,
+  during a take too (he reads faster than 190).
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -172,6 +172,10 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
 .speed { display: flex; align-items: center; gap: 6px; flex: none; }
 .speed span { font-family: var(--mono); font-size: 13px; min-width: 5.6em; text-align: center; font-variant-numeric: tabular-nums; }
 .cam.live #camBack, .cam.live .who { display: none; }
+/* Waiting for him to start talking: the red mark breathes. */
+.cam.waiting .band .mark { animation: waiting 0.8s ease-in-out infinite alternate; }
+@keyframes waiting { to { opacity: 0.2; } }
+@media (prefers-reduced-motion: reduce) { .cam.waiting .band .mark { animation: none; } }
 /* Until a take starts the timer only says 0:00, so it gives its room to the lesson's number. */
 .cam:not(.live) .timer { display: none; }
 .cam.side .who .t { display: none; }
@@ -577,7 +581,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
    */
   const BOOSTS = [0, 6, 12, 18, 24, 30];
   const sound = { ctx: null, src: null, split: null, mono: null, gain: null, limit: null, meter: null, dest: null, buf: null, raf: 0,
-    hold: -120, boost: 0, mixed: null, label: '', take: null, last: null, takeMixed: false, lastMixed: false };
+    hold: -120, rms: -120, boost: 0, mixed: null, label: '', take: null, last: null, takeMixed: false, lastMixed: false };
   const micKey = (label) => label || 'microphone';
   const boostFor = (label) => {
     const kept = local.get('boost', {});
@@ -655,6 +659,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       for (let i = 0; i < sound.buf.length; i++) { const v = sound.buf[i]; const a = v < 0 ? -v : v; if (a > peak) peak = a; sum += v * v; }
       const db = peak > 0 ? 20 * Math.log10(peak) : -120;
       sound.hold = Math.max(db, sound.hold - 0.5);
+      sound.rms = sum > 0 ? 10 * Math.log10(sum / sound.buf.length) : -120;
       if (sound.take) noteTake(db, sum / sound.buf.length);
       $('meterBar').style.width = `${Math.max(0, Math.min(100, ((sound.hold + 60) / 60) * 100))}%`;
       $('meter').className = `meter${sound.hold > -3 ? ' loud' : sound.hold > -24 ? ' good' : ''}`;
@@ -833,10 +838,32 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     startedAt = performance.now();
     $('rec').classList.add('on'); $('rec').setAttribute('aria-label', 'Stop'); $('timer').classList.add('live');
     tick = setInterval(() => { $('timer').textContent = fmtShort((performance.now() - startedAt) / 1000); }, 250);
-    roll.pos = 0; roll.done = false; $('words').style.transform = 'translateY(0)'; layoutWords(); playRoll();
+    roll.pos = 0; roll.done = false; $('words').style.transform = 'translateY(0)'; layoutWords(); rollWhenTalking();
+  }
+  /**
+   * The words wait for him: they start once he has been talking for a moment, so a breath, a smile or a clap
+   * at the start never puts him behind (21 October: the words had started with the recording). Talking is
+   * most of the last 0.4 seconds above -45 dB; a clap is a few hundredths of a second, so it doesn't count.
+   * Without the page's sound, or if he hasn't started in 2.5 seconds, they start anyway.
+   */
+  function rollWhenTalking() {
+    const began = performance.now();
+    const heard = [];
+    $('camera').classList.add('waiting');
+    const watch = () => {
+      if (!recorder || recorder.state !== 'recording' || !roll || roll.done) { $('camera').classList.remove('waiting'); return; }
+      if (roll.playing) { $('camera').classList.remove('waiting'); return; }
+      const now = performance.now();
+      heard.push({ t: now, talking: soundOn() && sound.rms > -45 });
+      while (heard.length && now - heard[0].t > 400) heard.shift();
+      const talking = heard.length >= 8 && heard.filter((h) => h.talking).length / heard.length > 0.6;
+      if (talking || now - began > 2500) { $('camera').classList.remove('waiting'); playRoll(); return; }
+      requestAnimationFrame(watch);
+    };
+    requestAnimationFrame(watch);
   }
   function stopRecording() {
-    clearTimeout(holdTimer); clearInterval(tick); pauseRoll(); live(false);
+    clearTimeout(holdTimer); clearInterval(tick); pauseRoll(); live(false); $('camera').classList.remove('waiting');
     sound.last = sound.take; sound.lastMixed = sound.takeMixed; sound.take = null;
     if (recorder && recorder.state === 'recording') { state.elapsed = (performance.now() - startedAt) / 1000; recorder.stop(); }
   }
