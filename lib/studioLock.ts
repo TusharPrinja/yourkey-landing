@@ -20,7 +20,7 @@ import { createHash, pbkdf2, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 
 /** From his Studio Password page, 21 October 2026. Empty: the Studio is shut. */
-export const STUDIO_FINGERPRINT = "studio-v1$600000$sbE4zFEpVlwpl_YSnl2lKQ$agN1yx9l7xK-Mm2GFpiwX4eJL9bUb43xxq2JpdEpPO4";
+export const STUDIO_FINGERPRINT = "studio-v1$600000$wRGNVKwyKDc0QkkvOl-Fkw$Th2qxTtPTd17TXqNDvM1yVi6Q1_iuctsi8-GcaY7hXQ";
 
 export const STUDIO_COOKIE = "yk_studio";
 /** One sign-in lasts the filming weeks on that phone. */
