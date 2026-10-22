@@ -245,6 +245,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     <label>Words a minute <select id="wpm"></select></label>
     <label>Words <select id="size"><option value="34">Big</option><option value="44">Bigger</option><option value="56">Biggest</option><option value="70">Huge</option></select></label>
     <label>Countdown <select id="countdown"><option value="3">3 s</option><option value="5">5 s</option><option value="8">8 s</option><option value="10">10 s</option></select></label>
+    <label>Picture <select id="quality"><option value="4k">4K, the sharpest</option><option value="hd">HD, smaller files</option></select></label>
     <label><input type="checkbox" id="autostop"> Stop by itself when the words end</label>
     <label><input type="checkbox" id="plain"> Plain sound, no boost (only if a take plays silent)</label>
   </section>
@@ -262,6 +263,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       <span class="mic" id="mic"></span>
       <button class="glassbtn" id="swap" type="button" aria-label="Move the words to the other side">⇄ Switch sides</button>
     </div>
+    <div class="camrow"><span class="mic" id="camsize"></span></div>
     <div class="sound" id="sound" hidden>
       <span class="meter" id="meter" aria-hidden="true"><i id="meterBar"></i><b></b></span>
       <button class="glassbtn sq" id="boostDown" type="button" aria-label="Microphone quieter">−</button>
@@ -300,6 +302,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   <div class="rv-side">
     <h2 id="reviewTitle">The take</h2>
     <p class="state" id="soundState" aria-live="polite"></p>
+    <p class="state" id="pictureState"></p>
     <div class="trim" aria-label="Trim">
       <label>Start <input type="range" id="tStart" min="0" step="any" value="0"><output id="oStart">0:00.0</output></label>
       <label>End <input type="range" id="tEnd" min="0" step="any" value="0"><output id="oEnd">0:00.0</output></label>
@@ -365,7 +368,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   const state = {
     scripts: null, sem: local.get('sem', 'sales'), token: null, tokenUntil: 0,
     folders: local.get('folders', {}), takes: {}, lesson: null, blob: null, duration: 0,
-    settings: { wpm: 210, size: 44, countdown: 5, autostop: true, ...saved },
+    settings: { wpm: 210, size: 44, countdown: 5, autostop: true, quality: '4k', ...saved },
+    picture: null,
   };
   const wordsOf = (text) => text.replace(/[—–-]/g, ' ').split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
   const fmt = (s) => { s = Math.max(0, s || 0); const m = Math.floor(s / 60); return `${m}:${(s - m * 60).toFixed(1).padStart(4, '0')}`; };
@@ -511,6 +515,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     wpmSel.value = String(state.settings.wpm); $('size').value = String(state.settings.size);
     $('countdown').value = String(state.settings.countdown); $('autostop').checked = !!state.settings.autostop;
     $('plain').checked = !!state.settings.plain;
+    $('quality').value = state.settings.quality === 'hd' ? 'hd' : '4k';
     $('speedLabel').textContent = `Speed ${state.settings.wpm}`;
     $('slower').disabled = state.settings.wpm <= SPEED.min; $('faster').disabled = state.settings.wpm >= SPEED.max;
   }
@@ -527,6 +532,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   }
   $('autostop').addEventListener('change', () => { state.settings.autostop = $('autostop').checked; local.set('settings', state.settings); });
   $('plain').addEventListener('change', () => { state.settings.plain = $('plain').checked; local.set('settings', state.settings); });
+  // A new picture size opens the camera afresh, at that size, the next time it is needed.
+  $('quality').addEventListener('change', () => { state.settings.quality = $('quality').value; local.set('settings', state.settings); if (!recorder) stopCamera(); });
 
   function renderHome() {
     if (!state.scripts || $('home').hidden) return;
@@ -563,15 +570,26 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
 
   // ── the camera and the words ────────────────────────────────────────────
   let stream = null, recorder = null, chunks = [], startedAt = 0, tick = 0, wake = null, roll = null, holdTimer = 0, inputs = '';
+  /**
+   * The picture: 4K from the front camera where the phone gives it, so the edit can frame and punch in without
+   * going soft, and YouTube streams the lesson in its better formats (his note, 22 October: "worse quality than
+   * it should for YouTube"). The phone gives the nearest size it has; the camera screen and each take say
+   * which it gave. HD, in the settings, keeps the files smaller.
+   */
   async function startCamera() {
     if (stream) return stream;
     $('camerr').hidden = true;
     try {
+      const big = state.settings.quality !== 'hd';
       stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } },
+        video: { facingMode: 'user', width: { ideal: big ? 3840 : 1920 }, height: { ideal: big ? 2160 : 1080 }, frameRate: { ideal: 30 } },
         audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
       });
       $('preview').srcObject = stream;
+      const cam = stream.getVideoTracks()[0];
+      const got = cam && cam.getSettings ? cam.getSettings() : {};
+      state.picture = { w: Math.max(got.width || 0, got.height || 0), h: Math.min(got.width || 0, got.height || 0), fps: Math.round(got.frameRate || 0) };
+      $('camsize').textContent = `Camera: ${pictureSaid(pickType())}`;
       const mic = stream.getAudioTracks()[0];
       $('mic').textContent = mic ? `Mic: ${mic.label || 'on'}` : 'No microphone';
       wireSound(stream);
@@ -954,9 +972,32 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   $('band').addEventListener('click', () => { if (!roll || !recorder || recorder.state !== 'recording') return; roll.playing ? pauseRoll() : playRoll(); });
   function wordsEnded() { if (state.settings.autostop && recorder && recorder.state === 'recording') holdTimer = setTimeout(stopRecording, HOLD_AFTER_WORDS); }
 
-  function pickType() {
-    const want = ['video/mp4;codecs="avc1.640028,mp4a.40.2"', 'video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm'];
-    return want.find((t) => window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
+  /**
+   * How the take is recorded: at 4K, HEVC where Safari offers it (iOS 18.4 and later), the codec the Camera
+   * app itself records in, about half the size of H.264 for the same picture; then H.264's High profile; then
+   * whatever the phone records. His first takes came out in H.264's simplest profile at 8 Mbps, well under
+   * what the Camera app makes.
+   */
+  const HEVC = ['video/mp4;codecs="hvc1.1.6.L153.B0,mp4a.40.2"', 'video/mp4;codecs="hvc1,mp4a.40.2"', 'video/mp4;codecs=hvc1'];
+  // H.264 as his first takes were recorded (21 October), the one kind known to work on his phone: HD records in
+  // it alone, so HD is always the way back.
+  const H264 = ['video/mp4;codecs="avc1.640033,mp4a.40.2"', 'video/mp4;codecs="avc1.640028,mp4a.40.2"', 'video/mp4;codecs=avc1.640028',
+    'video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm'];
+  const typesHere = () => (state.settings.quality === 'hd' ? H264 : [...HEVC, ...H264])
+    .filter((t) => window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t));
+  function pickType() { return typesHere()[0] || ''; }
+  const codecOf = (type) => (/hvc1|hev1/.test(type) ? 'HEVC' : /avc1\.64/.test(type) ? 'H.264 High' : /mp4/.test(type) ? 'H.264' : /vp9/.test(type) ? 'VP9' : 'video');
+  /** Bits a second for the picture: enough for the size and the codec to keep the camera's detail. */
+  function bitsFor(type, h) {
+    const hevc = /hvc1|hev1/.test(type);
+    if (h >= 2000) return hevc ? 20000000 : 32000000;
+    return hevc ? 10000000 : 14000000;
+  }
+  function pictureSaid(type) {
+    const p = state.picture;
+    if (!p || !p.h) return codecOf(type);
+    const name = p.h >= 2000 ? '4K' : p.h >= 1000 ? 'HD' : 'below HD';
+    return `${name} (${p.w} × ${p.h}${p.fps ? `, ${p.fps} fps` : ''}) · ${codecOf(type)}`;
   }
   async function countdown(n) {
     const c = $('count'); c.hidden = false;
@@ -972,16 +1013,23 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     await countdown(state.settings.countdown);
     if (!state.counting) { live(false); return; }
     state.counting = false;
-    const type = pickType();
+    const types = typesHere();
     chunks = [];
     // The mixed, boosted sound once the mic test has shown this phone records it, and while the engine runs;
     // the microphone as it comes otherwise, or with Plain sound ticked.
     const boosting = !state.settings.plain && state.settings.boostOK === true;
     if (boosting) await soundRunning(800);
     const recorded = boosting && soundOn() ? sound.mixed : s;
-    try {
-      recorder = new MediaRecorder(recorded, { ...(type ? { mimeType: type } : {}), videoBitsPerSecond: 8000000, audioBitsPerSecond: 160000 });
-    } catch (e) {
+    // The best kind this phone will start, trying the next if one refuses.
+    recorder = null;
+    for (const type of types.length ? types : ['']) {
+      try {
+        recorder = new MediaRecorder(recorded, { ...(type ? { mimeType: type } : {}), videoBitsPerSecond: bitsFor(type, (state.picture && state.picture.h) || 1080), audioBitsPerSecond: 160000 });
+        state.recordedAs = type;
+        break;
+      } catch (e) { recorder = null; }
+    }
+    if (!recorder) {
       live(false);
       $('camerr').hidden = false; $('camerr').textContent = 'This phone wouldn’t record here. Update iOS, then try again.'; return;
     }
@@ -1055,6 +1103,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     $('reviewTitle').textContent = `${state.lesson.id} · take ${n} · ${fmtShort(state.duration)}`;
     $('soundState').textContent = takeSaid();
     $('soundState').classList.toggle('ok', $('soundState').textContent === 'Sound: good.');
+    $('pictureState').textContent = `Picture: ${pictureSaid(state.recordedAs || type)} · ${Math.max(1, Math.round(state.blob.size / 1e6))} MB`;
     $('sendState').textContent = signedIn() ? '' : 'Not signed in to Google: Send will ask you to sign in.';
     $('progress').hidden = true; $('send').disabled = false; $('retake').disabled = false;
     show('review');
