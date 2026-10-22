@@ -238,7 +238,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     <p class="state" id="googleState">Not signed in.</p>
     <p class="note">Paste the client ID from your Google project once. The Studio asks Google only to add files to your Drive, and it can see only the files it made.</p>
     <input type="text" id="clientId" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="….apps.googleusercontent.com" aria-label="Google client ID">
-    <div class="row"><button class="btn" id="signIn" type="button">Sign in with Google</button></div>
+    <div class="row"><button class="btn" id="signIn" type="button">Sign in with Google</button><button class="link" id="switchAccount" type="button">Use a different Google account</button></div>
   </section>
 
   <div class="row"><button class="btn primary" id="toLessons" type="button" disabled>Open the lessons</button></div>
@@ -491,6 +491,21 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     return new Promise((resolve, reject) => { tokenWaiters.push({ resolve, reject }); c.requestAccessToken({ prompt: state.token ? '' : 'consent' }); });
   }
   const signedIn = () => !!state.token && Date.now() < state.tokenUntil;
+  /**
+   * Another Google account (22 October: his company account's Drive is the free 15 GB; his own has room).
+   * Google's account chooser opens every time, and the folders and takes of the last account are forgotten, so
+   * "Your Key seminars" is found or made in the new Drive. A take already sending to the old Drive finishes there.
+   */
+  function switchAccount() {
+    const c = ensureTokenClient();
+    if (!c) { $('googleState').textContent = 'Paste the client ID first, and check you’re online.'; return; }
+    state.token = null; state.tokenUntil = 0;
+    state.folders = {}; local.del('folders'); state.takes = {};
+    renderSetup();
+    new Promise((resolve, reject) => { tokenWaiters.push({ resolve, reject }); c.requestAccessToken({ prompt: 'select_account consent' }); })
+      .catch((e) => { $('googleState').textContent = e.message; });
+  }
+  $('switchAccount').addEventListener('click', () => { local.set('clientId', $('clientId').value.trim()); switchAccount(); });
   $('signIn').addEventListener('click', () => { local.set('clientId', $('clientId').value.trim()); signIn().catch((e) => { $('googleState').textContent = e.message; }); });
 
   async function api(url, opts = {}) {
@@ -1236,8 +1251,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   /** A kept take's place in Drive: its name, folder and marks. Its number comes after every take of the
    *  lesson already in Drive or ahead of it in the queue. */
   async function openSession(it) {
-    const parent = await semFolder(it.sem);
     const takes = await loadTakes(it.sem);
+    const parent = await semFolder(it.sem);
     const ahead = sending.items.slice(0, sending.items.indexOf(it)).filter((x) => x.sem === it.sem && x.lesson === it.lesson && x.session).length;
     it.n = Math.max(it.n || 1, (takes[it.lesson] || []).length + ahead + 1);
     const ext = it.type.includes('webm') ? 'webm' : 'mp4';

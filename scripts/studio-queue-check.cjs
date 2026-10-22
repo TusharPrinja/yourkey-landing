@@ -34,27 +34,34 @@ async function googleApi(route) {
   const req = route.request();
   const url = new URL(req.url());
   if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
+  const who = (req.headers().authorization || '').replace(/^Bearer /, '');
+  const mine = (f) => f.owner === who;
   if (url.pathname === '/drive/v3/files' && req.method() === 'GET') {
     const q = url.searchParams.get('q');
     const m = /^name='(.+?)' and mimeType='application\/vnd.google-apps.folder' and trashed=false(?: and '(.+?)' in parents)?$/.exec(q);
-    if (m) return json(route, { files: drive.folders.filter((f) => f.name === m[1] && (f.parent || null) === (m[2] || null)).map((f) => ({ id: f.id })) });
+    if (m) return json(route, { files: drive.folders.filter((f) => mine(f) && f.name === m[1] && (f.parent || null) === (m[2] || null)).map((f) => ({ id: f.id })) });
     const p = /^'(.+?)' in parents and trashed=false$/.exec(q);
-    if (p) return json(route, { files: drive.files.filter((f) => f.parent === p[1]).map((f) => ({ id: f.id, name: f.name, appProperties: f.appProperties })) });
+    if (p) return json(route, { files: drive.files.filter((f) => mine(f) && f.parent === p[1]).map((f) => ({ id: f.id, name: f.name, appProperties: f.appProperties })) });
     return json(route, { error: q }, 400);
   }
   if (url.pathname === '/drive/v3/files' && req.method() === 'POST') {
     const body = JSON.parse(req.postData());
-    const f = { id: `folder${++drive.seq}`, name: body.name, parent: (body.parents || [])[0] || null };
+    const f = { id: `folder${++drive.seq}`, name: body.name, parent: (body.parents || [])[0] || null, owner: who };
     drive.folders.push(f);
     return json(route, { id: f.id });
   }
-  if (url.pathname.startsWith('/drive/v3/files/')) return json(route, { id: url.pathname.split('/').pop(), trashed: false });
+  if (url.pathname.startsWith('/drive/v3/files/')) {
+    const f = drive.folders.find((x) => x.id === url.pathname.split('/').pop());
+    return f && mine(f) ? json(route, { id: f.id, trashed: false }) : json(route, { error: { code: 404, message: 'File not found.' } }, 404);
+  }
   if (url.pathname === '/upload/drive/v3/files' && req.method() === 'POST') {
-    if (req.headers().authorization !== 'Bearer tok') return json(route, { error: 'auth' }, 401);
+    if (!/^tok2?$/.test(who)) return json(route, { error: 'auth' }, 401);
     if (drive.full) { drive.log.push('full at a new session'); return json(route, FULL, 403); }
     const meta = JSON.parse(req.postData());
+    const into = drive.folders.find((x) => x.id === meta.parents[0]);
+    if (!into || !mine(into)) { drive.log.push(`no such folder for ${who}`); return json(route, { error: { code: 404, message: 'File not found.' } }, 404); }
     const sid = `s${++drive.seq}`;
-    drive.sessions[sid] = { meta, size: Number(req.headers()['x-upload-content-length']), got: [], received: 0, puts: 0 };
+    drive.sessions[sid] = { meta, owner: who, size: Number(req.headers()['x-upload-content-length']), got: [], received: 0, puts: 0 };
     drive.log.push(`session ${sid} ${meta.name}`);
     return route.fulfill({ status: 200, headers: { ...cors, location: `https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&upload_id=${sid}` }, body: '' });
   }
@@ -84,7 +91,7 @@ async function googleApi(route) {
     s.got.push(body); s.received += body.length;
     if (s.received >= s.size) {
       const data = Buffer.concat(s.got);
-      const f = { id: `file${++drive.seq}`, name: s.meta.name, parent: s.meta.parents[0], appProperties: s.meta.appProperties, size: data.length, sha: crypto.createHash('sha256').update(data).digest('hex') };
+      const f = { id: `file${++drive.seq}`, name: s.meta.name, parent: s.meta.parents[0], owner: s.owner, appProperties: s.meta.appProperties, size: data.length, sha: crypto.createHash('sha256').update(data).digest('hex') };
       drive.files.push(f); s.file = { id: f.id, name: f.name };
       drive.log.push(`done ${sid} ${f.name} ${f.size}`);
       return json(route, s.file, 200);
@@ -109,7 +116,10 @@ async function googleApi(route) {
     }
     window.__signIn = 'yes';
     window.google = { accounts: { oauth2: { initTokenClient(cfg) {
-      return { requestAccessToken() { setTimeout(() => (window.__signIn === 'yes' ? cfg.callback({ access_token: 'tok', expires_in: 3600 }) : cfg.error_callback({ type: 'popup_closed' })), 20); } };
+      return { requestAccessToken(o) {
+        (window.__prompts = window.__prompts || []).push((o && o.prompt) || '');
+        setTimeout(() => (window.__signIn === 'yes' ? cfg.callback({ access_token: sessionStorage.getItem('test:account') || 'tok', expires_in: 3600 }) : cfg.error_callback({ type: 'popup_closed' })), 20);
+      } };
     } } } };
     // A fingerprint of each take the page keeps, across reloads, so the test can check Drive got each one exactly.
     const keep = IDBObjectStore.prototype.put;
@@ -237,6 +247,20 @@ async function googleApi(route) {
   await page.waitForFunction(() => /All sent/.test(document.getElementById('sendingState').textContent), null, { timeout: 120000 });
   step('drive full, then room', { fullCard, log: drive.log.filter((l) => /full|done/.test(l)).slice(-3) });
 
+  // 4d. Another Google account (his own, with room): the chooser opens, the take goes to a folder in the new Drive.
+  await page.evaluate(() => sessionStorage.setItem('test:account', 'tok2'));
+  await page.click('#toSetup');
+  await page.click('#switchAccount');
+  await page.waitForFunction(() => /Signed in/.test(document.getElementById('googleState').textContent), null, { timeout: 10000 });
+  const prompt = await page.evaluate(() => window.__prompts[window.__prompts.length - 1]);
+  await page.click('#toLessons');
+  await film(1, 3);
+  await sendAndTime();
+  await page.waitForFunction(() => /All sent/.test(document.getElementById('sendingState').textContent), null, { timeout: 120000 });
+  const theirs = drive.files.filter((f) => f.owner === 'tok2');
+  const newRoot = drive.folders.filter((f) => f.owner === 'tok2').map((f) => f.name);
+  step('another account', { prompt, newRoot, theirs: theirs.map((f) => f.name), log: drive.log.slice(-3) });
+
   // 5. Every take Drive holds is byte for byte the take the phone kept, and nothing is left on the phone.
   await wait(500);
   const kept = await page.evaluate(() => JSON.parse(localStorage.getItem('test:kept') || '[]'));
@@ -252,7 +276,10 @@ async function googleApi(route) {
   await browser.close();
   server.close();
   const ok = errors.length === 0 && drive.errors.every((e) => /Drive had/.test(e)) && report.steps.find((s) => s.name === 'bytes').sameBytes
-    && report.steps.find((s) => s.name === 'bytes').leftOnPhone.queue === 0 && report.files.length === 8
+    && report.steps.find((s) => s.name === 'bytes').leftOnPhone.queue === 0 && report.files.length === 9
+    && /select_account/.test(report.steps.find((s) => s.name === 'another account').prompt)
+    && report.steps.find((s) => s.name === 'another account').theirs.length === 1
+    && report.steps.find((s) => s.name === 'another account').newRoot.join() === 'Your Key seminars,Sales'
     && /Google Drive is full/.test(report.steps.find((s) => s.name === 'drive full, then room').fullCard);
   console.log(ok ? 'PASS: every take arrived byte for byte, nothing left on the phone.' : 'FAIL: see the report above.');
   process.exit(ok ? 0 : 1);
