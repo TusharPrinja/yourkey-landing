@@ -1197,6 +1197,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   const noteDown = (it) => { if (it.stored) idb.set(it.key, recordOf(it), 'queue').catch(() => {}); };
   const sizeSaid = (b) => (b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : `${Math.max(1, Math.round(b / 1e6))} MB`);
   const takesSaid = (n) => `${n} ${n === 1 ? 'take' : 'takes'}`;
+  /** Google's reply when his Drive has no room left (403, storageQuotaExceeded): no retry fixes that, he does. */
+  const driveFull = (status, said) => status === 403 && /storageQuotaExceeded/.test(said || '');
 
   /** One resumable upload, in 8 MiB pieces, picking up where it stopped if the connection drops. */
   function put(session, blob, from, onProgress) {
@@ -1209,7 +1211,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       x.onload = () => {
         if (x.status === 200 || x.status === 201) resolve({ done: true, file: JSON.parse(x.responseText || '{}') });
         else if (x.status === 308) { const r = x.getResponseHeader('Range'); resolve({ done: false, next: r ? Number(r.split('-')[1]) + 1 : to }); }
-        else reject(Object.assign(new Error(`Google Drive said ${x.status}.`), { status: x.status }));
+        else reject(Object.assign(new Error(`Google Drive said ${x.status}.`), { status: x.status, full: driveFull(x.status, x.responseText) }));
       };
       x.onerror = () => reject(Object.assign(new Error('The connection dropped.'), { network: true }));
       x.send(blob.slice(from, to));
@@ -1224,7 +1226,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       x.onload = () => {
         if (x.status === 200 || x.status === 201) resolve({ file: JSON.parse(x.responseText || '{}') });
         else if (x.status === 308) { const r = x.getResponseHeader('Range'); resolve({ next: r ? Number(r.split('-')[1]) + 1 : it.sent || 0 }); }
-        else reject(Object.assign(new Error(`Google Drive said ${x.status}.`), { status: x.status }));
+        else reject(Object.assign(new Error(`Google Drive said ${x.status}.`), { status: x.status, full: driveFull(x.status, x.responseText) }));
       };
       x.onerror = () => reject(Object.assign(new Error('The connection dropped.'), { network: true }));
       x.send();
@@ -1253,7 +1255,10 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     });
     if (start.status === 401) { state.token = null; throw Object.assign(new Error('Sign in with Google again.'), { auth: true }); }
     const session = start.ok && start.headers.get('Location');
-    if (!session) throw Object.assign(new Error(`Google Drive said ${start.status}.`), { status: start.status });
+    if (!session) {
+      const said = await start.text().catch(() => '');
+      throw Object.assign(new Error(`Google Drive said ${start.status}.`), { status: start.status, full: driveFull(start.status, said) });
+    }
     Object.assign(it, { session, sent: 0, name: meta.name, appProperties: meta.appProperties });
     noteDown(it);
   }
@@ -1297,20 +1302,21 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     try {
       while (sending.items.length) {
         sending.why = '';
+        let full = false;
         // Every waiting take gets its Drive session while a sign-in is to hand.
         if (signedIn()) {
           for (const x of sending.items) {
             if (x.session) continue;
-            try { await openSession(x); } catch (e) { break; }
+            try { await openSession(x); } catch (e) { full = !!e.full; break; }
           }
         }
         // In order; one still waiting for a session lets one that has its session go past it.
         const it = sending.items.find((x) => x.session);
         if (!it) {
           if (!signedIn()) { sending.why = 'signin'; break; }
-          // Signed in, but no session would open: the connection, or Google, said no for now.
-          sending.tries++; sending.why = navigator.onLine === false ? 'offline' : 'retry'; renderSending();
-          await rest(Math.min(60000, 2000 * 2 ** Math.min(sending.tries, 5)));
+          // Signed in, but no session would open: his Drive is full, or the connection or Google said no for now.
+          sending.tries++; sending.why = full ? 'full' : navigator.onLine === false ? 'offline' : 'retry'; renderSending();
+          await rest(full ? 60000 : Math.min(60000, 2000 * 2 ** Math.min(sending.tries, 5)));
           continue;
         }
         sending.current = it; sending.at = it.sent || 0; renderSending();
@@ -1319,8 +1325,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
           sending.tries = 0;
         } catch (e) {
           if (e.status === 404 || e.status === 410) { it.session = null; it.sent = 0; noteDown(it); continue; } // a week old: a new session
-          sending.tries++; sending.why = navigator.onLine === false || e.network ? 'offline' : 'retry'; sending.said = e.message; renderSending();
-          await rest(Math.min(60000, 2000 * 2 ** Math.min(sending.tries, 5)));
+          sending.tries++; sending.why = e.full ? 'full' : navigator.onLine === false || e.network ? 'offline' : 'retry'; sending.said = e.message; renderSending();
+          await rest(e.full ? 60000 : Math.min(60000, 2000 * 2 ** Math.min(sending.tries, 5)));
         } finally { sending.current = null; }
       }
     } finally {
@@ -1355,7 +1361,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     const pct = cur && cur.size ? Math.min(100, Math.floor((sending.at / cur.size) * 100)) : 0;
     $('sendingRow').hidden = !(items.length && sending.why === 'signin');
     $('sendingState').classList.toggle('ok', !items.length && sending.done > 0);
-    $('sendingState').classList.remove('warn');
+    $('sendingState').classList.toggle('warn', !!items.length && sending.why === 'full');
     if (!items.length) {
       box.hidden = !sending.done && !sending.lost;
       $('sendingState').textContent = sending.lost
@@ -1371,6 +1377,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     const onPage = items.filter((x) => !x.stored).length;
     let line;
     if (sending.why === 'signin') line = `${takesSaid(items.length)} kept on this phone (${sizeSaid(left)}), waiting for Google. Sign in and they carry on.`;
+    else if (sending.why === 'full') line = `Your Google Drive is full. ${takesSaid(items.length)} kept safe on this phone (${sizeSaid(left)}): make room in Drive, or add storage, and they carry on by themselves.`;
     else if (sending.why === 'offline') line = `No connection just now. ${takesSaid(items.length)} kept on this phone (${sizeSaid(left)}); sending carries on when it’s back.`;
     else if (sending.why === 'retry') line = `${sending.said || 'Google Drive said no for now.'} Trying again in a moment. ${takesSaid(items.length)} kept on this phone (${sizeSaid(left)}).`;
     else if (cur) line = `Sending ${cur.name || cur.lesson}… ${pct}%${items.length > 1 ? ` · ${items.length - 1} more after it` : ''} · ${sizeSaid(left)} to go`;

@@ -23,7 +23,9 @@ const SCRIPTS = JSON.stringify(Object.fromEntries(Object.entries(NAMES).map(([k,
 const PAGE = fs.readFileSync(path.join(__dirname, '..', 'public', 'studio', 'index.html'), 'utf8')
   .replace('const CHUNK = 8 * 1024 * 1024;', 'const CHUNK = 64 * 1024;'); // small pieces, so a short take has several
 
-const drive = { folders: [], files: [], sessions: {}, seq: 0, log: [], errors: [], dropAt: new Set(), expire: new Set(), delay: 120, paused: false };
+const drive = { folders: [], files: [], sessions: {}, seq: 0, log: [], errors: [], dropAt: new Set(), expire: new Set(), delay: 120, paused: false, full: false };
+// Google's reply when the Drive has no room left.
+const FULL = { error: { code: 403, message: "The user's Drive storage quota has been exceeded.", errors: [{ domain: 'usageLimits', reason: 'storageQuotaExceeded' }] } };
 const cors = { 'access-control-allow-origin': '*', 'access-control-expose-headers': 'Location, Range', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'GET, POST, PUT, OPTIONS' };
 const json = (r, body, status = 200, extra = {}) => r.fulfill({ status, headers: { ...cors, 'content-type': 'application/json', ...extra }, body: JSON.stringify(body) });
 const wait = (ms) => new Promise((res) => setTimeout(res, ms));
@@ -49,6 +51,7 @@ async function googleApi(route) {
   if (url.pathname.startsWith('/drive/v3/files/')) return json(route, { id: url.pathname.split('/').pop(), trashed: false });
   if (url.pathname === '/upload/drive/v3/files' && req.method() === 'POST') {
     if (req.headers().authorization !== 'Bearer tok') return json(route, { error: 'auth' }, 401);
+    if (drive.full) { drive.log.push('full at a new session'); return json(route, FULL, 403); }
     const meta = JSON.parse(req.postData());
     const sid = `s${++drive.seq}`;
     drive.sessions[sid] = { meta, size: Number(req.headers()['x-upload-content-length']), got: [], received: 0, puts: 0 };
@@ -68,6 +71,7 @@ async function googleApi(route) {
       if (s.file) return json(route, s.file, 200);
       return route.fulfill({ status: 308, headers: { ...cors, ...has() }, body: '' });
     }
+    if (drive.full) { drive.log.push(`full at ${sid}`); return json(route, FULL, 403); }
     const m = /^bytes (\d+)-(\d+)\/(\d+)$/.exec(range);
     const body = req.postDataBuffer() || Buffer.alloc(0);
     s.puts++;
@@ -123,7 +127,8 @@ async function googleApi(route) {
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
-  page.on('console', (m) => { if (m.type() === 'error' && !/ERR_CONNECTION_RESET|net::ERR_FAILED|status of 404/.test(m.text())) errors.push(m.text()); });
+  // The fake Drive's refusals on purpose (a session gone, a dropped piece, a full Drive) show in the console too.
+  page.on('console', (m) => { if (m.type() === 'error' && !/ERR_CONNECTION_RESET|net::ERR_FAILED|status of 40[34]/.test(m.text())) errors.push(m.text()); });
   await page.route('https://accounts.google.com/**', (r) => r.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
   await page.route('https://www.googleapis.com/**', googleApi);
   await page.goto(URL_);
@@ -220,6 +225,18 @@ async function googleApi(route) {
   await page.waitForFunction(() => /All sent/.test(document.getElementById('sendingState').textContent), null, { timeout: 120000 });
   step('session gone, sent again', { gone, log: drive.log.slice(-4) });
 
+  // 4c. His Drive is full: the card says so, the take waits on the phone, and goes once there is room.
+  drive.full = true;
+  await film(7, 3);
+  await sendAndTime();
+  await page.waitForFunction(() => /Google Drive is full/.test(document.getElementById('sendingState').textContent), null, { timeout: 30000, polling: 50 });
+  const fullCard = await card();
+  await page.screenshot({ path: path.join(OUT, 'drive-full.png') });
+  drive.full = false;
+  await page.evaluate(() => window.dispatchEvent(new Event('online')));
+  await page.waitForFunction(() => /All sent/.test(document.getElementById('sendingState').textContent), null, { timeout: 120000 });
+  step('drive full, then room', { fullCard, log: drive.log.filter((l) => /full|done/.test(l)).slice(-3) });
+
   // 5. Every take Drive holds is byte for byte the take the phone kept, and nothing is left on the phone.
   await wait(500);
   const kept = await page.evaluate(() => JSON.parse(localStorage.getItem('test:kept') || '[]'));
@@ -235,7 +252,8 @@ async function googleApi(route) {
   await browser.close();
   server.close();
   const ok = errors.length === 0 && drive.errors.every((e) => /Drive had/.test(e)) && report.steps.find((s) => s.name === 'bytes').sameBytes
-    && report.steps.find((s) => s.name === 'bytes').leftOnPhone.queue === 0 && report.files.length === 7;
+    && report.steps.find((s) => s.name === 'bytes').leftOnPhone.queue === 0 && report.files.length === 8
+    && /Google Drive is full/.test(report.steps.find((s) => s.name === 'drive full, then room').fullCard);
   console.log(ok ? 'PASS: every take arrived byte for byte, nothing left on the phone.' : 'FAIL: see the report above.');
   process.exit(ok ? 0 : 1);
 })().catch((e) => { console.error(e); process.exit(1); });
