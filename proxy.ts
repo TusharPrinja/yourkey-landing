@@ -33,6 +33,16 @@ export async function proxy(request: NextRequest) {
   const fingerprint = readFingerprint();
   const { pathname } = request.nextUrl;
 
+  // Any other spelling of the address (/Studio, /STUDIO/index.html) goes to the one the lock answers. The rewrite
+  // in next.config.ts matches /Studio too, and a server that matched it without running this would send the
+  // Studio itself (found 22 October 2026 on Next.js 16.4.2's own server; Vercel ran the lock).
+  const lower = pathname.toLowerCase();
+  if (pathname !== lower) {
+    const url = request.nextUrl.clone();
+    url.pathname = lower;
+    return keepPrivate(NextResponse.redirect(url, 308));
+  }
+
   if (pathname === "/studio/lock") {
     const res = lock(fingerprint ? "locked" : "shut", 200);
     res.cookies.set({ name: STUDIO_COOKIE, value: "", maxAge: 0, ...cookieAt });
@@ -60,5 +70,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/studio", "/studio/:path*"],
+  // Every spelling of the address, so none reaches the Studio without the lock.
+  matcher: ["/studio", "/studio/:path*", "/([Ss][Tt][Uu][Dd][Ii][Oo](?:/.*)?)"],
 };
