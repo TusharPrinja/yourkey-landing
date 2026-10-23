@@ -6,7 +6,6 @@
 <title>Leadership Mastery — Your Key</title>
 <meta name="description" content="Lead a team, a family, or yourself: decisions made on time, feedback in plain parts, promises kept, and leader traits practised one a week.">
 <link rel="canonical" href="https://yourkey.app/leadership">
-<meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0A100C">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Leadership Mastery — Your Key">
@@ -169,8 +168,8 @@ footer nav{display:flex;flex-wrap:wrap;gap:16px;font-size:14px}footer nav a{colo
         <span class="pill buy">18% less than in the app</span>
         <div class="price buy"><b>£5.42</b><span>a month</span></div>
         <p class="billed buy">Billed £64.99 once a year — £1.25 a week.</p>
-        <a class="cta buy" href="#plans" data-preview>Join Leadership Mastery</a>
-        <a class="second buy" href="#plans" data-preview>Or pay £12.99 month to month</a>
+        <a class="cta buy" href="/join?package=leadership&amp;plan=yearly">Join Leadership Mastery</a>
+        <a class="second buy" href="/join?package=leadership&amp;plan=monthly">Or pay £12.99 month to month</a>
         <ul class="trust buy"><li>Full refund within 14 days</li><li>Cancel any time</li><li>Apple Pay and cards</li><li>Secure checkout by Stripe</li></ul>
       <div class="android-only note">
         <p>Your Key is on iPhone for now.</p>
@@ -288,8 +287,8 @@ footer nav{display:flex;flex-wrap:wrap;gap:16px;font-size:14px}footer nav a{colo
       <div class="plans buy">
         <label class="plan"><input type="radio" name="plan" value="yearly" checked><span class="radio"></span><span class="txt"><b>Yearly</b><span>£5.42 a month, billed £64.99 once a year</span></span><span class="best">Save £90.89 a year</span></label>
         <label class="plan"><input type="radio" name="plan" value="monthly"><span class="radio"></span><span class="txt"><b>Monthly</b><span>£12.99, billed every month</span></span></label>
-        <a class="cta cta-y" href="#plans" data-preview>Join Leadership Mastery — £64.99 a year</a>
-        <a class="cta cta-m" href="#plans" data-preview>Join Leadership Mastery — £12.99 a month</a>
+        <a class="cta cta-y" href="/join?package=leadership&amp;plan=yearly">Join Leadership Mastery — £64.99 a year</a>
+        <a class="cta cta-m" href="/join?package=leadership&amp;plan=monthly">Join Leadership Mastery — £12.99 a month</a>
         <p class="dim center">Cancel any time from your receipt email. Full refund within 14 days.</p>
       </div>
       <div class="android-only note">
@@ -324,8 +323,8 @@ footer nav{display:flex;flex-wrap:wrap;gap:16px;font-size:14px}footer nav a{colo
       <span class="tile mark" aria-hidden="true"></span>
       <h2>Start today, with fourteen days to change your mind.</h2>
       <p class="mute">£5.42 a month, billed £64.99 once a year. Or £12.99 month to month.</p>
-      <a class="cta buy" href="#plans" data-preview>Join Leadership Mastery</a>
-      <a class="second buy" href="#plans" data-preview>Or pay £12.99 month to month</a>
+      <a class="cta buy" href="/join?package=leadership&amp;plan=yearly">Join Leadership Mastery</a>
+      <a class="second buy" href="/join?package=leadership&amp;plan=monthly">Or pay £12.99 month to month</a>
       <div class="android-only note">
         <p>Your Key is on iPhone for now.</p>
         <a class="ghost" href="mailto:hello@yourkey.app?subject=Android%3A%20the%20Leadership%20Mastery%20package">Email me when it is on Android</a>
@@ -342,8 +341,7 @@ footer nav{display:flex;flex-wrap:wrap;gap:16px;font-size:14px}footer nav a{colo
     <p class="dim">© 2026 Your Key App Ltd</p>
   </div>
 </footer>
-<div id="sticky" class="sticky buy" aria-hidden="true"><p>£5.42 a month, billed yearly</p><a class="cta" tabindex="-1" href="#plans" data-preview>Join</a></div>
-<div id="toast" class="toast" role="status">Preview: on launch day this button opens the checkout.</div>
+<div id="sticky" class="sticky buy" aria-hidden="true"><p>£5.42 a month, billed yearly</p><a class="cta" tabindex="-1" href="/join?package=leadership&amp;plan=yearly">Join</a></div>
 <script>
 (function(){var d=document.documentElement;if(/Android/i.test(navigator.userAgent))d.classList.add('is-android');
 var bar=document.getElementById('sticky');if(bar&&'IntersectionObserver'in window){var on=new Set(),io=new IntersectionObserver(function(es){es.forEach(function(e){e.isIntersecting?on.add(e.target):on.delete(e.target)});var s=on.size===0;bar.classList.toggle('show',s);bar.setAttribute('aria-hidden',s?'false':'true')});document.querySelectorAll('[data-sticky-off]').forEach(function(el){io.observe(el)})}

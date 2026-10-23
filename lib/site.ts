@@ -20,10 +20,12 @@ export const SITE = {
   description:
     "Your goal, in your own words, at the centre of a daily practice: visualisations that speak it back to you as already real, affirmations written for it, and identity work around it. Private on your iPhone. Free to start.",
   /**
-   * The five packages ship in the next App Store version. Until it is live, every place that offers
-   * them says so ("in the next update"), so the site is never ahead of the store. Flip on launch day.
+   * The five packages shipped in App Store version 1.2.0, released 22 October 2026. While it was in
+   * review, every place that offered them said so ("in the next update"), so the site was never ahead
+   * of the store. Flipped on 23 October, with the four package pages selling (yourkey-app
+   * lib/web/purchaseLink.ts, WEBSITE_SELLS).
    */
-  packagesLive: false,
+  packagesLive: true,
 };
 
 export type PaidPackage = (typeof generated.paid)[number];

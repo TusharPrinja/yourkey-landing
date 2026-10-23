@@ -9,6 +9,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     page("/", 1, "weekly"),
     page("/packages", 0.9, "weekly"),
+    // The four package pages (public/packages/*.html, served by next.config.ts's rewrites), listed from
+    // the day they sell; until then they were noindex previews.
+    page("/sales", 0.9, "weekly"),
+    page("/time", 0.9, "weekly"),
+    page("/communication", 0.9, "weekly"),
+    page("/leadership", 0.9, "weekly"),
     page("/tools", 0.8),
     page("/pricing", 0.8),
     page("/support", 0.7),
