@@ -202,17 +202,28 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
 /* The review: the take, the two marks, and the choice. */
 .review video { width: 100%; max-height: 52vh; background: #000; border-radius: 6px; display: block; }
 .rv-side { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.rv-act { display: grid; gap: 14px; }
 /* Sideways on a phone: the take on the left, the marks and the choice beside it, nothing below the fold. */
 @media (orientation: landscape) and (max-height: 520px) {
   .review { max-width: none; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; padding-block: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-bottom, 0px)); }
   .review video { max-height: calc(100vh - 24px); }
-  .rv-side { gap: 10px; }
+  .rv-side { gap: 10px; max-height: calc(100vh - 24px); overflow-y: auto; }
   .rv-side .note { display: none; }
+  .rv-side > .state { font-size: 12px; }
+  /* Send, Retake and what happened stay in view at the foot of the side, the marks scrolling above them. */
+  .rv-act { position: sticky; bottom: 0; display: grid; gap: 8px; padding-top: 8px; background: var(--bg); box-shadow: 0 -10px 10px -6px var(--bg); }
 }
 .trim { display: grid; gap: 8px; }
 .trim label { display: grid; grid-template-columns: 54px minmax(0, 1fr) 64px; gap: 10px; align-items: center; font-size: 14px; }
 .trim input[type="range"] { width: 100%; }
 .trim output { font-family: var(--mono); font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; }
+/* Each mark to a tenth of a second (24 October: the slider moved in jumps of most of a second, so a cut between
+   two sentences landed in one of them): a tenth or a second either way, held down to keep going, the paused
+   place, and Hear, which plays up to the mark and stops on it. */
+.trim .fine { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.trim .fine .btn { min-height: 38px; padding: 0 2px; font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
+.trim .said { margin: 0; font-size: 13px; color: var(--muted); }
 .progress { height: 8px; background: var(--chip); border-radius: 4px; overflow: hidden; }
 .progress i { display: block; height: 100%; width: 0; background: var(--good); transition: width 0.2s; }
 @media (prefers-reduced-motion: reduce) { .progress i { transition: none; } }
@@ -318,22 +329,38 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     <p class="state" id="soundState" aria-live="polite"></p>
     <p class="state" id="pictureState"></p>
     <div class="trim" aria-label="Trim">
-      <label>Start <input type="range" id="tStart" min="0" step="any" value="0"><output id="oStart">0:00.0</output></label>
-      <label>End <input type="range" id="tEnd" min="0" step="any" value="0"><output id="oEnd">0:00.0</output></label>
+      <label>Start <input type="range" id="tStart" min="0" step="any" value="0"><output id="oStart">0:00.00</output></label>
+      <div class="fine" role="group" aria-label="Move the start">
+        <button class="btn" type="button" data-mark="a" data-by="-1" aria-label="Start a second earlier">−1s</button>
+        <button class="btn" type="button" data-mark="a" data-by="-0.1" aria-label="Start a tenth of a second earlier">−0.1</button>
+        <button class="btn" type="button" data-mark="a" data-by="0.1" aria-label="Start a tenth of a second later">+0.1</button>
+        <button class="btn" type="button" data-mark="a" data-by="1" aria-label="Start a second later">+1s</button>
+        <button class="btn" id="startHere" type="button" aria-label="Start where the take is paused">Here</button>
+        <button class="btn" id="hearStart" type="button" aria-label="Hear the start">Hear</button>
+      </div>
+      <label>End <input type="range" id="tEnd" min="0" step="any" value="0"><output id="oEnd">0:00.00</output></label>
+      <div class="fine" role="group" aria-label="Move the end">
+        <button class="btn" type="button" data-mark="b" data-by="-1" aria-label="End a second earlier">−1s</button>
+        <button class="btn" type="button" data-mark="b" data-by="-0.1" aria-label="End a tenth of a second earlier">−0.1</button>
+        <button class="btn" type="button" data-mark="b" data-by="0.1" aria-label="End a tenth of a second later">+0.1</button>
+        <button class="btn" type="button" data-mark="b" data-by="1" aria-label="End a second later">+1s</button>
+        <button class="btn" id="endHere" type="button" aria-label="End where the take is paused">Here</button>
+        <button class="btn" id="hearEnd" type="button" aria-label="Hear the end">Hear</button>
+      </div>
       <div class="row">
-        <button class="btn" id="startHere" type="button">Start here</button>
-        <button class="btn" id="endHere" type="button">End here</button>
         <button class="btn" id="playTrim" type="button">Play the trimmed take</button>
       </div>
-      <p class="note">Your start and end go with the take, and the edit cuts there at full quality.</p>
+      <p class="said">The whole take goes to Drive with these two marks, and the edit cuts exactly there.</p>
     </div>
-    <div class="row">
-      <button class="btn primary" id="send" type="button">Send to Drive</button>
-      <button class="btn red" id="retake" type="button">Retake</button>
-      <button class="link" id="toList" type="button">Lessons</button>
+    <div class="rv-act">
+      <div class="row">
+        <button class="btn primary" id="send" type="button">Send to Drive</button>
+        <button class="btn red" id="retake" type="button">Retake</button>
+        <button class="link" id="toList" type="button">Lessons</button>
+      </div>
+      <div class="progress" id="progress" hidden><i id="progressBar"></i></div>
+      <p class="state" id="sendState" aria-live="polite"></p>
     </div>
-    <div class="progress" id="progress" hidden><i id="progressBar"></i></div>
-    <p class="state" id="sendState" aria-live="polite"></p>
   </div>
 </div>
 
@@ -416,6 +443,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   const wordsOf = (text) => text.replace(/[—–-]/g, ' ').split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
   const fmt = (s) => { s = Math.max(0, s || 0); const m = Math.floor(s / 60); return `${m}:${(s - m * 60).toFixed(1).padStart(4, '0')}`; };
   const fmtShort = (s) => { s = Math.max(0, Math.round(s || 0)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+  /** A mark as it is set, to the hundredth: "2:03.65". */
+  const fmtMark = (s) => { s = Math.round(Math.max(0, s || 0) * 100) / 100; const m = Math.floor(s / 60); return `${m}:${(s - m * 60).toFixed(2).padStart(5, '0')}`; };
   const padId = (id) => id.replace(/^([A-Z])(\d+)\.(\d+)$/, (_, p, m, l) => `${p}${m.padStart(2, '0')}.${l.padStart(2, '0')}`);
 
   function show(id) {
@@ -618,8 +647,20 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       const mins = l.words / state.settings.wpm;
       b.innerHTML = `<span class="id">${l.id}</span><span class="t"></span><span class="m">${mins < 1 ? `${Math.round(mins * 60)} s` : `${mins.toFixed(1)} min`}</span>`;
       b.querySelector('.t').textContent = l.title;
-      if (takes[l.id]) { const t = document.createElement('span'); t.className = 'takes'; t.textContent = `${takes[l.id].length} ${takes[l.id].length === 1 ? 'take' : 'takes'} in Drive`; b.append(t); }
-      if (queued) { const t = document.createElement('span'); t.className = 'queued'; t.textContent = `${queued} ${queued === 1 ? 'take' : 'takes'} on this phone, sending`; b.append(t); }
+      // Each line says the newest take's marks as Drive holds them (or as they wait on the phone), so he can see
+      // his trim went with the take (24 October: "please confirm that the trimmed actually goes to Google Drive").
+      if (takes[l.id]) {
+        const t = document.createElement('span'); t.className = 'takes';
+        const newest = takes[l.id].reduce((x, y) => (Number((y.appProperties || {}).take) > Number((x.appProperties || {}).take) ? y : x));
+        const p = newest.appProperties || {};
+        const cut = p.trimStart != null && p.trimEnd != null ? ` · take ${p.take} trimmed ${fmtMark(Number(p.trimStart))} to ${fmtMark(Number(p.trimEnd))}` : '';
+        t.textContent = `${takes[l.id].length} ${takes[l.id].length === 1 ? 'take' : 'takes'} in Drive${cut}`; b.append(t);
+      }
+      if (queued) {
+        const t = document.createElement('span'); t.className = 'queued';
+        const last = sending.items.filter((it) => it.sem === state.sem && it.lesson === l.id).pop();
+        t.textContent = `${queued} ${queued === 1 ? 'take' : 'takes'} on this phone, sending · trimmed ${fmtMark(last.a)} to ${fmtMark(last.b)}`; b.append(t);
+      }
       b.addEventListener('click', () => openLesson(l));
       li.append(b); list.append(li);
     }
@@ -1179,15 +1220,67 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   function showMarks() {
     let a = Number($('tStart').value), b = Number($('tEnd').value);
     if (a > b - 0.5) { a = Math.max(0, b - 0.5); $('tStart').value = String(a); }
-    $('oStart').textContent = fmt(a); $('oEnd').textContent = fmt(b);
+    $('oStart').textContent = fmtMark(a); $('oEnd').textContent = fmtMark(b);
   }
-  $('tStart').addEventListener('input', () => { state.marked = true; showMarks(); $('take').currentTime = Number($('tStart').value); });
-  $('tEnd').addEventListener('input', () => { state.marked = true; showMarks(); $('take').currentTime = Number($('tEnd').value); });
-  $('startHere').addEventListener('click', () => { state.marked = true; $('tStart').value = String($('take').currentTime); showMarks(); });
-  $('endHere').addEventListener('click', () => { state.marked = true; $('tEnd').value = String($('take').currentTime); showMarks(); });
-  let stopAt = 0;
-  $('playTrim').addEventListener('click', () => { const v = $('take'); v.currentTime = Number($('tStart').value); stopAt = Number($('tEnd').value); v.play(); });
-  $('take').addEventListener('timeupdate', () => { const v = $('take'); if (stopAt && v.currentTime >= stopAt) { v.pause(); stopAt = 0; } });
+  /** One mark moved, the other left where it is: the start stays half a second before the end, the end half a
+   *  second after the start, both inside the take. The take shows the frame at the mark. */
+  function moveMark(which, to, seek = true) {
+    const d = state.duration || 0;
+    let a = Number($('tStart').value), b = Number($('tEnd').value);
+    if (which === 'a') a = Math.min(Math.max(0, to), Math.max(0, b - 0.5));
+    else b = Math.max(Math.min(d, to), Math.min(d, a + 0.5));
+    const at = Math.round((which === 'a' ? a : b) * 100) / 100;
+    $(which === 'a' ? 'tStart' : 'tEnd').value = String(at);
+    state.marked = true; showMarks();
+    if (seek) { const v = $('take'); stopHear(); v.pause(); v.currentTime = at; }
+  }
+  $('tStart').addEventListener('input', () => moveMark('a', Number($('tStart').value)));
+  $('tEnd').addEventListener('input', () => moveMark('b', Number($('tEnd').value)));
+  $('startHere').addEventListener('click', () => moveMark('a', $('take').currentTime, false));
+  $('endHere').addEventListener('click', () => moveMark('b', $('take').currentTime, false));
+  // −1s, −0.1, +0.1, +1s: a tap moves the mark once; held down, it keeps moving, faster than tapping.
+  for (const btn of document.querySelectorAll('.trim .fine [data-by]')) {
+    const step = () => { const which = btn.dataset.mark; moveMark(which, Number($(which === 'a' ? 'tStart' : 'tEnd').value) + Number(btn.dataset.by)); };
+    let wait = 0, again = 0, pressed = false;
+    const stop = () => { clearTimeout(wait); clearInterval(again); wait = again = 0; };
+    btn.addEventListener('pointerdown', () => { pressed = true; step(); stop(); wait = setTimeout(() => { again = setInterval(step, 90); }, 450); });
+    for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) btn.addEventListener(ev, stop);
+    btn.addEventListener('click', () => { if (pressed) { pressed = false; return; } step(); });
+  }
+  // Playing up to a mark stops on it, checked every frame (timeupdate alone comes about four times a second, so
+  // the take ran on past the end by up to a quarter of a second).
+  let stopAt = 0, backTo = null, watching = 0;
+  function stopHear() { cancelAnimationFrame(watching); watching = 0; stopAt = 0; backTo = null; }
+  function checkStop() {
+    const v = $('take');
+    if (!stopAt) return;
+    if (v.paused || v.ended) { stopHear(); return; }
+    if (v.currentTime >= stopAt - 0.012) {
+      v.pause();
+      const back = backTo;
+      stopHear();
+      if (back !== null) v.currentTime = back;
+      return;
+    }
+    cancelAnimationFrame(watching);
+    watching = requestAnimationFrame(checkStop);
+  }
+  function playUntil(from, to, back) {
+    const v = $('take');
+    stopHear();
+    v.currentTime = from;
+    stopAt = to; backTo = back;
+    const p = v.play();
+    if (p && p.catch) p.catch(() => stopHear());
+    watching = requestAnimationFrame(checkStop);
+  }
+  const marks = () => [Number($('tStart').value), Number($('tEnd').value)];
+  // Hear: the start plays two and a half seconds from the mark, the end the two and a half seconds up to it; each
+  // comes back to its mark after, so a nudge and another listen are one tap each.
+  $('hearStart').addEventListener('click', () => { const [a, b] = marks(); playUntil(a, Math.min(a + 2.5, b), a); });
+  $('hearEnd').addEventListener('click', () => { const [a, b] = marks(); playUntil(Math.max(a, b - 2.5), b, b); });
+  $('playTrim').addEventListener('click', () => { const [a, b] = marks(); playUntil(a, b, null); });
+  $('take').addEventListener('timeupdate', checkStop);
 
   function discard() { const v = $('take'); v.pause(); if (v.src) URL.revokeObjectURL(v.src); v.removeAttribute('src'); state.blob = null; }
   $('retake').addEventListener('click', () => { const l = state.lesson; discard(); openLesson(l); });
@@ -1259,7 +1352,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     const meta = {
       name: `${padId(it.lesson)} take ${it.n}.${ext}`,
       parents: [parent],
-      description: `${it.lesson} · ${it.title}\nTake ${it.n}. Start ${fmt(it.a)}, end ${fmt(it.b)}, of ${fmt(it.duration)}.`,
+      description: `${it.lesson} · ${it.title}\nTake ${it.n}. Start ${fmtMark(it.a)}, end ${fmtMark(it.b)}, of ${fmt(it.duration)}.`,
       appProperties: { lesson: it.lesson, seminar: it.sem, take: String(it.n), trimStart: it.a.toFixed(2), trimEnd: it.b.toFixed(2), duration: (it.duration || 0).toFixed(2), recorded: it.recorded },
     };
     if (!signedIn()) throw Object.assign(new Error('Sign in with Google again.'), { auth: true });
@@ -1445,14 +1538,15 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     // Asked once: a phone may then keep the Studio's takes even when it runs short of space.
     if (!sending.asked && navigator.storage && navigator.storage.persist) { sending.asked = true; navigator.storage.persist().catch(() => {}); }
     sending.items.push(it);
+    const trim = `trimmed ${fmtMark(it.a)} to ${fmtMark(it.b)}`;
     $('sendState').textContent = it.stored
-      ? 'Kept on this phone. It goes to your Drive behind you: film the next one.'
-      : 'Kept in this page. It goes to your Drive behind you: keep the Studio open until it has gone.';
+      ? `Kept on this phone, ${trim}. It goes to your Drive behind you with your marks: film the next one.`
+      : `Kept in this page, ${trim}. It goes to your Drive behind you with your marks: keep the Studio open until it has gone.`;
     $('sendState').classList.add('ok');
     discard();
     checkRoom();
     pump();
-    setTimeout(() => { $('sendState').classList.remove('ok'); if (!$('review').hidden) { show('home'); renderHome(); } }, 1200);
+    setTimeout(() => { $('sendState').classList.remove('ok'); if (!$('review').hidden) { show('home'); renderHome(); } }, 1800);
   }
   $('send').addEventListener('click', send);
 
