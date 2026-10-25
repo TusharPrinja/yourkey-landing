@@ -197,6 +197,16 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
 @media (prefers-reduced-motion: reduce) { .cam.waiting .band .mark { animation: none; } }
 /* Until a take starts the timer only says 0:00, so it gives its room to the lesson's number. */
 .cam:not(.live) .timer { display: none; }
+/* Back 10s, while a take records (25 October): big enough to hit without looking away from the lens, just above
+   Record (the bar has no room for it on a small phone), with a thumb's width between them. */
+.back { position: absolute; bottom: calc(100% + 8px); right: max(18px, env(safe-area-inset-right, 0px)); min-width: 72px; min-height: 52px;
+  font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: 0.02em; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+.cam.lens-right .back { right: 14px; }
+.cam:not(.recording) .back { display: none; }
+.backnote { position: absolute; left: 0; right: 0; top: max(12px, env(safe-area-inset-top, 0px)); display: grid; justify-items: center; pointer-events: none; }
+.backnote span { max-width: min(560px, 90%); padding: 8px 14px; border-radius: 6px; background: rgba(5, 6, 7, 0.82); font-size: 15px; text-align: center; }
+.cam.lens-left .backnote { left: var(--col); }
+.cam.lens-right .backnote { right: var(--col); }
 .cam.side .who .t { display: none; }
 
 /* The review: the take, the two marks, and the choice. */
@@ -283,6 +293,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   <video id="preview" playsinline muted autoplay></video>
   <div class="band" id="band" role="region" aria-label="Your words"><div class="mark" id="mark"></div><div class="inner" id="words"></div></div>
   <div class="count" id="count" hidden></div>
+  <div class="backnote" id="backNote" hidden></div>
   <div class="camtop">
     <div class="camrow">
       <span class="mic" id="mic"></span>
@@ -316,6 +327,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       <button class="glassbtn sq" id="faster" type="button" aria-label="Words faster">+</button>
     </div>
     <span class="timer" id="timer">0:00</span>
+    <button class="glassbtn back" id="back" type="button" aria-label="Back ten seconds">↺ 10s</button>
     <button class="rec" id="rec" type="button" aria-label="Record"></button>
   </div>
   <div class="turn" id="turn" hidden>Turn the phone sideways to film</div>
@@ -328,6 +340,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     <h2 id="reviewTitle">The take</h2>
     <p class="state" id="soundState" aria-live="polite"></p>
     <p class="state" id="pictureState"></p>
+    <p class="state" id="backState" hidden></p>
     <div class="trim" aria-label="Trim">
       <label>Start <input type="range" id="tStart" min="0" step="any" value="0"><output id="oStart">0:00.00</output></label>
       <div class="fine" role="group" aria-label="Move the start">
@@ -1055,7 +1068,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     }
     inner.style.transform = 'translateY(0)';
     $('timer').textContent = '0:00'; $('timer').classList.remove('live'); $('rec').classList.remove('on'); $('rec').setAttribute('aria-label', 'Record');
-    roll = { pos: 0, total: 1, playing: false, last: 0, raf: 0, done: false };
+    roll = { pos: 0, total: 1, playing: false, last: 0, raf: 0, done: false, trail: [], noted: 0, offset: 0, resume: null };
     live(false); syncSettings();
     show('camera'); checkTurn(); layoutWords();
     // The column's width comes from the letters as drawn, so lay it out again once the typeface is in.
@@ -1069,12 +1082,21 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     const seconds = (state.lesson.words / state.settings.wpm) * 60;
     roll.pos = Math.min(roll.total, roll.pos + (roll.total / Math.max(1, seconds)) * dt);
     $('words').style.transform = `translateY(${-roll.pos}px)`;
+    // Where the words stood, a tenth of a second apart, so Back 10s knows where they were ten seconds ago: on the
+    // take's clock (t), and on the lesson's as it will play once the edit cuts each time back (k). The first step
+    // after a time back picks the lesson's clock up where the words went back to.
+    if (startedAt && t - roll.noted >= 100) {
+      roll.noted = t;
+      const now = recNow();
+      if (roll.resume) { roll.offset = now - roll.resume.k; roll.trail.push({ t: now, k: roll.resume.k, pos: roll.resume.pos }); roll.resume = null; }
+      else roll.trail.push({ t: now, k: now - roll.offset, pos: roll.pos });
+    }
     if (roll.pos >= roll.total && !roll.done) { roll.done = true; roll.playing = false; wordsEnded(); return; }
     roll.raf = requestAnimationFrame(rollStep);
   }
   function playRoll() { if (!roll || roll.done) return; roll.playing = true; roll.last = 0; roll.raf = requestAnimationFrame(rollStep); }
   function pauseRoll() { if (!roll) return; roll.playing = false; cancelAnimationFrame(roll.raf); }
-  $('band').addEventListener('click', () => { if (!roll || !recorder || recorder.state !== 'recording') return; roll.playing ? pauseRoll() : playRoll(); });
+  $('band').addEventListener('click', () => { if (!roll || !recorder || recorder.state !== 'recording' || backing) return; roll.playing ? pauseRoll() : playRoll(); });
   function wordsEnded() { if (state.settings.autostop && recorder && recorder.state === 'recording') holdTimer = setTimeout(stopRecording, HOLD_AFTER_WORDS); }
 
   /**
@@ -1144,10 +1166,94 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     sound.take = { bins: new Uint32Array(141), frames: 0, caught: 0 };
     sound.takeMixed = recorded === sound.mixed;
     startedAt = performance.now();
+    state.rewinds = []; backing = null;
     $('rec').classList.add('on'); $('rec').setAttribute('aria-label', 'Stop'); $('timer').classList.add('live');
+    $('camera').classList.add('recording');
     tick = setInterval(() => { $('timer').textContent = fmtShort((performance.now() - startedAt) / 1000); }, 250);
-    roll.pos = 0; roll.done = false; $('words').style.transform = 'translateY(0)'; layoutWords(); rollWhenTalking();
+    roll.pos = 0; roll.done = false; roll.trail = [{ t: 0, k: 0, pos: 0 }]; roll.noted = 0; roll.offset = 0; roll.resume = null;
+    $('words').style.transform = 'translateY(0)'; layoutWords(); rollWhenTalking();
   }
+
+  // ── Back 10s ────────────────────────────────────────────────────────────
+  /**
+   * Back 10s (his ask, 25 October: "instead of restarting the whole video, I just go back by 10 seconds"): while a
+   * take records, the words go back to the start of the sentence they showed ten seconds before, a countdown shows,
+   * and they wait for his voice again; each tap during the countdown goes ten seconds further back. Ten seconds of
+   * the lesson as it will play: what an earlier time back cut doesn't count, so two taps in a row, or one just after
+   * starting again, never land past where he is. The take keeps recording all the while, and each time back goes to
+   * Drive with it ("Back at 1:10.20 to 1:00.40, again 1:15.80."), so the edit cuts from his first go at that
+   * sentence to his second and the lesson plays as one take.
+   */
+  const BACK_BY = 10, BACK_COUNT = 5;
+  let backing = null;
+  const recNow = () => (performance.now() - startedAt) / 1000;
+  /** The lesson's clock now: still at the sentence he went back to until the words roll again. */
+  const keptNow = () => (roll.resume ? roll.resume.k : recNow() - roll.offset);
+  const firstWords = (s) => String(s || '').trim().split(/\s+/).slice(0, 8).join(' ');
+  /** Where the words stood at a moment of the lesson's clock: the last place noted at or before it. */
+  function posAt(k) {
+    let pos = 0;
+    for (const s of roll.trail) { if (s.k > k) break; pos = s.pos; }
+    return pos;
+  }
+  /** The sentence at the reading mark when the words stood at `pos`, and the place that puts its first line there. */
+  function sentenceAt(pos) {
+    const inner = $('words');
+    const top = inner.getBoundingClientRect().top;
+    const half = (state.settings.size * 1.32) / 2;
+    let found = null;
+    for (const el of inner.querySelectorAll('.sent')) {
+      const y = el.getBoundingClientRect().top - top;
+      if (y <= pos + half) found = { el, y }; else break;
+    }
+    return found || { el: inner.querySelector('.sent'), y: 0 };
+  }
+  /** When the words came to `pos` in the lesson as it will play, before `before` on its clock: the trail keeps only
+   *  what stays, so it only ever moves on, and the first place at or past `pos` is when he got there. */
+  function reachedAt(pos, before) {
+    for (const s of roll.trail) { if (s.k > before) break; if (s.pos >= pos - 1) return s; }
+    return roll.trail.length ? roll.trail[roll.trail.length - 1] : { t: 0, k: 0, pos: 0 };
+  }
+  function goBack() {
+    if (!recorder || recorder.state !== 'recording' || !roll) return;
+    clearTimeout(holdTimer);
+    const now = recNow();
+    const from = backing ? backing.from : keptNow();
+    const target = Math.max(0, (backing ? backing.target : from) - BACK_BY);
+    const { el, y } = sentenceAt(posAt(target));
+    const pos = Math.max(0, Math.min(y, roll.total));
+    pauseRoll(); $('camera').classList.remove('waiting');
+    roll.pos = pos; roll.done = false;
+    $('words').style.transform = `translateY(${-pos}px)`;
+    const reached = reachedAt(pos, from);
+    backing = { at: backing ? backing.at : now, from, target, pos, to: reached.t, toK: Math.min(reached.k, from), seq: (backing ? backing.seq : 0) + 1 };
+    const note = document.createElement('span');
+    note.textContent = `Back to “${firstWords(el && el.textContent)}…” · tap again for ten more seconds`;
+    $('backNote').replaceChildren(note); $('backNote').hidden = false;
+    backCount(backing.seq);
+  }
+  async function backCount(seq) {
+    const c = $('count');
+    c.hidden = false;
+    for (let i = BACK_COUNT; i > 0; i--) {
+      if (!backing || backing.seq !== seq) return;
+      c.textContent = String(i);
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    if (backing && backing.seq === seq) endBack();
+  }
+  /** The time back noted, and the lesson's clock taken back to the sentence: what came after it is cut. The words
+   *  roll again once he talks (or the take stopped mid-countdown). */
+  function endBack(stopped = false) {
+    if (!backing) return;
+    state.rewinds.push({ at: backing.at, to: backing.to, again: recNow() });
+    roll.trail = roll.trail.filter((s) => s.k < backing.toK);
+    roll.resume = { k: backing.toK, pos: backing.pos };
+    backing = null;
+    $('count').hidden = true; $('backNote').hidden = true;
+    if (!stopped) rollWhenTalking();
+  }
+  $('back').addEventListener('click', () => { wakeSound(); goBack(); });
   /**
    * The words wait for him: they start once he has been talking for a moment, so a breath, a smile or a clap
    * at the start never puts him behind (21 October: the words had started with the recording). Talking is
@@ -1171,7 +1277,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     requestAnimationFrame(watch);
   }
   function stopRecording() {
-    clearTimeout(holdTimer); clearInterval(tick); pauseRoll(); live(false); $('camera').classList.remove('waiting');
+    if (backing) endBack(true);
+    clearTimeout(holdTimer); clearInterval(tick); pauseRoll(); live(false); $('camera').classList.remove('waiting', 'recording');
     sound.last = sound.take; sound.lastMixed = sound.takeMixed; sound.take = null;
     if (recorder && recorder.state === 'recording') { state.elapsed = (performance.now() - startedAt) / 1000; recorder.stop(); }
   }
@@ -1182,6 +1289,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   });
   $('camBack').addEventListener('click', () => {
     state.counting = false;
+    backing = null; $('backNote').hidden = true; $('count').hidden = true; $('camera').classList.remove('recording');
     if (recorder && recorder.state === 'recording') { recorder.onstop = null; recorder.stop(); clearInterval(tick); }
     sound.take = null;
     pauseRoll(); live(false); unlockScreen(); show('home'); renderHome();
@@ -1209,6 +1317,11 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     $('soundState').textContent = takeSaid();
     $('soundState').classList.toggle('ok', $('soundState').textContent === 'Sound: good.');
     $('pictureState').textContent = `Picture: ${pictureSaid(state.recordedAs || type)} · ${Math.max(1, Math.round(state.blob.size / 1e6))} MB`;
+    // Each time back stays in the take here; the edit cuts from his first go at the sentence to his second.
+    state.takeRewinds = (state.rewinds || []).slice();
+    const backs = state.takeRewinds.length;
+    $('backState').hidden = !backs;
+    $('backState').textContent = backs ? `Back ${backs === 1 ? 'once' : `${backs} times`} (${state.takeRewinds.map((r) => fmtShort(r.at)).join(', ')}): the fumbles stay in the take here, and the edit cuts them out.` : '';
     $('sendState').textContent = signedIn() ? '' : 'Not signed in to Google: Send will ask you to sign in.';
     $('progress').hidden = true; $('send').disabled = false; $('retake').disabled = false;
     show('review');
@@ -1349,11 +1462,13 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     const ahead = sending.items.slice(0, sending.items.indexOf(it)).filter((x) => x.sem === it.sem && x.lesson === it.lesson && x.session).length;
     it.n = Math.max(it.n || 1, (takes[it.lesson] || []).length + ahead + 1);
     const ext = it.type.includes('webm') ? 'webm' : 'mp4';
+    // Each time back, short, after the marks, for the edit to cut: "Back at 1:10.20 to 1:00.40, again 1:15.80."
+    const backs = (it.rewinds || []).map((r) => `Back at ${fmtMark(r.at)} to ${fmtMark(r.to)}, again ${fmtMark(r.again)}.`).join(' ');
     const meta = {
       name: `${padId(it.lesson)} take ${it.n}.${ext}`,
       parents: [parent],
-      description: `${it.lesson} · ${it.title}\nTake ${it.n}. Start ${fmtMark(it.a)}, end ${fmtMark(it.b)}, of ${fmt(it.duration)}.`,
-      appProperties: { lesson: it.lesson, seminar: it.sem, take: String(it.n), trimStart: it.a.toFixed(2), trimEnd: it.b.toFixed(2), duration: (it.duration || 0).toFixed(2), recorded: it.recorded },
+      description: `${it.lesson} · ${it.title}\nTake ${it.n}. Start ${fmtMark(it.a)}, end ${fmtMark(it.b)}, of ${fmt(it.duration)}.${backs ? ` ${backs}` : ''}`,
+      appProperties: { lesson: it.lesson, seminar: it.sem, take: String(it.n), trimStart: it.a.toFixed(2), trimEnd: it.b.toFixed(2), duration: (it.duration || 0).toFixed(2), recorded: it.recorded, backs: String((it.rewinds || []).length) },
     };
     if (!signedIn()) throw Object.assign(new Error('Sign in with Google again.'), { auth: true });
     const start = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name', {
@@ -1530,6 +1645,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       sem: state.sem, lesson: state.lesson.id, title: state.lesson.title, n: state.takeNo || 1,
       type: blob.type || 'video/mp4', size: blob.size, a: Number($('tStart').value), b: Number($('tEnd').value),
       duration: state.duration, recorded: new Date().toISOString(), session: null, sent: 0, blob, stored: false,
+      rewinds: (state.takeRewinds || []).map((r) => ({ at: r.at, to: r.to, again: r.again })),
     };
     try { await idb.keep(recordOf(it), blob); it.stored = true; } catch (e) { it.stored = false; }
     // Read back, the take is a file on the phone, and the copy in memory can go: a queue of 4K takes held in
@@ -1538,7 +1654,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     // Asked once: a phone may then keep the Studio's takes even when it runs short of space.
     if (!sending.asked && navigator.storage && navigator.storage.persist) { sending.asked = true; navigator.storage.persist().catch(() => {}); }
     sending.items.push(it);
-    const trim = `trimmed ${fmtMark(it.a)} to ${fmtMark(it.b)}`;
+    const trim = `trimmed ${fmtMark(it.a)} to ${fmtMark(it.b)}${it.rewinds.length ? `, ${it.rewinds.length === 1 ? 'one time' : `${it.rewinds.length} times`} back for the edit to cut` : ''}`;
     $('sendState').textContent = it.stored
       ? `Kept on this phone, ${trim}. It goes to your Drive behind you with your marks: film the next one.`
       : `Kept in this page, ${trim}. It goes to your Drive behind you with your marks: keep the Studio open until it has gone.`;
