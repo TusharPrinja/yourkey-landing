@@ -8,7 +8,7 @@
 // reload. This films takes with Chromium's fake camera and checks: the parts reach the store as it records; a reload at
 // the review opens the same take's review again, saying it was kept; a reload in the middle of a take keeps what was
 // filmed; a second tap on Stop starts nothing; Retake and Lessons each need a second tap to throw a take away, and then
-// it leaves the store; Send puts it in the queue and lets the kept copy go.
+// it leaves the store; Send puts it in the queue as it is (no second copy), and it leaves the store once Drive holds it.
 //
 // (The rest of this header was the Back 10s check's, which this one is built from.)
 //
@@ -181,7 +181,7 @@ const check = (name, ok, seen) => { results.push({ name, ok: !!ok, seen }); cons
   const size3 = await page.evaluate(() => { const v = document.getElementById('take'); return v.src ? fetch(v.src).then((r) => r.blob()).then((b) => b.size) : 0; });
   check('a reload in the middle of a take opens its review with what was filmed', mid.shown && /S1\.1 · take 1 · 0:0[4-7]/.test(mid.title) && size3 > 10000, { mid, size3 });
 
-  // 5. Send: the queue holds its own copy, and the kept take leaves the store.
+  // 5. Send: the queue points at the take kept as it recorded, and it leaves the store once Drive holds all of it.
   await page.click('#send');
   await page.waitForSelector('#home:not([hidden])', { timeout: 15000 });
   await page.waitForFunction(() => /All sent/.test(document.getElementById('sendingState').textContent), null, { timeout: 60000 });

@@ -5,7 +5,11 @@
 // The Studio (public/studio/index.html) keeps each take on the phone and sends the kept takes to Drive one at a
 // time behind him. This films takes with Chromium's fake camera and sends them to a fake Drive that is slow, drops
 // the connection mid-take, loses a session and is reloaded part-way through, then checks that every take arrived
-// byte for byte, in order, numbered right, and that nothing is left on the phone. It serves the page itself and
+// byte for byte, in order, numbered right, and that nothing is left on the phone. Since 26 October it also starts the
+// next lesson's take while the last is still sending (that take's seconds stay on the phone until Drive holds all of
+// it), has Drive refuse one take over and over (it goes behind the others), brings back a take kept before that day
+// and one whose seconds are gone (named, to film again), and renews a sign-in with under twenty minutes left at Send.
+// It serves the page itself and
 // pastes made-up lessons, so it needs no scripts and no Google account. Needs Chromium and playwright-core (the
 // paths below are the cloud container's; PLAYWRIGHT_CORE and CHROMIUM override them).
 const { chromium } = require(process.env.PLAYWRIGHT_CORE || '/opt/node-tools/node_modules/playwright-core');
@@ -23,7 +27,8 @@ const SCRIPTS = JSON.stringify(Object.fromEntries(Object.entries(NAMES).map(([k,
 const PAGE = fs.readFileSync(path.join(__dirname, '..', 'public', 'studio', 'index.html'), 'utf8')
   .replace('const CHUNK = 8 * 1024 * 1024;', 'const CHUNK = 64 * 1024;'); // small pieces, so a short take has several
 
-const drive = { folders: [], files: [], sessions: {}, seq: 0, log: [], errors: [], dropAt: new Set(), expire: new Set(), delay: 120, paused: false, full: false };
+const drive = { folders: [], files: [], sessions: {}, seq: 0, log: [], errors: [], dropAt: new Set(), expire: new Set(), delay: 120, paused: false, full: false,
+  failNext: false, failing: new Set() };
 // Google's reply when the Drive has no room left.
 const FULL = { error: { code: 403, message: "The user's Drive storage quota has been exceeded.", errors: [{ domain: 'usageLimits', reason: 'storageQuotaExceeded' }] } };
 const cors = { 'access-control-allow-origin': '*', 'access-control-expose-headers': 'Location, Range', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'GET, POST, PUT, OPTIONS' };
@@ -62,6 +67,7 @@ async function googleApi(route) {
     if (!into || !mine(into)) { drive.log.push(`no such folder for ${who}`); return json(route, { error: { code: 404, message: 'File not found.' } }, 404); }
     const sid = `s${++drive.seq}`;
     drive.sessions[sid] = { meta, owner: who, size: Number(req.headers()['x-upload-content-length']), got: [], received: 0, puts: 0 };
+    if (drive.failNext) { drive.failNext = false; drive.failing.add(sid); }
     drive.log.push(`session ${sid} ${meta.name}`);
     return route.fulfill({ status: 200, headers: { ...cors, location: `https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&upload_id=${sid}` }, body: '' });
   }
@@ -70,6 +76,7 @@ async function googleApi(route) {
     const s = drive.sessions[sid];
     if (!s || drive.expire.has(sid)) { drive.log.push(`gone ${sid}`); return json(route, { error: 'gone' }, 404); }
     while (drive.paused) await wait(50);
+    if (drive.failing.has(sid)) { drive.log.push(`503 ${sid}`); return json(route, { error: { code: 503, message: 'Backend Error' } }, 503); }
     const range = req.headers()['content-range'];
     const status = /^bytes \*\/(\d+)$/.exec(range);
     const has = () => (s.received ? { range: `bytes=0-${s.received - 1}` } : {});
@@ -118,27 +125,27 @@ async function googleApi(route) {
     window.google = { accounts: { oauth2: { initTokenClient(cfg) {
       return { requestAccessToken(o) {
         (window.__prompts = window.__prompts || []).push((o && o.prompt) || '');
-        setTimeout(() => (window.__signIn === 'yes' ? cfg.callback({ access_token: sessionStorage.getItem('test:account') || 'tok', expires_in: 3600 }) : cfg.error_callback({ type: 'popup_closed' })), 20);
+        setTimeout(() => (window.__signIn === 'yes' ? cfg.callback({ access_token: sessionStorage.getItem('test:account') || 'tok', expires_in: window.__expiresIn || 3600 }) : cfg.error_callback({ type: 'popup_closed' })), 20);
       } };
     } } } };
-    // A fingerprint of each take the page keeps, across reloads, so the test can check Drive got each one exactly.
-    const keep = IDBObjectStore.prototype.put;
-    IDBObjectStore.prototype.put = function (v, k) {
-      if (v instanceof Blob && this.name === 'blobs') {
+    // A fingerprint of each take as its review plays it, across reloads, so the test can check Drive got each one exactly.
+    const url = URL.createObjectURL;
+    URL.createObjectURL = function (v) {
+      if (v instanceof Blob && /^video\//.test(v.type)) {
         v.arrayBuffer().then((b) => crypto.subtle.digest('SHA-256', b)).then((d) => {
           const all = JSON.parse(localStorage.getItem('test:kept') || '[]');
           all.push({ size: v.size, sha: [...new Uint8Array(d)].map((x) => x.toString(16).padStart(2, '0')).join('') });
           localStorage.setItem('test:kept', JSON.stringify(all));
         });
       }
-      return keep.call(this, v, k);
+      return url.call(URL, v);
     };
   });
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
-  // The fake Drive's refusals on purpose (a session gone, a dropped piece, a full Drive) show in the console too.
-  page.on('console', (m) => { if (m.type() === 'error' && !/ERR_CONNECTION_RESET|net::ERR_FAILED|status of 40[34]/.test(m.text())) errors.push(m.text()); });
+  // The fake Drive's refusals on purpose (a session gone, a dropped piece, a full Drive, a 503) show in the console too.
+  page.on('console', (m) => { if (m.type() === 'error' && !/ERR_CONNECTION_RESET|net::ERR_FAILED|status of 40[34]|status of 503/.test(m.text())) errors.push(m.text()); });
   await page.route('https://accounts.google.com/**', (r) => r.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
   await page.route('https://www.googleapis.com/**', googleApi);
   await page.goto(URL_);
@@ -173,6 +180,23 @@ async function googleApi(route) {
     return ms;
   }
   const card = () => page.$eval('#sending', (e) => (e.hidden ? '(hidden)' : e.innerText.replace(/\s+/g, ' ').trim()));
+  const driveLine = () => page.$eval('#driveLine', (e) => (e.hidden ? '(hidden)' : `${e.textContent}${e.classList.contains('bad') ? ' [red]' : e.classList.contains('ok') ? ' [green]' : ''}`));
+  const allSent = (timeout = 120000) => page.waitForFunction(() => /All sent/.test(document.getElementById('sendingState').textContent), null, { timeout });
+  // Each take waiting in the queue, and how many of its seconds are on the phone.
+  const queued = () => page.evaluate(() => new Promise((resolve) => {
+    const r = indexedDB.open('studio');
+    r.onsuccess = () => {
+      const db = r.result;
+      const t = db.transaction(['queue', 'live']);
+      const recs = t.objectStore('queue').getAll();
+      const keys = t.objectStore('live').getAllKeys();
+      t.oncomplete = () => {
+        const ks = keys.result || [];
+        resolve((recs.result || []).map((x) => ({ lesson: x.lesson, parts: x.parts, have: x.liveKey ? ks.filter((k) => k[0] === x.liveKey).length : -1 })));
+        db.close();
+      };
+    };
+  }));
 
   // 1. Two lessons back to back while the first is still sending; the second take of a lesson is take 2.
   drive.delay = 300;
@@ -190,6 +214,43 @@ async function googleApi(route) {
   step('all sent', { card: await card(), files: drive.files.map((f) => `${f.name} ${f.size} ${JSON.stringify(f.appProperties)}`) });
   await page.screenshot({ path: path.join(OUT, 'sent-home.png') });
 
+  // 1b. The next lesson's take starts while the last is still sending (26 October: when the phone's second copy of a
+  // take failed, starting the next one threw that take's seconds away, and five takes never reached Drive). Drive is
+  // held so the first take is still waiting: its seconds must all be on the phone while the next records, and both go.
+  const beforeB = drive.files.length;
+  await film(3, 4);
+  drive.paused = true;
+  await page.click('#send');
+  await page.waitForSelector('#camera:not([hidden])', { timeout: 10000 });
+  await page.click('#rec');
+  await page.waitForFunction(() => document.getElementById('rec').classList.contains('on'), null, { timeout: 15000 });
+  await page.waitForTimeout(3000);
+  const whileB = await queued();
+  const lineB = await driveLine();
+  await page.screenshot({ path: path.join(OUT, 'drive-line-recording.png') });
+  await page.click('#rec');
+  await page.waitForSelector('#review:not([hidden])', { timeout: 15000 });
+  drive.paused = false;
+  await sendAndTime();
+  await allSent(180000);
+  step('next take while sending', { whileB, lineB, files: drive.files.length - beforeB, lineAfter: await driveLine(), left: await queued() });
+
+  // 1c. A take Drive keeps refusing (503) goes behind the others, so it never holds them up (26 October: one take stuck
+  // at 0% kept five waiting behind it), and goes once Drive takes it.
+  const beforeC = drive.files.length;
+  drive.failNext = true;
+  await film(5, 3);
+  await sendAndTime();
+  await film(6, 3);
+  await sendAndTime();
+  for (let i = 0; i < 600 && !drive.files.some((f) => f.appProperties.lesson === 'S1.6'); i++) await wait(100);
+  const passed = drive.files.some((f) => f.appProperties.lesson === 'S1.6') && !drive.files.some((f) => f.appProperties.lesson === 'S1.5');
+  const card503 = await card();
+  drive.failing.clear();
+  await page.evaluate(() => window.dispatchEvent(new Event('online')));
+  await allSent();
+  step('a refused take goes behind', { passed, card503, files: drive.files.length - beforeC, order: drive.log.filter((l) => /^done/.test(l)).slice(-2), refused: drive.log.filter((l) => /^503/.test(l)).length });
+
   // 2. The connection drops in the middle of a take: it picks up where Drive got to.
   const before = drive.files.length;
   await film(3, 4);
@@ -198,6 +259,42 @@ async function googleApi(route) {
   await sendAndTime();
   await page.waitForFunction((n) => /All sent/.test(document.getElementById('sendingState').textContent), null, { timeout: 120000 });
   step('dropped twice, then sent', { files: drive.files.length - before, log: drive.log.filter((l) => /drop|ask/.test(l)).slice(-6), sid2 });
+
+  // 2b. After the update: a take kept the old way (a whole copy, before 26 October) still goes, and a take whose
+  // seconds are gone from the phone is named, to film again. Until Drive is read, the seminar says what waits on the
+  // phone, never "filmed" (26 October: "6 of 80 filmed" with 58 lessons in Drive).
+  await page.evaluate(async () => {
+    const bytes = new Uint8Array(300 * 1024);
+    for (let i = 0; i < bytes.length; i += 65536) crypto.getRandomValues(bytes.subarray(i, Math.min(bytes.length, i + 65536)));
+    const blob = new Blob([bytes], { type: 'video/mp4' });
+    const d = await crypto.subtle.digest('SHA-256', await blob.arrayBuffer());
+    const all = JSON.parse(localStorage.getItem('test:kept') || '[]');
+    all.push({ size: blob.size, sha: [...new Uint8Array(d)].map((x) => x.toString(16).padStart(2, '0')).join('') });
+    localStorage.setItem('test:kept', JSON.stringify(all));
+    const db = await new Promise((res) => { const r = indexedDB.open('studio'); r.onsuccess = () => res(r.result); });
+    const now = Date.now();
+    const rec = { key: 'old-1', made: now - 60000, sem: 'sales', lesson: 'S1.7', title: 'Lesson 7', n: 1, type: 'video/mp4', size: blob.size, a: 0.5, b: 2.5, duration: 3,
+      recorded: new Date(now - 60000).toISOString(), session: null, sent: 0, rewinds: [] };
+    const gone = { ...rec, key: 'gone-1', made: now - 30000, lesson: 'S1.6', title: 'Lesson 6', liveKey: 'no-such-take', parts: 3, size: 123456 };
+    await new Promise((res, rej) => {
+      const t = db.transaction(['queue', 'blobs'], 'readwrite');
+      t.objectStore('blobs').put(blob, rec.key); t.objectStore('queue').put(rec, rec.key); t.objectStore('queue').put(gone, gone.key);
+      t.oncomplete = res; t.onerror = rej;
+    });
+    db.close();
+  });
+  await page.reload();
+  await page.waitForSelector('#home:not([hidden]), #setup:not([hidden])');
+  if (await page.isVisible('#setup')) await page.click('#toLessons');
+  await page.waitForFunction(() => !document.getElementById('sendingRow').hidden, null, { timeout: 20000 });
+  const oldCard = await card();
+  const semBefore = await page.$eval('.sem', (e) => e.innerText.replace(/\s+/g, ' ').trim());
+  const lostLine = await driveLine();
+  await page.click('#sendingSignIn');
+  await allSent();
+  await page.waitForFunction(() => /filmed/.test(document.querySelector('.sem').innerText), null, { timeout: 10000 });
+  const semAfter = await page.$eval('.sem', (e) => e.innerText.replace(/\s+/g, ' ').trim());
+  step('old take and a lost one', { oldCard, semBefore, lostLine, semAfter, cardAfter: await card(), landed: drive.files.some((f) => f.appProperties.lesson === 'S1.7' && f.size === 300 * 1024) });
 
   // 3. A reload in the middle of a take: the take is still on the phone and carries on from where Drive got to.
   drive.delay = 400;
@@ -213,6 +310,7 @@ async function googleApi(route) {
   const afterReload = await card();
   await page.waitForFunction(() => /All sent/.test(document.getElementById('sendingState').textContent), null, { timeout: 120000 });
   step('reloaded mid-take', { atReload, afterReload, log: drive.log.slice(-4) });
+
 
   // 4. Signed out, and the session gone (a week old): the take waits for Google, then goes with a new session.
   await film(5, 3);
@@ -265,10 +363,25 @@ async function googleApi(route) {
   const newRoot = drive.folders.filter((f) => f.owner === 'tok2').map((f) => f.name);
   step('another account', { prompt, newRoot, theirs: theirs.map((f) => f.name), log: drive.log.slice(-3) });
 
+  // 4e. A sign-in with under twenty minutes left is renewed at Send, from that tap (a sign-in lasts an hour, and a take
+  // sent after it ran out waited for Google out of his sight).
+  await page.evaluate(() => { window.__expiresIn = 900; });
+  await page.click('#toSetup');
+  await page.click('#signIn');
+  await page.waitForFunction(() => /Signed in/.test(document.getElementById('googleState').textContent), null, { timeout: 10000 });
+  await page.click('#toLessons');
+  await page.evaluate(() => { window.__expiresIn = 3600; });
+  const asked0 = await page.evaluate(() => window.__prompts.length);
+  await film(2, 3);
+  await sendAndTime();
+  await allSent();
+  const asked1 = await page.evaluate(() => window.__prompts.length);
+  step('sign-in renewed at Send', { asked: asked1 - asked0 });
+
   // 5. Every take Drive holds is byte for byte the take the phone kept, and nothing is left on the phone.
   await wait(500);
   const kept = await page.evaluate(() => JSON.parse(localStorage.getItem('test:kept') || '[]'));
-  const left = await page.evaluate(() => new Promise((res) => { const r = indexedDB.open('studio'); r.onsuccess = () => { const t = r.result.transaction(['queue', 'blobs']); const a = t.objectStore('queue').count(); const b = t.objectStore('blobs').count(); t.oncomplete = () => res({ queue: a.result, blobs: b.result }); }; }));
+  const left = await page.evaluate(() => new Promise((res) => { const r = indexedDB.open('studio'); r.onsuccess = () => { const t = r.result.transaction(['queue', 'blobs', 'live', 'kv']); const a = t.objectStore('queue').count(); const b = t.objectStore('blobs').count(); const c = t.objectStore('live').count(); const d = t.objectStore('kv').get('live'); t.oncomplete = () => res({ queue: a.result, blobs: b.result, live: c.result, reviewing: !!d.result }); }; }));
   const sameBytes = drive.files.every((f) => kept.some((k) => k.sha === f.sha && k.size === f.size));
   step('bytes', { driveFiles: drive.files.length, keptOnPhone: kept.length, sameBytes, leftOnPhone: left, serverErrors: drive.errors });
   report.pageErrors = errors;
@@ -279,8 +392,23 @@ async function googleApi(route) {
   console.log('files:', JSON.stringify(report.files, null, 1));
   await browser.close();
   server.close();
-  const ok = errors.length === 0 && drive.errors.every((e) => /Drive had/.test(e)) && report.steps.find((s) => s.name === 'bytes').sameBytes
-    && report.steps.find((s) => s.name === 'bytes').leftOnPhone.queue === 0 && report.files.length === 9
+  const st = (n) => report.steps.find((s) => s.name === n);
+  const lost = st('old take and a lost one');
+  const checks = {
+    'the take sending kept all its seconds on the phone while the next recorded': st('next take while sending').whileB.some((x) => x.lesson === 'S1.3' && x.parts > 0 && x.have === x.parts),
+    'the camera said it was sending, while recording': /^Drive ↑ S1\.3 \d+%/.test(st('next take while sending').lineB),
+    'both reached Drive, the camera then said all sent': st('next take while sending').files === 2 && /Drive ✓ all sent \[green\]/.test(st('next take while sending').lineAfter),
+    'a refused take let the next go past it, then went': st('a refused take goes behind').passed && st('a refused take goes behind').files === 2 && st('a refused take goes behind').refused > 0
+      && /S01\.06/.test(st('a refused take goes behind').order[0]) && /S01\.05/.test(st('a refused take goes behind').order[1]),
+    'a take kept before the update still went': lost.landed,
+    'a take whose seconds are gone is named, on the card and the camera': /S1\.6 isn’t on this phone any more: film it again/.test(lost.oldCard) && /S1\.6 lost: film again \[red\]/.test(lost.lostLine),
+    'before Drive is read the seminar says what waits on the phone, then the lessons filmed': /8 lessons · 1 on this phone/.test(lost.semBefore) && /\d+ of 8 filmed/.test(lost.semAfter),
+    'a short sign-in renewed at Send': st('sign-in renewed at Send').asked === 1,
+    'nothing left on the phone': st('bytes').leftOnPhone.queue === 0 && st('bytes').leftOnPhone.blobs === 0 && st('bytes').leftOnPhone.live === 0 && !st('bytes').leftOnPhone.reviewing,
+  };
+  for (const [k, v] of Object.entries(checks)) console.log(`${v ? 'ok  ' : 'FAIL'} ${k}`);
+  const ok = errors.length === 0 && drive.errors.every((e) => /Drive had/.test(e)) && st('bytes').sameBytes && Object.values(checks).every(Boolean)
+    && report.files.length === 15
     && /select_account/.test(report.steps.find((s) => s.name === 'another account').prompt)
     && report.steps.find((s) => s.name === 'another account').theirs.length === 1
     && report.steps.find((s) => s.name === 'another account').newRoot.join() === 'Your Key seminars,Sales'
