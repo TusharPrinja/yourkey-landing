@@ -203,11 +203,23 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: 0.02em; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
 .cam.lens-right .back { right: 14px; }
 .cam:not(.recording) .back { display: none; }
-.backnote { position: absolute; left: 0; right: 0; top: max(12px, env(safe-area-inset-top, 0px)); display: grid; justify-items: center; pointer-events: none; }
+.backnote { position: absolute; left: 0; right: 0; top: calc(max(12px, env(safe-area-inset-top, 0px)) + 40px); display: grid; justify-items: center; pointer-events: none; }
 .backnote span { max-width: min(560px, 90%); padding: 8px 14px; border-radius: 6px; background: rgba(5, 6, 7, 0.82); font-size: 15px; text-align: center; }
 .cam.lens-left .backnote { left: var(--col); }
 .cam.lens-right .backnote { right: var(--col); }
 .cam.side .who .t { display: none; }
+/* The lesson being filmed, over the top of the picture while a take records (25 October, his ask: "have the video
+   thing like S7.4 next to the video as recording so I know it's the next one"). */
+.liveid { position: absolute; top: max(10px, env(safe-area-inset-top, 0px)); left: 14px; display: none; padding: 5px 10px; border-radius: 6px;
+  background: rgba(5, 6, 7, 0.82); font-family: var(--mono); font-size: 15px; color: var(--glass-fg); pointer-events: none; white-space: nowrap; }
+.cam.live .liveid { display: block; }
+.cam.lens-left .liveid { left: calc(var(--col) + 14px); }
+.cam.lens-right .liveid { left: max(14px, env(safe-area-inset-left, 0px)); }
+/* After Send, the next lesson opens with the take just kept said over it for a few seconds. */
+.keptnote { position: absolute; left: 0; right: 0; bottom: 96px; display: grid; justify-items: center; pointer-events: none; }
+.keptnote span { max-width: min(560px, 90%); padding: 8px 14px; border-radius: 6px; background: rgba(5, 6, 7, 0.86); font-size: 15px; text-align: center; }
+.cam.lens-left .keptnote { left: var(--col); }
+.cam.lens-right .keptnote { right: var(--col); }
 
 /* The review: the take, the two marks, and the choice. */
 .review video { width: 100%; max-height: 52vh; background: #000; border-radius: 6px; display: block; }
@@ -294,6 +306,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   <div class="band" id="band" role="region" aria-label="Your words"><div class="mark" id="mark"></div><div class="inner" id="words"></div></div>
   <div class="count" id="count" hidden></div>
   <div class="backnote" id="backNote" hidden></div>
+  <div class="liveid" id="liveId"></div>
+  <div class="keptnote" id="keptNote" hidden></div>
   <div class="camtop">
     <div class="camrow">
       <span class="mic" id="mic"></span>
@@ -1083,6 +1097,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     wakeSound();
     state.lesson = l;
     $('who').innerHTML = `<b>${l.id}</b><span class="t"></span>`; $('who').querySelector('.t').textContent = l.title;
+    const takeN = ((state.takes[state.sem] || {})[l.id] || []).length + queuedFor(state.sem, l.id) + 1;
+    $('liveId').textContent = `${l.id} · take ${takeN}`;
     const inner = $('words'); inner.replaceChildren();
     // Each sentence starts on its own line, so where one ends shows before he reaches it (21 October: he
     // sometimes read the end of a sentence as if it were the start of one).
@@ -1193,7 +1209,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     sound.take = { bins: new Uint32Array(141), frames: 0, caught: 0 };
     sound.takeMixed = recorded === sound.mixed;
     startedAt = performance.now();
-    state.rewinds = []; backing = null;
+    state.rewinds = []; backing = null; $('keptNote').hidden = true;
     $('rec').classList.add('on'); $('rec').setAttribute('aria-label', 'Stop'); $('timer').classList.add('live');
     $('camera').classList.add('recording');
     // The recorder asked for what it holds each second as well, since some only hand it over at the end: each second is
@@ -1771,7 +1787,22 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     if (it.stored) forgetLive();
     checkRoom();
     pump();
-    setTimeout(() => { $('sendState').classList.remove('ok'); if (!$('review').hidden) { show('home'); renderHome(); } }, 1800);
+    // Straight on to the next lesson (25 October, his ask: "once I click add to drive the next video page starts
+    // instead of me going back to home page"), the take just kept said over its camera for a few seconds.
+    const list = (state.scripts && state.scripts[it.sem]) || [];
+    const next = list[list.findIndex((l) => l.id === it.lesson) + 1];
+    setTimeout(() => {
+      $('sendState').classList.remove('ok');
+      if ($('review').hidden) return;
+      if (!next) { show('home'); renderHome(); return; }
+      openLesson(next);
+      const note = document.createElement('span');
+      note.textContent = it.stored ? `${it.lesson} kept on this phone: it goes to Drive behind you. Now ${next.id}.`
+        : `${it.lesson} kept in this page: keep the Studio open until it has gone to Drive. Now ${next.id}.`;
+      $('keptNote').replaceChildren(note); $('keptNote').hidden = false;
+      clearTimeout(send.noteTimer);
+      send.noteTimer = setTimeout(() => { $('keptNote').hidden = true; }, it.stored ? 4000 : 9000);
+    }, 700);
   }
   $('send').addEventListener('click', send);
 

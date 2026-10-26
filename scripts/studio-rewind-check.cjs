@@ -112,6 +112,8 @@ const secs = (m) => { const [a, b] = m.split(':'); return Number(a) * 60 + Numbe
     await page.click('#rec');
     await page.waitForFunction(() => document.getElementById('rec').classList.contains('on'), null, { timeout: 15000 });
     check(`${tag}: Back 10s shows while the take records`, await backShown());
+    const idShown = await page.evaluate(() => { const e = document.getElementById('liveId'); return { shown: getComputedStyle(e).display !== 'none', text: e.textContent }; });
+    if (!layoutOnly) check(`${tag}: the lesson and its take show over the picture while it records`, idShown.shown && idShown.text === 'S1.0 · take 1', idShown);
     // Back 10s just above Record, right edges together, a thumb's width apart, on the picture's side, inside the screen.
     const box = (sel) => page.evaluate((q) => { const r = document.querySelector(q).getBoundingClientRect(); return { l: Math.round(r.left), r: Math.round(r.right), t: Math.round(r.top), b: Math.round(r.bottom), w: Math.round(r.width), h: Math.round(r.height) }; }, sel);
     const bar = { back: await box('#back'), rec: await box('#rec'), band: await box('#band'), screen: await page.evaluate(() => ({ w: innerWidth, h: innerHeight, overflow: (() => { const b = document.querySelector('.bar'); return b.scrollWidth - b.clientWidth; })() })) };
@@ -123,7 +125,9 @@ const secs = (m) => { const [a, b] = m.split(':'); return Number(a) * 60 + Numbe
       await page.tap('#back');
       await page.waitForTimeout(150);
       const note = await box('#backNote span');
-      check(`${tag}: the note sits at the top of the picture, clear of the words and of Back`, note.t >= 0 && note.b <= bar.back.t && note.r <= bar.band.l + 1 && note.l >= 0, { note, band: bar.band });
+      const id = await box('#liveId');
+      check(`${tag}: the note sits at the top of the picture, clear of the words, of Back and of the lesson's label`,
+        note.t >= 0 && note.b <= bar.back.t && note.r <= bar.band.l + 1 && note.l >= 0 && (id.b <= note.t || id.r <= note.l) && id.r <= bar.band.l + 1, { note, id, band: bar.band });
       await page.screenshot({ path: path.join(OUT, `back-${tag.replace(/\W+/g, '-')}.png`) });
       check(`${tag}: no errors on the page`, errors.length === 0, errors);
       await context.close();
@@ -190,6 +194,14 @@ const secs = (m) => { const [a, b] = m.split(':'); return Number(a) * 60 + Numbe
     // Send: each time back written into the take's description, for the edit.
     await page.click('#send');
     await page.waitForFunction(() => /times back for the edit to cut/.test(document.getElementById('sendState').textContent), null, { timeout: 10000 });
+    // Straight on to the next lesson's camera, the take just kept said over it.
+    await page.waitForSelector('#camera:not([hidden])', { timeout: 10000 });
+    const onward = await page.evaluate(() => ({ lesson: document.querySelector('#who b')?.textContent, kept: document.getElementById('keptNote').hidden ? null : document.getElementById('keptNote').textContent,
+      idShown: getComputedStyle(document.getElementById('liveId')).display !== 'none', id: document.getElementById('liveId').textContent }));
+    check(`${tag}: Send opens the next lesson's camera, saying the take is kept and going to Drive`,
+      onward.lesson === 'S1.1' && onward.kept === 'S1.0 kept on this phone: it goes to Drive behind you. Now S1.1.' && !onward.idShown && onward.id === 'S1.1 · take 1', onward);
+    await page.screenshot({ path: path.join(OUT, `next-${tag}.png`) });
+    await page.click('#camBack');
     await page.waitForSelector('#home:not([hidden])', { timeout: 10000 });
     await page.waitForFunction(() => /All sent/.test(document.getElementById('sendingState').textContent), null, { timeout: 60000 });
     const f = drive.files[drive.files.length - 1];

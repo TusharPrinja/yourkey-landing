@@ -206,6 +206,8 @@ const check = (name, ok, seen) => { results.push({ name, ok: !!ok, seen }); cons
     await page.waitForFunction(() => /trimmed/.test(document.getElementById('sendState').textContent), null, { timeout: 10000 });
     const said = await page.$eval('#sendState', (e) => e.textContent);
     check(`${tag}: Send says the marks back`, /trimmed 0:00\.50 to 0:06\.37\. It goes to your Drive behind you with your marks/.test(said), said);
+    await page.waitForSelector('#camera:not([hidden])', { timeout: 10000 });
+    await page.click('#camBack');
     await page.waitForSelector('#home:not([hidden])', { timeout: 10000 });
     await page.waitForFunction(() => /All sent/.test(document.getElementById('sendingState').textContent), null, { timeout: 60000 });
     const f = drive.files[drive.files.length - 1];

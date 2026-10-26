@@ -165,8 +165,12 @@ async function googleApi(route) {
   async function sendAndTime() {
     const t0 = Date.now();
     await page.click('#send');
+    // Send opens the next lesson's camera (the last lesson of a seminar goes home): back to the lessons from there.
+    await page.waitForSelector('#camera:not([hidden]), #home:not([hidden])', { timeout: 10000 });
+    const ms = Date.now() - t0;
+    if (await page.isVisible('#camera')) await page.click('#camBack');
     await page.waitForSelector('#home:not([hidden])', { timeout: 10000 });
-    return Date.now() - t0;
+    return ms;
   }
   const card = () => page.$eval('#sending', (e) => (e.hidden ? '(hidden)' : e.innerText.replace(/\s+/g, ' ').trim()));
 
