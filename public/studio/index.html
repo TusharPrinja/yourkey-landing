@@ -335,7 +335,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
 </div>
 
 <div class="page review" id="review" hidden>
-  <div class="rv-video"><video id="take" playsinline controls></video></div>
+  <div class="rv-video"><video id="take" playsinline controls preload="metadata"></video></div>
   <div class="rv-side">
     <h2 id="reviewTitle">The take</h2>
     <p class="state" id="soundState" aria-live="polite"></p>
@@ -396,14 +396,15 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     del(k) { try { localStorage.removeItem(`studio:${k}`); } catch (e) { /* storage off */ } },
   };
   // The phone's own store: the scripts in `kv`, and each kept take waiting to send, its details in `queue` and
-  // the take itself in `blobs`, so its progress can be noted without writing the whole take again.
+  // the take itself in `blobs`, so its progress can be noted without writing the whole take again. The take being
+  // recorded goes into `live` a second at a time, keyed [take, part], its details in `kv` under 'live'.
   let dbOpen = null;
   const idb = {
     open() {
       if (!dbOpen) {
         dbOpen = new Promise((resolve, reject) => {
-          const r = indexedDB.open('studio', 2);
-          r.onupgradeneeded = () => { for (const s of ['kv', 'queue', 'blobs']) if (!r.result.objectStoreNames.contains(s)) r.result.createObjectStore(s); };
+          const r = indexedDB.open('studio', 3);
+          r.onupgradeneeded = () => { for (const s of ['kv', 'queue', 'blobs', 'live']) if (!r.result.objectStoreNames.contains(s)) r.result.createObjectStore(s); };
           r.onsuccess = () => { const db = r.result; db.onversionchange = () => { db.close(); dbOpen = null; }; resolve(db); };
           r.onerror = () => reject(r.error);
         });
@@ -437,6 +438,31 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       return new Promise((resolve, reject) => {
         const t = db.transaction(['queue', 'blobs'], 'readwrite');
         t.objectStore('blobs').delete(key); t.objectStore('queue').delete(key);
+        t.oncomplete = () => resolve(); t.onerror = () => reject(t.error); t.onabort = () => reject(t.error);
+      });
+    },
+    /** The parts of a take kept as it recorded, by number. */
+    async liveParts(key) {
+      const db = await idb.open();
+      const range = IDBKeyRange.bound([key, 0], [key, Number.MAX_SAFE_INTEGER]);
+      return new Promise((resolve, reject) => {
+        const t = db.transaction('live');
+        const st = t.objectStore('live');
+        const ks = st.getAllKeys(range);
+        const vs = st.getAll(range);
+        t.oncomplete = () => resolve(new Map((ks.result || []).map((k, i) => [k[1], vs.result[i]])));
+        t.onerror = () => reject(t.error); t.onabort = () => reject(t.error);
+      });
+    },
+    /** A take kept as it recorded, gone: its parts and its details. */
+    async dropLive(key) {
+      const db = await idb.open();
+      return new Promise((resolve, reject) => {
+        const t = db.transaction(['live', 'kv'], 'readwrite');
+        t.objectStore('live').delete(IDBKeyRange.bound([key, 0], [key, Number.MAX_SAFE_INTEGER]));
+        const kv = t.objectStore('kv');
+        const r = kv.get('live');
+        r.onsuccess = () => { if (r.result && r.result.key === key) kv.delete('live'); };
         t.oncomplete = () => resolve(); t.onerror = () => reject(t.error); t.onabort = () => reject(t.error);
       });
     },
@@ -1160,7 +1186,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       live(false);
       $('camerr').hidden = false; $('camerr').textContent = 'This phone wouldn’t record here. Update iOS, then try again.'; return;
     }
-    recorder.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+    startLive();
+    recorder.ondataavailable = (e) => { if (e.data && e.data.size) keepPart(e.data); };
     recorder.onstop = finishTake;
     recorder.start(1000);
     sound.take = { bins: new Uint32Array(141), frames: 0, caught: 0 };
@@ -1169,7 +1196,12 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     state.rewinds = []; backing = null;
     $('rec').classList.add('on'); $('rec').setAttribute('aria-label', 'Stop'); $('timer').classList.add('live');
     $('camera').classList.add('recording');
-    tick = setInterval(() => { $('timer').textContent = fmtShort((performance.now() - startedAt) / 1000); }, 250);
+    // The recorder asked for what it holds each second as well, since some only hand it over at the end: each second is
+    // on the phone, not in memory, if Safari stops the page.
+    tick = setInterval(() => {
+      $('timer').textContent = fmtShort((performance.now() - startedAt) / 1000);
+      if (recorder && recorder.state === 'recording' && performance.now() - (recorder.asked || 0) >= 1000) { recorder.asked = performance.now(); try { recorder.requestData(); } catch (e) { /* the timeslice serves */ } }
+    }, 250);
     roll.pos = 0; roll.done = false; roll.trail = [{ t: 0, k: 0, pos: 0 }]; roll.noted = 0; roll.offset = 0; roll.resume = null;
     $('words').style.transform = 'translateY(0)'; layoutWords(); rollWhenTalking();
   }
@@ -1247,6 +1279,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   function endBack(stopped = false) {
     if (!backing) return;
     state.rewinds.push({ at: backing.at, to: backing.to, again: recNow() });
+    liveMeta();
     roll.trail = roll.trail.filter((s) => s.k < backing.toK);
     roll.resume = { k: backing.toK, pos: backing.pos };
     backing = null;
@@ -1285,6 +1318,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   $('rec').addEventListener('click', () => {
     wakeSound();
     if (state.counting) { state.counting = false; $('count').hidden = true; live(false); return; }
+    if (state.finishing || (recorder && recorder.state === 'inactive')) return;
     if (recorder && recorder.state === 'recording') stopRecording(); else startRecording();
   });
   $('camBack').addEventListener('click', () => {
@@ -1295,25 +1329,74 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     pauseRoll(); live(false); unlockScreen(); show('home'); renderHome();
   });
 
+  // ── the take, kept on the phone as it records ──────────────────────────
+  /**
+   * The take goes to the phone's own store a second at a time as it records, each part's copy in memory let go once
+   * it is kept, and the take reviewed is read back from there (25 October: two long 4K takes were lost when Safari
+   * reloaded the page at the review, the whole take held in its memory). If Safari reloads or closes, the Studio
+   * opens again on that take's review; it leaves the store when it is sent, or thrown away with a second tap.
+   */
+  const onPhone = { key: null, seq: 0, parts: [], writes: [] };
+  function liveMeta(more = {}) {
+    if (!onPhone.key) return Promise.resolve();
+    return idb.set('live', { key: onPhone.key, sem: state.sem, lesson: state.lesson.id, title: state.lesson.title, type: state.recordedAs || '',
+      started: onPhone.started, rewinds: (state.rewinds || []).map((r) => ({ at: r.at, to: r.to, again: r.again })), ...more }, 'kv').catch(() => {});
+  }
+  function startLive() {
+    if (onPhone.key) idb.dropLive(onPhone.key).catch(() => {});
+    Object.assign(onPhone, { key: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`, seq: 0, parts: [], writes: [], started: Date.now() });
+    liveMeta();
+  }
+  function keepPart(blob) {
+    const part = { blob, kept: false };
+    const seq = onPhone.seq++;
+    onPhone.parts[seq] = part;
+    onPhone.writes.push(idb.set([onPhone.key, seq], blob, 'live').then(() => { part.kept = true; part.blob = null; }).catch(() => {}));
+  }
+  /** The whole take: each part read back from the phone's store, or from memory where the store said no. */
+  async function liveTake(type) {
+    await Promise.all(onPhone.writes);
+    let kept = new Map();
+    try { kept = await idb.liveParts(onPhone.key); } catch (e) { /* the parts still in memory serve */ }
+    const parts = onPhone.parts.map((p, seq) => (p.kept ? kept.get(seq) : p.blob) || p.blob).filter(Boolean);
+    return new Blob(parts, { type });
+  }
+  /** The take kept as it recorded, let go: sent (a copy is in the queue), or thrown away. */
+  function forgetLive() {
+    if (onPhone.key) idb.dropLive(onPhone.key).catch(() => {});
+    Object.assign(onPhone, { key: null, seq: 0, parts: [], writes: [] });
+  }
+
   // ── the review: watch it, mark it, send it or take it again ─────────────
-  function finishTake() {
+  async function finishTake() {
     unlockScreen();
     const type = (recorder && recorder.mimeType) || pickType() || 'video/mp4';
-    state.blob = new Blob(chunks, { type });
     chunks = []; recorder = null;
+    state.finishing = true;
+    $('rec').disabled = true;
+    let blob;
+    try { blob = await liveTake(type); } finally { state.finishing = false; $('rec').disabled = false; }
+    liveMeta({ stopped: true, elapsed: state.elapsed || 0 });
+    reviewTake(blob, type, false);
+  }
+  /** The review of a take: just recorded, or kept when Safari reloaded (`again`). */
+  function reviewTake(blob, type, again) {
+    state.blob = blob;
     const v = $('take');
     if (v.src) URL.revokeObjectURL(v.src);
     v.src = URL.createObjectURL(state.blob);
     state.duration = state.elapsed || 0;
     state.marked = false;
+    const n = ((state.takes[state.sem] || {})[state.lesson.id] || []).length + queuedFor(state.sem, state.lesson.id) + 1;
+    state.takeNo = n;
+    const title = () => { $('reviewTitle').textContent = `${state.lesson.id} · take ${n} · ${fmtShort(state.duration)}`; };
     v.onloadedmetadata = () => {
       if (Number.isFinite(v.duration) && v.duration > 0) state.duration = v.duration;
       if (!state.marked) setMarks(0, state.duration); else for (const id of ['tStart', 'tEnd']) $(id).max = String(state.duration);
+      title();
     };
     setMarks(0, state.duration);
-    const n = ((state.takes[state.sem] || {})[state.lesson.id] || []).length + queuedFor(state.sem, state.lesson.id) + 1;
-    state.takeNo = n;
-    $('reviewTitle').textContent = `${state.lesson.id} · take ${n} · ${fmtShort(state.duration)}`;
+    title();
     $('soundState').textContent = takeSaid();
     $('soundState').classList.toggle('ok', $('soundState').textContent === 'Sound: good.');
     $('pictureState').textContent = `Picture: ${pictureSaid(state.recordedAs || type)} · ${Math.max(1, Math.round(state.blob.size / 1e6))} MB`;
@@ -1322,9 +1405,30 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     const backs = state.takeRewinds.length;
     $('backState').hidden = !backs;
     $('backState').textContent = backs ? `Back ${backs === 1 ? 'once' : `${backs} times`} (${state.takeRewinds.map((r) => fmtShort(r.at)).join(', ')}): the fumbles stay in the take here, and the edit cuts them out.` : '';
-    $('sendState').textContent = signedIn() ? '' : 'Not signed in to Google: Send will ask you to sign in.';
+    $('sendState').textContent = again ? 'Kept on this phone when Safari reloaded: this take is safe. Send it, or film it again.'
+      : signedIn() ? '' : 'Not signed in to Google: Send will ask you to sign in.';
     $('progress').hidden = true; $('send').disabled = false; $('retake').disabled = false;
+    delete $('retake').dataset.sure; $('retake').textContent = 'Retake';
     show('review');
+  }
+  /** A take kept as it recorded and never sent or thrown away: Safari reloaded or closed. Back to its review. */
+  async function reviewKept() {
+    let meta = null;
+    try { meta = await idb.get('live', 'kv'); } catch (e) { return false; }
+    if (!meta || !meta.key) return false;
+    let kept = new Map();
+    try { kept = await idb.liveParts(meta.key); } catch (e) { return false; }
+    const parts = [...kept.keys()].sort((x, y) => x - y).map((k) => kept.get(k)).filter(Boolean);
+    if (!parts.length) { idb.dropLive(meta.key).catch(() => {}); return false; }
+    const lessons = (state.scripts && state.scripts[meta.sem]) || [];
+    state.sem = meta.sem;
+    state.lesson = lessons.find((l) => l.id === meta.lesson) || { id: meta.lesson, title: meta.title || '', clips: [], words: 0 };
+    Object.assign(onPhone, { key: meta.key, seq: parts.length, parts: parts.map(() => ({ blob: null, kept: true })), writes: [], started: meta.started });
+    state.recordedAs = meta.type || '';
+    state.rewinds = meta.rewinds || [];
+    state.elapsed = meta.elapsed || 0;
+    reviewTake(new Blob(parts, { type: meta.type || 'video/mp4' }), meta.type || 'video/mp4', true);
+    return true;
   }
   function setMarks(a, b) {
     for (const id of ['tStart', 'tEnd']) $(id).max = String(Math.max(0.1, state.duration));
@@ -1396,10 +1500,14 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   $('take').addEventListener('timeupdate', checkStop);
 
   function discard() { const v = $('take'); v.pause(); if (v.src) URL.revokeObjectURL(v.src); v.removeAttribute('src'); state.blob = null; }
-  $('retake').addEventListener('click', () => { const l = state.lesson; discard(); openLesson(l); });
+  $('retake').addEventListener('click', () => {
+    if (state.blob && !$('retake').dataset.sure) { $('retake').dataset.sure = '1'; $('retake').textContent = 'Tap again to film it again'; return; }
+    delete $('retake').dataset.sure; $('retake').textContent = 'Retake';
+    const l = state.lesson; discard(); forgetLive(); openLesson(l);
+  });
   $('toList').addEventListener('click', () => {
     if (state.blob && !$('toList').dataset.sure) { $('toList').dataset.sure = '1'; $('toList').textContent = 'Tap again to throw this take away'; return; }
-    delete $('toList').dataset.sure; $('toList').textContent = 'Lessons'; discard(); show('home'); renderHome();
+    delete $('toList').dataset.sure; $('toList').textContent = 'Lessons'; discard(); forgetLive(); show('home'); renderHome();
   });
 
   // ── sending: kept on the phone, then to Drive one at a time behind him ────
@@ -1660,6 +1768,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       : `Kept in this page, ${trim}. It goes to your Drive behind you with your marks: keep the Studio open until it has gone.`;
     $('sendState').classList.add('ok');
     discard();
+    if (it.stored) forgetLive();
     checkRoom();
     pump();
     setTimeout(() => { $('sendState').classList.remove('ok'); if (!$('review').hidden) { show('home'); renderHome(); } }, 1800);
@@ -1669,7 +1778,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   // ── start ───────────────────────────────────────────────────────────────
   syncSettings();
   restoreQueue();
-  idb.get('scripts').then((text) => { if (text) takeScripts(text); }).catch(() => {}).finally(() => {
+  idb.get('scripts').then((text) => { if (text) takeScripts(text); }).catch(() => {}).finally(async () => {
+    if (state.scripts && await reviewKept().catch(() => false)) return;
     if (state.scripts) { show('home'); renderHome(); } else { show('setup'); renderSetup(); }
   });
   window.addEventListener('beforeunload', (e) => { if (state.blob || sending.items.length || (recorder && recorder.state === 'recording')) { e.preventDefault(); e.returnValue = ''; } });

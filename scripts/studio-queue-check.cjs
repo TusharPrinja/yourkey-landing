@@ -264,7 +264,7 @@ async function googleApi(route) {
   // 5. Every take Drive holds is byte for byte the take the phone kept, and nothing is left on the phone.
   await wait(500);
   const kept = await page.evaluate(() => JSON.parse(localStorage.getItem('test:kept') || '[]'));
-  const left = await page.evaluate(() => new Promise((res) => { const r = indexedDB.open('studio', 2); r.onsuccess = () => { const t = r.result.transaction(['queue', 'blobs']); const a = t.objectStore('queue').count(); const b = t.objectStore('blobs').count(); t.oncomplete = () => res({ queue: a.result, blobs: b.result }); }; }));
+  const left = await page.evaluate(() => new Promise((res) => { const r = indexedDB.open('studio'); r.onsuccess = () => { const t = r.result.transaction(['queue', 'blobs']); const a = t.objectStore('queue').count(); const b = t.objectStore('blobs').count(); t.oncomplete = () => res({ queue: a.result, blobs: b.result }); }; }));
   const sameBytes = drive.files.every((f) => kept.some((k) => k.sha === f.sha && k.size === f.size));
   step('bytes', { driveFiles: drive.files.length, keptOnPhone: kept.length, sameBytes, leftOnPhone: left, serverErrors: drive.errors });
   report.pageErrors = errors;
