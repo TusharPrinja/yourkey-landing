@@ -37,8 +37,8 @@ const SCRIPTS = JSON.stringify(Object.fromEntries(Object.entries(NAMES).map(([k,
 }))])));
 const PAGE = fs.readFileSync(path.join(__dirname, '..', 'public', 'studio', 'index.html'), 'utf8');
 
-const drive = { folders: [], files: [], sessions: {}, seq: 0 };
-const cors = { 'access-control-allow-origin': '*', 'access-control-expose-headers': 'Location, Range', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'GET, POST, PUT, OPTIONS' };
+const drive = { folders: [], files: [], sessions: {}, seq: 0, texts: [] };
+const cors = { 'access-control-allow-origin': '*', 'access-control-expose-headers': 'Location, Range', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'GET, POST, PUT, PATCH, OPTIONS' };
 const json = (r, body, status = 200) => r.fulfill({ status, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(body) });
 async function googleApi(route) {
   const req = route.request();
@@ -50,6 +50,9 @@ async function googleApi(route) {
     if (m) return json(route, { files: drive.folders.filter((f) => f.name === m[1] && (f.parent || null) === (m[2] || null)).map((f) => ({ id: f.id })) });
     const p = /^'(.+?)' in parents and trashed=false$/.exec(q);
     if (p) return json(route, { files: drive.files.filter((f) => f.parent === p[1]).map((f) => ({ id: f.id, name: f.name, appProperties: f.appProperties })) });
+    // The Studio's log, looked for by name in the top folder.
+    const named = /^name='(.+?)' and '(.+?)' in parents and trashed=false$/.exec(q);
+    if (named) return json(route, { files: drive.texts.filter((f) => f.name === named[1] && f.parent === named[2]).map((f) => ({ id: f.id })) });
     return json(route, { error: q }, 400);
   }
   if (url.pathname === '/drive/v3/files' && req.method() === 'POST') {
@@ -59,6 +62,21 @@ async function googleApi(route) {
     return json(route, { id: f.id });
   }
   if (url.pathname.startsWith('/drive/v3/files/')) return json(route, { id: url.pathname.split('/').pop(), trashed: false });
+  // The Studio's log: made once (a multipart upload), then written over (PATCH).
+  if (url.pathname === '/upload/drive/v3/files' && req.method() === 'POST' && url.searchParams.get('uploadType') === 'multipart') {
+    const body = req.postData() || '';
+    const meta = JSON.parse(/application\/json[^\r\n]*\r\n\r\n([\s\S]*?)\r\n--/.exec(body)[1]);
+    const text = /text\/plain[^\r\n]*\r\n\r\n([\s\S]*)\r\n--[^\r\n]*--$/.exec(body)[1];
+    const f = { id: `text${drive.texts.length + 1}`, name: meta.name, parent: (meta.parents || [])[0], text, writes: 1 };
+    drive.texts.push(f);
+    return json(route, { id: f.id });
+  }
+  if (url.pathname.startsWith('/upload/drive/v3/files/') && req.method() === 'PATCH') {
+    const f = drive.texts.find((x) => x.id === url.pathname.split('/').pop());
+    if (!f) return json(route, { error: { code: 404, message: 'File not found.' } }, 404);
+    f.text = req.postData() || ''; f.writes++;
+    return json(route, { id: f.id });
+  }
   if (url.pathname === '/upload/drive/v3/files' && req.method() === 'POST') {
     const sid = `s${++drive.seq}`;
     drive.sessions[sid] = { meta: JSON.parse(req.postData()), size: Number(req.headers()['x-upload-content-length']), received: 0 };

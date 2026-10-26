@@ -583,10 +583,11 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
           // What Drive holds, read again, so the lessons already filmed show green (26 October: after a reload and a
           // sign-in the list showed only the takes still on the phone, "6 of 80 filmed").
           refreshTakes();
+          note('Signed in to Google');
         } else waiters.forEach((w) => w.reject(new Error((r && r.error) || 'Google said no')));
         renderSetup(); renderHome(); renderDrive();
       },
-      error_callback: (e) => { const waiters = tokenWaiters; tokenWaiters = []; waiters.forEach((w) => w.reject(new Error((e && e.type) || 'Google sign-in closed'))); renderSetup(); },
+      error_callback: (e) => { const waiters = tokenWaiters; tokenWaiters = []; waiters.forEach((w) => w.reject(new Error((e && e.type) || 'Google sign-in closed'))); renderSetup(); note(`Google sign-in not done (${(e && e.type) || 'closed'})`); },
     });
     tokenClient._id = id;
     return tokenClient;
@@ -609,6 +610,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     if (!c) { $('googleState').textContent = 'Paste the client ID first, and check you’re online.'; return; }
     state.token = null; state.tokenUntil = 0;
     state.folders = {}; local.del('folders'); state.takes = {};
+    driveEpoch++; for (const k of Object.keys(folderAsks)) delete folderAsks[k];
+    studioLog.fileId = null; local.del('logFile');
     renderSetup();
     new Promise((resolve, reject) => { tokenWaiters.push({ resolve, reject }); c.requestAccessToken({ prompt: 'select_account consent' }); })
       .catch((e) => { $('googleState').textContent = e.message; });
@@ -624,9 +627,18 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     return r.json();
   }
   const q = (s) => encodeURIComponent(s);
-  async function folder(name, parent) {
+  // One look for a folder at a time, and one make: two at once (the takes, the log, the lessons list after a sign-in)
+  // would each make it, and Drive would hold two "Your Key seminars" (26 October).
+  const folderAsks = {};
+  let driveEpoch = 0; // a new Google account starts a new one, so a look begun for the last account is not kept
+  function folder(name, parent) {
     const key = parent ? `${parent}/${name}` : name;
-    if (state.folders[key]) return state.folders[key];
+    if (state.folders[key]) return Promise.resolve(state.folders[key]);
+    if (!folderAsks[key]) folderAsks[key] = findOrMakeFolder(name, parent, key).finally(() => { delete folderAsks[key]; });
+    return folderAsks[key];
+  }
+  async function findOrMakeFolder(name, parent, key) {
+    const epoch = driveEpoch;
     const query = `name='${name.replace(/'/g, "\\'")}' and mimeType='application/vnd.google-apps.folder' and trashed=false${parent ? ` and '${parent}' in parents` : ''}`;
     const found = await api(`https://www.googleapis.com/drive/v3/files?q=${q(query)}&fields=files(id)&spaces=drive`);
     let id = found.files && found.files[0] && found.files[0].id;
@@ -637,7 +649,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       });
       id = made.id;
     }
-    state.folders[key] = id; local.set('folders', state.folders);
+    if (epoch === driveEpoch) { state.folders[key] = id; local.set('folders', state.folders); }
     return id;
   }
   const semFolder = async (sem) => folder(NAMES[sem], await folder(ROOT_FOLDER));
@@ -1053,6 +1065,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   async function lockScreen() { try { wake = await navigator.wakeLock.request('screen'); } catch (e) { wake = null; } }
   function unlockScreen() { try { wake && wake.release(); } catch (e) { /* gone */ } wake = null; }
   document.addEventListener('visibilitychange', () => {
+    // A page in the background is paused by the phone, sending too: said in the log, so a gap in the sending is explained.
+    if (sending.items.length || (recorder && recorder.state === 'recording')) note(document.hidden ? 'Safari in the background: sending pauses' : 'Safari back on screen');
     if (!document.hidden && !$('camera').hidden) lockScreen();
     if (!document.hidden && sending.items.length) { renderSending(); pump(); }
   });
@@ -1234,6 +1248,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       $('camerr').hidden = false; $('camerr').textContent = 'This phone wouldn’t record here. Update iOS, then try again.'; return;
     }
     startLive();
+    note(`Recording ${state.lesson.id} (${pictureSaid(state.recordedAs || '')})`);
     recorder.ondataavailable = (e) => { if (e.data && e.data.size) keepPart(e.data); };
     recorder.onstop = finishTake;
     recorder.start(1000);
@@ -1404,7 +1419,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     onPhone.parts[seq] = part;
     // A second the phone wouldn't keep is said on the camera at once, in red, while the take is still recording.
     onPhone.writes.push(idb.set([key, seq], blob, 'live').then(() => { part.kept = true; part.blob = null; })
-      .catch(() => { if (onPhone.key === key) { onPhone.failed = (onPhone.failed || 0) + 1; renderDrive(); } }));
+      .catch(() => { if (onPhone.key === key) { if (!onPhone.failed) note(`The phone wouldn't keep a second of ${state.lesson.id}`); onPhone.failed = (onPhone.failed || 0) + 1; renderDrive(); } }));
   }
   /** The whole take: each part read back from the phone's store, or from memory where the store said no. */
   async function liveTake(type) {
@@ -1432,6 +1447,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     let blob;
     try { blob = await liveTake(type); } finally { state.finishing = false; $('rec').disabled = false; }
     liveMeta({ stopped: true, elapsed: state.elapsed || 0 });
+    note(`Stopped ${state.lesson.id} at ${fmtShort(state.elapsed || 0)} (${sizeSaid(blob.size)})`);
     reviewTake(blob, type, false);
   }
   /** The review of a take: just recorded, or kept when Safari reloaded (`again`). */
@@ -1558,11 +1574,11 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   $('retake').addEventListener('click', () => {
     if (state.blob && !$('retake').dataset.sure) { $('retake').dataset.sure = '1'; $('retake').textContent = 'Tap again to film it again'; return; }
     delete $('retake').dataset.sure; $('retake').textContent = 'Retake';
-    const l = state.lesson; discard(); forgetLive(); openLesson(l);
+    const l = state.lesson; discard(); forgetLive(); note(`Retake of ${l.id}: the take thrown away`); openLesson(l);
   });
   $('toList').addEventListener('click', () => {
     if (state.blob && !$('toList').dataset.sure) { $('toList').dataset.sure = '1'; $('toList').textContent = 'Tap again to throw this take away'; return; }
-    delete $('toList').dataset.sure; $('toList').textContent = 'Lessons'; discard(); forgetLive(); show('home'); renderHome();
+    delete $('toList').dataset.sure; $('toList').textContent = 'Lessons'; discard(); forgetLive(); note(`A take of ${state.lesson.id} thrown away`); show('home'); renderHome();
   });
 
   // ── sending: kept on the phone, then to Drive one at a time behind him ────
@@ -1577,7 +1593,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
    */
   const sending = { items: [], busy: false, why: '', current: null, at: 0, done: 0, lost: 0, lostLessons: [], tries: 0, nudge: null, wake: null, waking: false, room: null, asked: false };
   const queuedFor = (sem, lesson) => sending.items.filter((it) => it.sem === sem && it.lesson === lesson).length;
-  const recordOf = (it) => { const { blob, stored, failed, unread, ...rec } = it; return rec; };
+  const recordOf = (it) => { const { blob, stored, failed, unread, lastSaid, ...rec } = it; return rec; };
   const noteDown = (it) => { if (it.stored) idb.set(it.key, recordOf(it), 'queue').catch(() => {}); };
   const sizeSaid = (b) => (b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : `${Math.max(1, Math.round(b / 1e6))} MB`);
   const takesSaid = (n) => `${n} ${n === 1 ? 'take' : 'takes'}`;
@@ -1647,6 +1663,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     }
     Object.assign(it, { session, sent: 0, name: meta.name, appProperties: meta.appProperties });
     noteDown(it);
+    note(`Drive ready for ${meta.name}`);
   }
 
   /** The take, from where Drive got to, to its end. */
@@ -1669,6 +1686,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     sending.done++;
     // Only now, with all of it in Drive, does the take leave the phone: its details and its parts.
     idb.drop(it.key, it.liveKey).catch(() => {});
+    note(`In Drive: ${file.name || it.name} (${sizeSaid(it.size)}), ${Math.max(0, Math.round((Date.now() - (it.made || Date.now())) / 60000))} min after it was kept`);
     it.blob = null;
     renderHome();
   }
@@ -1691,6 +1709,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   /** A take gone from the phone, named so he films that lesson again. */
   function lose(rec) {
     sending.lost++;
+    note(`${rec.lesson} take ${rec.n || '?'} is not on this phone any more: film it again`);
     if (rec.lesson && !sending.lostLessons.includes(rec.lesson)) sending.lostLessons.push(rec.lesson);
   }
   /** A take the phone can no longer read, in the page or in its store: out of the queue, and named. */
@@ -1757,6 +1776,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
           if (e.unreadable && (it.unread = (it.unread || 0) + 1) >= 3) { giveUp(it); continue; }
           toTheBack(it);
           it.failed = true;
+          if (it.lastSaid !== e.message) { it.lastSaid = e.message; note(`${it.lesson}: ${e.message} Trying again.`); }
           sending.tries++; sending.why = e.full ? 'full' : navigator.onLine === false || e.network ? 'offline' : 'retry'; sending.said = e.message; renderSending();
           // A take not tried since the last one went has its turn at once; only when every take has failed is there a rest.
           if (!e.full && sending.items.some((x) => x.session && !x.failed)) continue;
@@ -1793,6 +1813,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     : sending.lost ? `${takesSaid(sending.lost)} kept earlier couldn’t be found on this phone.` : '');
   function renderSending() {
     renderDrive();
+    if (sending.items.length) writeLogSoon(60000);
     const box = $('sending');
     if (!box) return;
     const items = sending.items;
@@ -1866,6 +1887,74 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     if (sending.items.length && !signedIn()) signIn().then(() => pump()).catch(() => {});
   });
 
+  /**
+   * The Studio's log, a text file in his Drive's "Your Key seminars" folder (26 October, his ask: "find a way where u
+   * can check the studio for what it sends to the drive and when? So that you know yourself"): what waits on the phone
+   * now, and each thing that happened, with its time: a take recorded, kept, sent and in Drive, Drive saying no, Safari
+   * in the background and back, a sign-in. The folder is shared with Claude by its link, so Claude reads it from there.
+   * Written a few seconds after each change, and once a minute while takes are sending; never anything but lesson
+   * numbers, sizes, times and what Drive said.
+   */
+  const LOG_NAME = 'Studio log.txt';
+  const studioLog = { events: local.get('log', []), fileId: local.get('logFile', null), timer: 0, due: 0, writing: false, again: false };
+  const stamp = () => `${new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC`;
+  function note(what) {
+    studioLog.events.push(`${stamp()}  ${what}`);
+    if (studioLog.events.length > 300) studioLog.events.splice(0, studioLog.events.length - 300);
+    local.set('log', studioLog.events);
+    writeLogSoon(8000);
+  }
+  function writeLogSoon(ms) {
+    const due = Date.now() + ms;
+    if (studioLog.timer && studioLog.due <= due) return;
+    clearTimeout(studioLog.timer);
+    studioLog.due = due;
+    studioLog.timer = setTimeout(() => { studioLog.timer = 0; writeLog(); }, ms);
+  }
+  function logText() {
+    const cur = sending.current;
+    const rows = sending.items.map((it) => `  ${it.lesson} take ${it.n || '?'} · ${sizeSaid(it.size)} · ${it === cur ? `sending, ${it.size ? Math.floor((sending.at / it.size) * 100) : 0}%`
+      : it.session ? `waiting, ${it.size ? Math.floor(((it.sent || 0) / it.size) * 100) : 0}% in Drive` : 'waiting for its place in Drive'}${it.stored ? '' : ' · ONLY IN THIS PAGE'}`);
+    return [
+      `Your Key Studio, as the phone sees it. Written ${stamp()}.`,
+      `Waiting on the phone: ${sending.items.length}${sending.why ? ` (${sending.why})` : ''}${signedIn() ? '' : ', not signed in to Google'}.`,
+      ...rows,
+      `In Drive since the Studio opened: ${takesSaid(sending.done)}.${sending.lostLessons.length ? ` Not on the phone any more: ${sending.lostLessons.join(', ')}.` : ''}`,
+      '',
+      'What happened, newest last:',
+      ...studioLog.events,
+      '',
+    ].join('\n');
+  }
+  async function writeLog() {
+    if (studioLog.writing) { studioLog.again = true; return; }
+    if (!signedIn()) return; // written at the next sign-in
+    studioLog.writing = true;
+    try {
+      const body = logText();
+      if (!studioLog.fileId) {
+        const parent = await folder(ROOT_FOLDER);
+        const found = await api(`https://www.googleapis.com/drive/v3/files?q=${q(`name='${LOG_NAME}' and '${parent}' in parents and trashed=false`)}&fields=files(id)&spaces=drive`);
+        const id = found.files && found.files[0] && found.files[0].id;
+        if (id) { studioLog.fileId = id; local.set('logFile', id); }
+        else {
+          const cut = `studio-log-${Date.now().toString(36)}`;
+          const made = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+            method: 'POST', headers: { Authorization: `Bearer ${state.token}`, 'Content-Type': `multipart/related; boundary=${cut}` },
+            body: `--${cut}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({ name: LOG_NAME, parents: [parent], mimeType: 'text/plain' })}\r\n--${cut}\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n${body}\r\n--${cut}--`,
+          });
+          if (made.ok) { studioLog.fileId = (await made.json()).id; local.set('logFile', studioLog.fileId); }
+          return;
+        }
+      }
+      const r = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${studioLog.fileId}?uploadType=media&fields=id`, {
+        method: 'PATCH', headers: { Authorization: `Bearer ${state.token}`, 'Content-Type': 'text/plain; charset=UTF-8' }, body,
+      });
+      if (r.status === 404) { studioLog.fileId = null; local.del('logFile'); writeLogSoon(2000); } // deleted in Drive: made again
+    } catch (e) { /* written with the next change */ }
+    finally { studioLog.writing = false; if (studioLog.again) { studioLog.again = false; writeLogSoon(2000); } }
+  }
+
   /** The takes kept before a reload or a closed Safari, back in the queue in the order they were kept. */
   async function restoreQueue() {
     let recs = [];
@@ -1876,6 +1965,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       if (!blob) { lose(rec); idb.drop(rec.key, rec.liveKey).catch(() => {}); continue; }
       sending.items.push({ ...rec, blob, stored: true });
     }
+    note(`Studio opened: ${takesSaid(sending.items.length)} waiting on the phone`);
     if (sending.items.length || sending.lost) { checkRoom(); renderSending(); renderHome(); }
     if (sending.items.length) pump();
   }
@@ -1916,6 +2006,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     if (!sending.asked && navigator.storage && navigator.storage.persist) { sending.asked = true; navigator.storage.persist().catch(() => {}); }
     sending.lostLessons = sending.lostLessons.filter((l) => l !== it.lesson);
     sending.items.push(it);
+    note(`Kept ${it.lesson} take ${it.n} (${sizeSaid(it.size)}), trimmed ${fmtMark(it.a)} to ${fmtMark(it.b)}${it.rewinds.length ? `, back ${it.rewinds.length}x` : ''}${it.stored ? ', on the phone' : ', ONLY IN THIS PAGE'}`);
     const trim = `trimmed ${fmtMark(it.a)} to ${fmtMark(it.b)}${it.rewinds.length ? `, ${it.rewinds.length === 1 ? 'one time' : `${it.rewinds.length} times`} back for the edit to cut` : ''}`;
     $('sendState').textContent = it.stored
       ? `Kept on this phone, ${trim}. It goes to your Drive behind you with your marks: film the next one.`

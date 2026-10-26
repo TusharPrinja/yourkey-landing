@@ -27,11 +27,11 @@ const SCRIPTS = JSON.stringify(Object.fromEntries(Object.entries(NAMES).map(([k,
 const PAGE = fs.readFileSync(path.join(__dirname, '..', 'public', 'studio', 'index.html'), 'utf8')
   .replace('const CHUNK = 8 * 1024 * 1024;', 'const CHUNK = 64 * 1024;'); // small pieces, so a short take has several
 
-const drive = { folders: [], files: [], sessions: {}, seq: 0, log: [], errors: [], dropAt: new Set(), expire: new Set(), delay: 120, paused: false, full: false,
+const drive = { folders: [], files: [], sessions: {}, seq: 0, texts: [], log: [], errors: [], dropAt: new Set(), expire: new Set(), delay: 120, paused: false, full: false,
   failNext: false, failing: new Set() };
 // Google's reply when the Drive has no room left.
 const FULL = { error: { code: 403, message: "The user's Drive storage quota has been exceeded.", errors: [{ domain: 'usageLimits', reason: 'storageQuotaExceeded' }] } };
-const cors = { 'access-control-allow-origin': '*', 'access-control-expose-headers': 'Location, Range', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'GET, POST, PUT, OPTIONS' };
+const cors = { 'access-control-allow-origin': '*', 'access-control-expose-headers': 'Location, Range', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'GET, POST, PUT, PATCH, OPTIONS' };
 const json = (r, body, status = 200, extra = {}) => r.fulfill({ status, headers: { ...cors, 'content-type': 'application/json', ...extra }, body: JSON.stringify(body) });
 const wait = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -47,6 +47,9 @@ async function googleApi(route) {
     if (m) return json(route, { files: drive.folders.filter((f) => mine(f) && f.name === m[1] && (f.parent || null) === (m[2] || null)).map((f) => ({ id: f.id })) });
     const p = /^'(.+?)' in parents and trashed=false$/.exec(q);
     if (p) return json(route, { files: drive.files.filter((f) => mine(f) && f.parent === p[1]).map((f) => ({ id: f.id, name: f.name, appProperties: f.appProperties })) });
+    // The Studio's log, looked for by name in the top folder.
+    const named = /^name='(.+?)' and '(.+?)' in parents and trashed=false$/.exec(q);
+    if (named) return json(route, { files: drive.texts.filter((f) => f.name === named[1] && f.parent === named[2]).map((f) => ({ id: f.id })) });
     return json(route, { error: q }, 400);
   }
   if (url.pathname === '/drive/v3/files' && req.method() === 'POST') {
@@ -58,6 +61,21 @@ async function googleApi(route) {
   if (url.pathname.startsWith('/drive/v3/files/')) {
     const f = drive.folders.find((x) => x.id === url.pathname.split('/').pop());
     return f && mine(f) ? json(route, { id: f.id, trashed: false }) : json(route, { error: { code: 404, message: 'File not found.' } }, 404);
+  }
+  // The Studio's log: made once (a multipart upload), then written over (PATCH).
+  if (url.pathname === '/upload/drive/v3/files' && req.method() === 'POST' && url.searchParams.get('uploadType') === 'multipart') {
+    const body = req.postData() || '';
+    const meta = JSON.parse(/application\/json[^\r\n]*\r\n\r\n([\s\S]*?)\r\n--/.exec(body)[1]);
+    const text = /text\/plain[^\r\n]*\r\n\r\n([\s\S]*)\r\n--[^\r\n]*--$/.exec(body)[1];
+    const f = { id: `text${drive.texts.length + 1}`, name: meta.name, parent: (meta.parents || [])[0], text, writes: 1 };
+    drive.texts.push(f);
+    return json(route, { id: f.id });
+  }
+  if (url.pathname.startsWith('/upload/drive/v3/files/') && req.method() === 'PATCH') {
+    const f = drive.texts.find((x) => x.id === url.pathname.split('/').pop());
+    if (!f) return json(route, { error: { code: 404, message: 'File not found.' } }, 404);
+    f.text = req.postData() || ''; f.writes++;
+    return json(route, { id: f.id });
   }
   if (url.pathname === '/upload/drive/v3/files' && req.method() === 'POST') {
     if (!/^tok2?$/.test(who)) return json(route, { error: 'auth' }, 401);
@@ -384,6 +402,17 @@ async function googleApi(route) {
   const left = await page.evaluate(() => new Promise((res) => { const r = indexedDB.open('studio'); r.onsuccess = () => { const t = r.result.transaction(['queue', 'blobs', 'live', 'kv']); const a = t.objectStore('queue').count(); const b = t.objectStore('blobs').count(); const c = t.objectStore('live').count(); const d = t.objectStore('kv').get('live'); t.oncomplete = () => res({ queue: a.result, blobs: b.result, live: c.result, reviewing: !!d.result }); }; }));
   const sameBytes = drive.files.every((f) => kept.some((k) => k.sha === f.sha && k.size === f.size));
   step('bytes', { driveFiles: drive.files.length, keptOnPhone: kept.length, sameBytes, leftOnPhone: left, serverErrors: drive.errors });
+  // 6. The Studio's log in Drive (26 October, his ask: Claude reads it from his shared folder): what waits, what was
+  // kept and sent and when, in the top folder of each account's Drive, with no sign-in token in it.
+  await wait(12000);
+  const logs = drive.texts.filter((f) => f.name === 'Studio log.txt');
+  const last = logs[logs.length - 1] || { text: '' };
+  fs.writeFileSync(path.join(OUT, 'studio-log.txt'), last.text);
+  step('the log', { files: logs.length, writes: logs.map((f) => f.writes), parents: logs.map((f) => drive.folders.find((x) => x.id === f.parent)?.name),
+    head: last.text.split('\n').slice(0, 3), lines: last.text.split('\n').filter((l) => / UTC  /.test(l)).length,
+    kept: (last.text.match(/  Kept S1\.\d take \d+ \(/g) || []).length, inDrive: (last.text.match(/  In Drive: S01\.\d\d take \d+\.\w+ \(/g) || []).length,
+    lost: /S1\.6 take \d+ is not on this phone any more: film it again/.test(last.text), opened: /Studio opened: /.test(last.text),
+    refused: /S1\.5: Google Drive said 503\. Trying again\./.test(last.text), clean: !/Bearer|access_token|ya29/.test(drive.texts.map((f) => f.text).join('\n')) });
   report.pageErrors = errors;
   report.files = drive.files.map((f) => ({ name: f.name, size: f.size, lesson: f.appProperties.lesson, take: f.appProperties.take, trim: [f.appProperties.trimStart, f.appProperties.trimEnd] }));
   fs.writeFileSync(path.join(OUT, 'report.json'), JSON.stringify(report, null, 1));
@@ -404,6 +433,10 @@ async function googleApi(route) {
     'a take whose seconds are gone is named, on the card and the camera': /S1\.6 isn’t on this phone any more: film it again/.test(lost.oldCard) && /S1\.6 lost: film again \[red\]/.test(lost.lostLine),
     'before Drive is read the seminar says what waits on the phone, then the lessons filmed': /8 lessons · 1 on this phone/.test(lost.semBefore) && /\d+ of 8 filmed/.test(lost.semAfter),
     'a short sign-in renewed at Send': st('sign-in renewed at Send').asked === 1,
+    'the log is in each account\'s top folder, says what was kept, sent, refused and lost, and holds no token': st('the log').files === 2
+      && st('the log').parents.every((n) => n === 'Your Key seminars') && st('the log').kept >= 14 && st('the log').inDrive >= 14 && st('the log').lost
+      && st('the log').opened && st('the log').refused && st('the log').clean && /^Your Key Studio, as the phone sees it\. Written /.test(st('the log').head[0])
+      && /^Waiting on the phone: 0/.test(st('the log').head[1]),
     'nothing left on the phone': st('bytes').leftOnPhone.queue === 0 && st('bytes').leftOnPhone.blobs === 0 && st('bytes').leftOnPhone.live === 0 && !st('bytes').leftOnPhone.reviewing,
   };
   for (const [k, v] of Object.entries(checks)) console.log(`${v ? 'ok  ' : 'FAIL'} ${k}`);
