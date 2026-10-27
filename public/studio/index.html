@@ -86,6 +86,7 @@ h2 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 21px; 
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 10px; }
 .state { font-family: var(--mono); font-size: 13px; color: var(--muted); }
 .state.ok { color: var(--good); }
+.state.bad { color: #ff8a80; }
 .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .btn { border: 1px solid var(--fg); background: var(--surface); border-radius: 6px; padding: 9px 14px; font-weight: 700; }
 .btn.primary { background: var(--fg); color: var(--bg); }
@@ -293,6 +294,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   <div class="clapper" aria-hidden="true"></div>
   <h1>Your Key Studio</h1>
   <p class="lede" id="homeLede">Pick a lesson, turn the phone sideways, and tap Record.</p>
+  <p class="state" id="scriptsLine" aria-live="polite"></p>
   <section class="card sending" id="sending" aria-label="Sending to Drive" hidden>
     <p class="state" id="sendingState" aria-live="polite"></p>
     <div class="progress"><i id="sendingBar"></i></div>
@@ -532,7 +534,24 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   }
 
   // ── 1. scripts, pasted from the teleprompter page and kept on this phone ──
-  function takeScripts(text) {
+  // Their check code: six letters from the scripts themselves, the same the teleprompter page shows beside its copy
+  // button, so a glance says the Studio has the page's scripts (26 October: after Safari reloaded, the Studio had gone
+  // back to the scripts pasted on the 23rd, the newer paste never kept, and 11.1 to 16.3 were read from them).
+  async function codeOf(text) {
+    try {
+      const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+      return [...new Uint8Array(d).slice(0, 3)].map((b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+    } catch (e) { return ''; }
+  }
+  function renderScriptsLine() {
+    const el = $('scriptsLine');
+    if (!state.scripts) { el.textContent = ''; return; }
+    const at = state.scriptsAt ? new Date(state.scriptsAt) : null;
+    const when = at ? `, pasted ${at.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} at ${at.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}` : '';
+    el.textContent = state.scriptsSaved === false ? 'These scripts aren’t saved on this phone: if Safari reloads, paste them again.' : `Scripts: check code ${state.scriptsCode || '…'}${when}.`;
+    el.classList.toggle('bad', state.scriptsSaved === false);
+  }
+  function takeScripts(text, pasted) {
     let json;
     try { json = JSON.parse(text); } catch (e) { $('scriptsState').textContent = 'That wasn’t the scripts. Copy them again from the teleprompter page, then paste here.'; return false; }
     const ok = json && typeof json === 'object' && Object.keys(NAMES).every((k) => Array.isArray(json[k]));
@@ -542,8 +561,12 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       l.words = wordsOf(l.text);
     }
     state.scripts = json;
-    idb.set('scripts', text).catch(() => { $('scriptsState').textContent = 'The scripts are here for now, but this phone wouldn’t keep them. Paste again next time.'; });
+    state.scriptsSaved = true;
+    codeOf(text).then((c) => { state.scriptsCode = c; renderSetup(); renderScriptsLine(); });
+    if (pasted) { state.scriptsAt = new Date().toISOString(); idb.set('scriptsAt', state.scriptsAt).catch(() => {}); }
+    idb.set('scripts', text).catch(() => { state.scriptsSaved = false; renderSetup(); renderScriptsLine(); });
     renderSetup();
+    renderScriptsLine();
     return true;
   }
   $('pasteBox').addEventListener('paste', (e) => {
@@ -551,16 +574,16 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     if (!text) return;
     e.preventDefault();
     $('pasteBox').value = '';
-    takeScripts(text);
+    takeScripts(text, true);
   });
   $('pasteBox').addEventListener('input', () => {
     // A paste the browser put straight into the box: take it once it is a whole JSON object.
     const v = $('pasteBox').value.trim();
-    if (v.startsWith('{') && v.endsWith('}') && takeScripts(v)) $('pasteBox').value = '';
+    if (v.startsWith('{') && v.endsWith('}') && takeScripts(v, true)) $('pasteBox').value = '';
   });
   $('scriptFile').addEventListener('change', async () => {
     const f = $('scriptFile').files[0];
-    if (f) takeScripts(await f.text());
+    if (f) takeScripts(await f.text(), true);
   });
 
   // ── 2. Google: drive.file only, a token for the session ─────────────────
@@ -677,8 +700,11 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   // ── setup and home ──────────────────────────────────────────────────────
   function renderSetup() {
     const n = state.scripts ? Object.values(state.scripts).reduce((a, l) => a + l.length, 0) : 0;
-    $('scriptsState').textContent = state.scripts ? `${n} lessons, on this phone.` : $('scriptsState').textContent;
-    $('scriptsState').classList.toggle('ok', !!state.scripts);
+    $('scriptsState').textContent = !state.scripts ? $('scriptsState').textContent
+      : state.scriptsSaved === false ? 'The scripts are here for now, but this phone wouldn’t keep them. Paste again next time.'
+        : `${n} lessons, on this phone${state.scriptsCode ? `. Check code ${state.scriptsCode}` : ''}.`;
+    $('scriptsState').classList.toggle('ok', !!state.scripts && state.scriptsSaved !== false);
+    $('scriptsState').classList.toggle('bad', state.scriptsSaved === false);
     $('googleState').textContent = signedIn() ? 'Signed in. Takes go to “Your Key seminars” in your Drive.' : 'Not signed in.';
     $('googleState').classList.toggle('ok', signedIn());
     $('toLessons').disabled = !state.scripts;
@@ -715,6 +741,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
 
   function renderHome() {
     if (!state.scripts || $('home').hidden) return;
+    renderScriptsLine();
     const sems = $('sems'); sems.replaceChildren();
     for (const key of Object.keys(NAMES)) {
       const lessons = state.scripts[key] || [];
@@ -2038,6 +2065,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   // ── start ───────────────────────────────────────────────────────────────
   syncSettings();
   restoreQueue();
+  idb.get('scriptsAt').then((at) => { if (at) { state.scriptsAt = at; renderScriptsLine(); } }).catch(() => {});
   idb.get('scripts').then((text) => { if (text) takeScripts(text); }).catch(() => {}).finally(async () => {
     if (state.scripts && await reviewKept().catch(() => false)) return;
     if (state.scripts) { show('home'); renderHome(); } else { show('setup'); renderSetup(); }

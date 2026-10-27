@@ -174,6 +174,11 @@ async function googleApi(route) {
   await page.waitForFunction(() => /Signed in/.test(document.getElementById('googleState').textContent));
   await page.click('#toLessons');
   await page.waitForSelector('#home:not([hidden])');
+  // The scripts' check code, the same six letters the teleprompter page shows for these scripts, and when they were
+  // pasted (26 October: after a reload the Studio had gone back to older scripts, and nothing on screen said so).
+  const code = require('crypto').createHash('sha256').update(SCRIPTS).digest('hex').slice(0, 6).toUpperCase();
+  await page.waitForFunction((c) => document.getElementById('scriptsLine').textContent.includes(`check code ${c}, pasted`), code);
+  if (!(await page.textContent('#scriptsState')).includes(`Check code ${code}`)) throw new Error('the setup page does not show the check code');
 
   const report = { steps: [] };
   const step = (name, data) => { report.steps.push({ name, ...data }); console.log(name, JSON.stringify(data)); };
