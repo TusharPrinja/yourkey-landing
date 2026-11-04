@@ -20,7 +20,7 @@ const crypto = require('crypto');
 const OUT = process.argv[2] || fs.mkdtempSync(path.join(require('os').tmpdir(), 'studio-queue-'));
 fs.mkdirSync(OUT, { recursive: true });
 // Made-up lessons in the teleprompter's shape: five seminars, eight short lessons each.
-const NAMES = { sales: 'S', time: 'T', communication: 'C', leadership: 'L', quitting: 'Q' };
+const NAMES = { sales: 'S', time: 'T', communication: 'C', leadership: 'L', quitting: 'Q', attraction: 'A' };
 const SCRIPTS = JSON.stringify(Object.fromEntries(Object.entries(NAMES).map(([k, p]) => [k, Array.from({ length: 8 }, (_, i) => ({
   id: `${p}1.${i}`, title: `Lesson ${i}`, clips: [{ said: ['A short line to read out loud, then another short line after it.'] }],
 }))])));

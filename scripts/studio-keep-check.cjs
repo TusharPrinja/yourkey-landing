@@ -31,7 +31,7 @@ fs.mkdirSync(OUT, { recursive: true });
 
 // One long lesson, so the words roll for well over a minute: forty sentences of about ten words.
 const LINES = Array.from({ length: 40 }, (_, i) => `Sentence number ${i + 1} is here to be read out loud, slowly and clearly.`);
-const NAMES = { sales: 'S', time: 'T', communication: 'C', leadership: 'L', quitting: 'Q' };
+const NAMES = { sales: 'S', time: 'T', communication: 'C', leadership: 'L', quitting: 'Q', attraction: 'A' };
 const SCRIPTS = JSON.stringify(Object.fromEntries(Object.entries(NAMES).map(([k, p]) => [k, Array.from({ length: 2 }, (_, i) => ({
   id: `${p}1.${i}`, title: `Lesson ${i}`, clips: [{ said: [LINES.slice(0, 20).join(' '), LINES.slice(20).join(' ')] }],
 }))])));
