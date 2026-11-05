@@ -16,7 +16,8 @@ const ACCOUNT_PAGES = ["join", "welcome"];
 
 /**
  * The Studio (2026-10-20): Tushar's private recorder for filming the seminars on his iPhone, the words on
- * its screen and every kept take straight to his Google Drive. public/studio/index.html holds no scripts
+ * its screen and every kept take straight to his Google Drive (since 5 November 2026 to his private R2 bucket instead,
+ * once the website's environment holds its four R2 settings: app/studio/r2/route.ts, lib/r2.ts). public/studio/index.html holds no scripts
  * (they are pasted in and stay on his phone) and asks Google only for drive.file. Since 2026-10-21 it is
  * locked: proxy.ts sends a password page instead until the phone holds the Studio's cookie
  * (lib/studioLock.ts keeps only the password's fingerprint; the password is never in this public repository).

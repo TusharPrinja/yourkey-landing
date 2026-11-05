@@ -63,6 +63,16 @@ export async function proxy(request: NextRequest) {
     return res;
   }
 
+  // The Studio's door to its private R2 bucket (5 November 2026): only a phone holding the cookie gets past, and the
+  // route checks the cookie again itself (app/studio/r2/route.ts).
+  if (pathname === "/studio/r2") {
+    if (request.method !== "POST") return keepPrivate(new NextResponse(null, { status: 405 }));
+    if (!fingerprint || !cookieOpens(request.cookies.get(STUDIO_COOKIE)?.value, fingerprint)) {
+      return keepPrivate(NextResponse.json({ error: "locked" }, { status: 401 }));
+    }
+    return keepPrivate(NextResponse.next());
+  }
+
   if (request.method !== "GET" && request.method !== "HEAD") return keepPrivate(new NextResponse(null, { status: 405 }));
   if (!fingerprint) return lock("shut", 503);
   if (!cookieOpens(request.cookies.get(STUDIO_COOKIE)?.value, fingerprint)) return lock("ask", 401);

@@ -269,7 +269,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
 <div class="page" id="setup" hidden>
   <div class="clapper" aria-hidden="true"></div>
   <h1>Your Key Studio</h1>
-  <p class="lede">Film on this phone with your words beside the camera. Every take you keep goes straight to your Google Drive, never to your camera roll.</p>
+  <p class="lede">Film on this phone with your words beside the camera. Every take you keep goes straight to your private R2 bucket (or your Google Drive), never to your camera roll.</p>
 
   <section class="card" aria-labelledby="s1">
     <h2 id="s1">1 · Your scripts</h2>
@@ -280,9 +280,10 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   </section>
 
   <section class="card" aria-labelledby="s2">
-    <h2 id="s2">2 · Your Google Drive</h2>
+    <h2 id="s2">2 · Where your takes go</h2>
+    <p class="state" id="storeState">Asking the website about R2…</p>
     <p class="state" id="googleState">Not signed in.</p>
-    <p class="note">Paste the client ID from your Google project once. The Studio asks Google only to add files to your Drive, and it can see only the files it made.</p>
+    <p class="note">With R2 set up, nothing else is needed here. For Google Drive instead: paste the client ID from your Google project once. The Studio asks Google only to add files to your Drive, and it can see only the files it made.</p>
     <input type="text" id="clientId" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="….apps.googleusercontent.com" aria-label="Google client ID">
     <div class="row"><button class="btn" id="signIn" type="button">Sign in with Google</button><button class="link" id="switchAccount" type="button">Use a different Google account</button></div>
   </section>
@@ -295,7 +296,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   <h1>Your Key Studio</h1>
   <p class="lede" id="homeLede">Pick a lesson, turn the phone sideways, and tap Record.</p>
   <p class="state" id="scriptsLine" aria-live="polite"></p>
-  <section class="card sending" id="sending" aria-label="Sending to Drive" hidden>
+  <section class="card sending" id="sending" aria-label="Sending your takes" hidden>
     <p class="state" id="sendingState" aria-live="polite"></p>
     <div class="progress"><i id="sendingBar"></i></div>
     <p class="state" id="sendingRoom"></p>
@@ -309,10 +310,13 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     <label>Picture <select id="quality"><option value="4k">4K, the sharpest</option><option value="hd">HD, smaller files</option></select></label>
     <label><input type="checkbox" id="autostop"> Stop by itself when the words end</label>
     <label><input type="checkbox" id="plain"> Plain sound, no boost (only if a take plays silent)</label>
+    <label id="useDriveRow" hidden><input type="checkbox" id="useDrive"> Send takes to Google Drive instead of R2</label>
   </section>
+  <div class="row" id="r2Row" hidden><button class="btn" id="r2Check" type="button">Check what’s in R2</button></div>
+  <p class="state" id="r2Said" aria-live="polite"></p>
   <p class="note" id="driveNote"></p>
   <ol class="lessons" id="list"></ol>
-  <div class="row"><button class="link" id="toSetup" type="button">Scripts and Google</button></div>
+  <div class="row"><button class="link" id="toSetup" type="button">Scripts, and where takes go</button></div>
 </div>
 
 <div class="cam" id="camera" hidden>
@@ -416,6 +420,10 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   const SCOPE = 'https://www.googleapis.com/auth/drive.file';
   const ROOT_FOLDER = 'Your Key seminars';
   const CHUNK = 8 * 1024 * 1024; // a multiple of 256 KiB, as Drive's resumable upload asks
+  /** Where takes go (5 November 2026, his ask: "My Google drive storage is full ... make it take it to r2 from the studio
+   *  instead"): his private R2 bucket once the website has it set up, or Google Drive if he ticks it in the settings. */
+  const store = { ready: false, asked: false };
+  const R2_PART = 8 * 1024 * 1024;
   const HOLD_AFTER_WORDS = 2000;
 
   // ── small stores ────────────────────────────────────────────────────────
@@ -677,6 +685,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   }
   const semFolder = async (sem) => folder(NAMES[sem], await folder(ROOT_FOLDER));
   async function loadTakes(sem, again = true) {
+    if (useR2()) return r2LoadTakes(sem);
     let parent;
     try { parent = await semFolder(sem); await api(`https://www.googleapis.com/drive/v3/files/${parent}?fields=id,trashed`).then((f) => { if (f.trashed) throw new Error('gone'); }); }
     catch (e) {
@@ -705,7 +714,12 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
         : `${n} lessons, on this phone${state.scriptsCode ? `. Check code ${state.scriptsCode}` : ''}.`;
     $('scriptsState').classList.toggle('ok', !!state.scripts && state.scriptsSaved !== false);
     $('scriptsState').classList.toggle('bad', state.scriptsSaved === false);
-    $('googleState').textContent = signedIn() ? 'Signed in. Takes go to “Your Key seminars” in your Drive.' : 'Not signed in.';
+    $('storeState').textContent = !store.asked ? 'Asking the website about R2…'
+      : useR2() ? 'Takes go to your private R2 bucket. No Google sign-in needed, and each take is checked in R2 before it leaves this phone.'
+        : store.ready ? 'R2 is set up, but takes go to Google Drive (untick the setting on the lessons page for R2).'
+          : 'R2 isn’t set up on the website yet, so takes go to Google Drive.';
+    $('storeState').classList.toggle('ok', useR2());
+    $('googleState').textContent = signedIn() ? 'Signed in. Takes go to “Your Key seminars” in your Drive.' : useR2() ? 'Google: not needed while R2 is on.' : 'Not signed in.';
     $('googleState').classList.toggle('ok', signedIn());
     $('toLessons').disabled = !state.scripts;
   }
@@ -757,7 +771,9 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       b.addEventListener('click', () => { state.sem = key; local.set('sem', key); renderHome(); refreshTakes(); });
       sems.append(b);
     }
-    $('driveNote').textContent = signedIn() ? ''
+    $('useDriveRow').hidden = !store.ready; $('useDrive').checked = !!local.get('useDrive', false);
+    $('r2Row').hidden = !useR2();
+    $('driveNote').textContent = useR2() ? '' : signedIn() ? ''
       : sending.items.length ? 'Not signed in to Google, so the lessons already in Drive aren’t ticked here. Sign in (the button above) to see them.'
         : 'Not signed in to Google: takes you keep wait on this phone until you sign in (Scripts and Google, at the bottom).';
     const list = $('list'); list.replaceChildren();
@@ -777,7 +793,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
         const newest = takes[l.id].reduce((x, y) => (Number((y.appProperties || {}).take) > Number((x.appProperties || {}).take) ? y : x));
         const p = newest.appProperties || {};
         const cut = p.trimStart != null && p.trimEnd != null ? ` · take ${p.take} trimmed ${fmtMark(Number(p.trimStart))} to ${fmtMark(Number(p.trimEnd))}` : '';
-        t.textContent = `${takes[l.id].length} ${takes[l.id].length === 1 ? 'take' : 'takes'} in Drive${cut}`; b.append(t);
+        const chk = state.checked && state.checked[`${state.sem}/${l.id}`];
+        t.textContent = `${takes[l.id].length} ${takes[l.id].length === 1 ? 'take' : 'takes'} in ${where()}${cut}${chk ? ` · ✓ ${chk.name} checked in R2, ${sizeSaid(chk.size)}` : ''}`; b.append(t);
       }
       if (queued) {
         const t = document.createElement('span'); t.className = 'queued';
@@ -789,7 +806,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     }
   }
   async function refreshTakes() {
-    if (!signedIn()) return;
+    if (!useR2() && !signedIn()) return;
     try { await loadTakes(state.sem); renderHome(); } catch (e) { $('driveNote').textContent = e.message; }
   }
 
@@ -1608,6 +1625,141 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     delete $('toList').dataset.sure; $('toList').textContent = 'Lessons'; discard(); forgetLive(); note(`A take of ${state.lesson.id} thrown away`); show('home'); renderHome();
   });
 
+
+  // ── R2: his private bucket (5 November 2026) ───────────────────────────────
+  /**
+   * The website keeps the bucket's keys; the Studio asks it (behind the password) for signed addresses and sends each
+   * take straight to R2 in 8 MiB pieces. A take is in R2 only when R2, asked after the pieces are joined, says it holds
+   * every byte the phone kept: then, and only then, the take leaves the phone. Takes started in Drive finish in Drive.
+   */
+  const useR2 = () => store.ready && !local.get('useDrive', false);
+  const canOpen = () => useR2() || signedIn();
+  const where = () => (useR2() ? 'R2' : 'Drive');
+  const whereLong = () => (useR2() ? 'your private R2 bucket' : 'your Drive');
+  async function r2(op, payload = {}) {
+    let res;
+    try {
+      res = await fetch('/studio/r2', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ op, ...payload }) });
+    } catch (e) { throw Object.assign(new Error('The connection dropped.'), { network: true }); }
+    let data = {};
+    try { data = await res.json(); } catch (e) { /* no body */ }
+    if (res.status === 401) throw Object.assign(new Error('The Studio is locked on this phone: open it with the password again.'), { status: 401 });
+    if (!res.ok) throw Object.assign(new Error(data.said ? `R2 said ${data.said}` : `R2 said ${res.status}.`), { status: res.status });
+    return data;
+  }
+  /** One piece to its signed address; R2's answer carries the piece's ETag, which the join needs. */
+  function putPart(url, body, onProgress) {
+    return new Promise((resolve, reject) => {
+      const x = new XMLHttpRequest();
+      x.open('PUT', url);
+      x.upload.onprogress = (e) => onProgress(e.loaded);
+      x.onload = () => {
+        const etag = x.getResponseHeader('ETag');
+        if (x.status >= 200 && x.status < 300 && etag) resolve(etag);
+        else if (x.status >= 200 && x.status < 300) reject(new Error('R2 took a piece but didn’t show its ETag: the bucket’s CORS needs ExposeHeaders ETag.'));
+        else reject(Object.assign(new Error(`R2 said ${x.status}.`), { status: x.status }));
+      };
+      x.onerror = () => reject(Object.assign(new Error('The connection dropped.'), { network: true }));
+      x.send(body);
+    });
+  }
+  /** A kept take's place in R2: its name, its marks beside it, and an upload begun. */
+  async function r2OpenSession(it) {
+    const takes = await loadTakes(it.sem);
+    const ahead = sending.items.slice(0, sending.items.indexOf(it)).filter((x) => x.sem === it.sem && x.lesson === it.lesson && x.session).length;
+    it.n = Math.max(it.n || 1, (takes[it.lesson] || []).length + ahead + 1);
+    const ext = it.type.includes('webm') ? 'webm' : 'mp4';
+    const name = `${padId(it.lesson)} take ${it.n}.${ext}`;
+    const backs = (it.rewinds || []).map((r) => `Back at ${fmtMark(r.at)} to ${fmtMark(r.to)}, again ${fmtMark(r.again)}.`).join(' ');
+    const appProperties = { lesson: it.lesson, seminar: it.sem, take: String(it.n), trimStart: it.a.toFixed(2), trimEnd: it.b.toFixed(2), duration: (it.duration || 0).toFixed(2), recorded: it.recorded, backs: String((it.rewinds || []).length) };
+    const marks = { ...appProperties, title: it.title, rewinds: it.rewinds || [], size: it.size,
+      description: `${it.lesson} · ${it.title}\nTake ${it.n}. Start ${fmtMark(it.a)}, end ${fmtMark(it.b)}, of ${fmt(it.duration)}.${backs ? ` ${backs}` : ''}` };
+    const d = await r2('start', { folder: NAMES[it.sem], name, type: it.type, size: it.size, marks });
+    Object.assign(it, { session: { r2: true, key: d.key, uploadId: d.uploadId }, sent: 0, name, appProperties });
+    noteDown(it);
+    note(`R2 ready for ${name}`);
+  }
+  /** The take, from the pieces R2 already holds to its end, then joined and checked. */
+  async function r2SendOne(it) {
+    const s = it.session;
+    const have = await r2('parts', { key: s.key, uploadId: s.uploadId });
+    if (have.gone) {
+      // Joined already (the answer lost on the way) or given up by R2: what R2 holds says which.
+      const held = await r2('head', { key: s.key });
+      if (held.size === it.size) return { id: s.key, name: it.name, size: held.size, checked: true };
+      throw Object.assign(new Error('R2 had let this take go: starting it again.'), { status: 404 });
+    }
+    const total = Math.max(1, Math.ceil(it.size / R2_PART));
+    const pieceSize = (n) => Math.min(R2_PART, it.size - (n - 1) * R2_PART);
+    const done = new Map((have.parts || []).filter((p) => p.n >= 1 && p.n <= total && p.size === pieceSize(p.n)).map((p) => [p.n, p.etag]));
+    const sentBytes = () => [...done.keys()].reduce((sum, n) => sum + pieceSize(n), 0);
+    it.sent = sentBytes(); sending.at = it.sent; renderSending();
+    const todo = [];
+    for (let n = 1; n <= total; n++) if (!done.has(n)) todo.push(n);
+    while (todo.length) {
+      const batch = todo.splice(0, 6);
+      const signed = await r2('sign', { key: s.key, uploadId: s.uploadId, parts: batch });
+      for (const { n, url } of signed.urls || []) {
+        const from = (n - 1) * R2_PART;
+        const base = sentBytes();
+        const etag = await putPart(url, it.blob.slice(from, from + pieceSize(n)), (loaded) => { sending.at = base + loaded; renderSending(); });
+        done.set(n, etag);
+        it.sent = sentBytes(); noteDown(it);
+        sending.at = it.sent; renderSending();
+      }
+    }
+    const fin = await r2('complete', { key: s.key, uploadId: s.uploadId, parts: [...done].map(([n, etag]) => ({ n, etag })) });
+    if (fin.size !== it.size) throw Object.assign(new Error(`R2 holds ${sizeSaid(fin.size || 0)} of the take’s ${sizeSaid(it.size)}: sending it again.`), { status: 404 });
+    return { id: s.key, name: it.name, size: fin.size, checked: true };
+  }
+  /** A seminar's takes in R2, by lesson, read from their names ("A03.02 take 1.mp4" is lesson A3.2). */
+  async function r2LoadTakes(sem) {
+    const d = await r2('list', { folder: NAMES[sem] });
+    const byLesson = {};
+    for (const t of d.takes || []) {
+      const m = /^([A-Z])0*(\d+)\.0*(\d+) take (\d+)\./.exec(t.name);
+      if (!m) continue;
+      const id = `${m[1]}${m[2]}.${m[3]}`;
+      (byLesson[id] = byLesson[id] || []).push({ id: t.key, name: t.name, size: t.size, at: t.at, appProperties: { lesson: id, take: m[4] } });
+    }
+    state.takes[sem] = byLesson;
+    state.r2List = state.r2List || {};
+    state.r2List[sem] = d.takes || [];
+    return byLesson;
+  }
+  /** What R2 holds for the seminar on screen, said in one line: his check, any time. */
+  async function checkR2() {
+    $('r2Said').classList.remove('ok', 'bad');
+    $('r2Said').textContent = 'Asking R2…';
+    try {
+      await r2LoadTakes(state.sem);
+      const list = (state.r2List && state.r2List[state.sem]) || [];
+      const bytes = list.reduce((sum, t) => sum + (t.size || 0), 0);
+      const newest = list.slice().sort((x, y) => String(y.at).localeCompare(String(x.at)))[0];
+      const when = newest && newest.at ? new Date(newest.at).toLocaleString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+      $('r2Said').textContent = list.length
+        ? `R2 holds ${takesSaid(list.length)} of ${NAMES[state.sem]} (${sizeSaid(bytes)}). Newest: ${newest.name}, ${sizeSaid(newest.size)}${when ? `, ${when}` : ''}.`
+        : `R2 holds no takes of ${NAMES[state.sem]} yet.`;
+      $('r2Said').classList.add('ok');
+      renderHome();
+    } catch (e) { $('r2Said').textContent = e.message; $('r2Said').classList.add('bad'); }
+  }
+  $('r2Check').addEventListener('click', checkR2);
+  $('useDrive').addEventListener('change', () => {
+    local.set('useDrive', $('useDrive').checked);
+    note($('useDrive').checked ? 'Takes go to Google Drive from now on' : 'Takes go to R2 from now on');
+    renderSetup(); renderHome(); renderSending(); refreshTakes(); pump();
+  });
+  /** Whether the website has R2 set up, asked once as the Studio opens. */
+  async function askStore() {
+    try { const d = await r2('status'); store.ready = !!d.ready; } catch (e) { store.ready = false; }
+    store.asked = true;
+    note(store.ready ? (useR2() ? 'R2 is set up: takes go to the private bucket' : 'R2 is set up, but takes go to Google Drive (the setting)') : 'R2 isn’t set up on the website: takes go to Google Drive');
+    renderSetup(); renderHome(); renderSending();
+    if (useR2()) refreshTakes();
+    if (sending.items.length) pump();
+  }
+
   // ── sending: kept on the phone, then to Drive one at a time behind him ────
   /**
    * Send keeps the take on the phone and goes straight back to the lessons (22 October: a day of 4K is about
@@ -1663,6 +1815,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   /** A kept take's place in Drive: its name, folder and marks. Its number comes after every take of the
    *  lesson already in Drive or ahead of it in the queue. */
   async function openSession(it) {
+    if (useR2()) return r2OpenSession(it);
     const takes = await loadTakes(it.sem);
     const parent = await semFolder(it.sem);
     const ahead = sending.items.slice(0, sending.items.indexOf(it)).filter((x) => x.sem === it.sem && x.lesson === it.lesson && x.session).length;
@@ -1695,9 +1848,10 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
 
   /** The take, from where Drive got to, to its end. */
   async function sendOne(it) {
-    const where = await askWhere(it);
-    if (where.file) return where.file;
-    let from = where.next;
+    if (it.session && it.session.r2) return r2SendOne(it);
+    const at = await askWhere(it);
+    if (at.file) return at.file;
+    let from = at.next;
     sending.at = from; renderSending();
     for (;;) {
       const r = await put(it.session, it.blob, from, (sent) => { sending.at = sent; renderSending(); });
@@ -1708,12 +1862,19 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   }
   function landed(it, file) {
     const takes = state.takes[it.sem] || (state.takes[it.sem] = {});
-    (takes[it.lesson] = takes[it.lesson] || []).push({ id: file.id, name: file.name || it.name, appProperties: it.appProperties });
+    (takes[it.lesson] = takes[it.lesson] || []).push({ id: file.id, name: file.name || it.name, size: file.size, appProperties: it.appProperties });
+    if (file.checked) {
+      state.checked = state.checked || {};
+      state.checked[`${it.sem}/${it.lesson}`] = { name: file.name || it.name, size: file.size, at: Date.now() };
+      // Kept on the phone, so a reload still shows which takes R2 confirmed (the newest 400).
+      const keep = Object.entries(state.checked).sort((x, y) => y[1].at - x[1].at).slice(0, 400);
+      state.checked = Object.fromEntries(keep); local.set('checked', state.checked);
+    }
     sending.items = sending.items.filter((x) => x !== it);
     sending.done++;
     // Only now, with all of it in Drive, does the take leave the phone: its details and its parts.
     idb.drop(it.key, it.liveKey).catch(() => {});
-    note(`In Drive: ${file.name || it.name} (${sizeSaid(it.size)}), ${Math.max(0, Math.round((Date.now() - (it.made || Date.now())) / 60000))} min after it was kept`);
+    note(`${file.checked ? 'In R2, checked: R2 holds every byte of' : 'In Drive:'} ${file.name || it.name} (${sizeSaid(file.size || it.size)}), ${Math.max(0, Math.round((Date.now() - (it.made || Date.now())) / 60000))} min after it was kept`);
     it.blob = null;
     renderHome();
   }
@@ -1772,7 +1933,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
         sending.why = '';
         let full = false;
         // Every waiting take gets its Drive session while a sign-in is to hand.
-        if (signedIn()) {
+        if (canOpen()) {
           for (const x of sending.items) {
             if (x.session) continue;
             try { await openSession(x); } catch (e) { full = !!e.full; break; }
@@ -1781,7 +1942,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
         // In order; one still waiting for a session lets one that has its session go past it.
         const it = sending.items.find((x) => x.session);
         if (!it) {
-          if (!signedIn()) { sending.why = 'signin'; break; }
+          if (!canOpen()) { sending.why = 'signin'; break; }
           // Signed in, but no session would open: his Drive is full, or the connection or Google said no for now.
           sending.tries++; sending.why = full ? 'full' : navigator.onLine === false ? 'offline' : 'retry'; renderSending();
           await rest(full ? 60000 : Math.min(60000, 2000 * 2 ** Math.min(sending.tries, 5)));
@@ -1847,14 +2008,14 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     const cur = sending.current;
     const pct = cur && cur.size ? Math.min(100, Math.floor((sending.at / cur.size) * 100)) : 0;
     const lost = lostSaid();
-    $('sendingRow').hidden = !(items.length && !signedIn());
+    $('sendingRow').hidden = !(items.length && !canOpen());
     $('sendingSignIn').textContent = sending.why === 'signin' ? 'Sign in to keep sending' : 'Sign in to Google';
     $('sendingState').classList.toggle('ok', !items.length && sending.done > 0 && !lost);
     $('sendingState').classList.toggle('warn', (!!items.length && sending.why === 'full') || !!lost);
     if (!items.length) {
       box.hidden = !sending.done && !sending.lost;
       $('sendingState').textContent = sending.done
-        ? `All sent: ${takesSaid(sending.done)} in your Drive since you opened the Studio.${lost ? ` ${lost}` : ''}` : lost;
+        ? `All sent: ${takesSaid(sending.done)} in ${whereLong()} since you opened the Studio${useR2() ? ', each one checked' : ''}.${lost ? ` ${lost}` : ''}` : lost;
       $('sendingBar').style.width = sending.done ? '100%' : '0';
       $('sendingRoom').textContent = '';
       holdScreen(false);
@@ -1867,7 +2028,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     if (sending.why === 'signin') line = `${takesSaid(items.length)} kept on this phone (${sizeSaid(left)}), waiting for Google. Sign in and they carry on.`;
     else if (sending.why === 'full') line = `Your Google Drive is full. ${takesSaid(items.length)} kept safe on this phone (${sizeSaid(left)}): make room in Drive, or add storage, and they carry on by themselves.`;
     else if (sending.why === 'offline') line = `No connection just now. ${takesSaid(items.length)} kept on this phone (${sizeSaid(left)}); sending carries on when it’s back.`;
-    else if (sending.why === 'retry') line = `${sending.said || 'Google Drive said no for now.'} Trying again in a moment. ${takesSaid(items.length)} kept on this phone (${sizeSaid(left)}).`;
+    else if (sending.why === 'retry') line = `${sending.said || `${where()} said no for now.`} Trying again in a moment. ${takesSaid(items.length)} kept on this phone (${sizeSaid(left)}).`;
     else if (cur) line = `Sending ${cur.name || cur.lesson}… ${pct}%${items.length > 1 ? ` · ${items.length - 1} more after it` : ''} · ${sizeSaid(left)} to go`;
     else line = `${takesSaid(items.length)} kept on this phone (${sizeSaid(left)}), about to send.`;
     if (onPage) line += ` Keep the Studio open: ${takesSaid(onPage)} ${onPage === 1 ? 'is' : 'are'} only in this page.`;
@@ -1903,15 +2064,15 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     else if (onPage) { text = `${onPage} only in this page: keep the Studio open`; tone = 'bad'; }
     else if (items.length && cur) {
       const pct = cur.size ? Math.min(100, Math.floor((sending.at / cur.size) * 100)) : 0;
-      text = `Drive ↑ ${cur.lesson} ${pct}%${items.length > 1 ? ` · ${waiting(items.length - 1)}` : ''}`;
-    } else if (items.length) text = `Drive · ${waiting(items.length)}${sending.why === 'offline' ? ', no connection' : sending.why === 'retry' ? ', trying again' : ''}`;
-    else if (sending.done) { text = 'Drive ✓ all sent'; tone = 'ok'; }
+      text = `${where()} ↑ ${cur.lesson} ${pct}%${items.length > 1 ? ` · ${waiting(items.length - 1)}` : ''}`;
+    } else if (items.length) text = `${where()} · ${waiting(items.length)}${sending.why === 'offline' ? ', no connection' : sending.why === 'retry' ? ', trying again' : ''}`;
+    else if (sending.done) { text = `${where()} ✓ all sent${useR2() ? ' and checked' : ''}`; tone = 'ok'; }
     el.hidden = !text;
     if (el.textContent !== text) el.textContent = text;
     el.classList.toggle('ok', tone === 'ok'); el.classList.toggle('bad', tone === 'bad');
   }
   $('driveLine').addEventListener('click', () => {
-    if (sending.items.length && !signedIn()) signIn().then(() => pump()).catch(() => {});
+    if (sending.items.length && !canOpen()) signIn().then(() => pump()).catch(() => {});
   });
 
   /**
@@ -1941,12 +2102,12 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   function logText() {
     const cur = sending.current;
     const rows = sending.items.map((it) => `  ${it.lesson} take ${it.n || '?'} · ${sizeSaid(it.size)} · ${it === cur ? `sending, ${it.size ? Math.floor((sending.at / it.size) * 100) : 0}%`
-      : it.session ? `waiting, ${it.size ? Math.floor(((it.sent || 0) / it.size) * 100) : 0}% in Drive` : 'waiting for its place in Drive'}${it.stored ? '' : ' · ONLY IN THIS PAGE'}`);
+      : it.session ? `waiting, ${it.size ? Math.floor(((it.sent || 0) / it.size) * 100) : 0}% in ${it.session.r2 ? 'R2' : 'Drive'}` : `waiting for its place in ${where()}`}${it.stored ? '' : ' · ONLY IN THIS PAGE'}`);
     return [
       `Your Key Studio, as the phone sees it. Written ${stamp()}.`,
-      `Waiting on the phone: ${sending.items.length}${sending.why ? ` (${sending.why})` : ''}${signedIn() ? '' : ', not signed in to Google'}.`,
+      `Waiting on the phone: ${sending.items.length}${sending.why ? ` (${sending.why})` : ''}${useR2() || signedIn() ? '' : ', not signed in to Google'}. Takes go to: ${useR2() ? 'R2' : 'Google Drive'}.`,
       ...rows,
-      `In Drive since the Studio opened: ${takesSaid(sending.done)}.${sending.lostLessons.length ? ` Not on the phone any more: ${sending.lostLessons.join(', ')}.` : ''}`,
+      `In ${where()} since the Studio opened: ${takesSaid(sending.done)}.${sending.lostLessons.length ? ` Not on the phone any more: ${sending.lostLessons.join(', ')}.` : ''}`,
       '',
       'What happened, newest last:',
       ...studioLog.events,
@@ -1955,6 +2116,12 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   }
   async function writeLog() {
     if (studioLog.writing) { studioLog.again = true; return; }
+    if (useR2()) {
+      studioLog.writing = true;
+      try { await r2('log', { text: logText() }); } catch (e) { /* written with the next change */ }
+      finally { studioLog.writing = false; if (studioLog.again) { studioLog.again = false; writeLogSoon(2000); } }
+      return;
+    }
     if (!signedIn()) return; // written at the next sign-in
     studioLog.writing = true;
     try {
@@ -2003,7 +2170,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     // A new sign-in from this tap when the last has under twenty minutes left (a sign-in lasts an hour, and Google's
     // window needs a tap to open): the take's place in Drive is made with it, and from then on the take goes whatever
     // the sign-in does. Not waited for: the take is kept now and goes as soon as Google answers.
-    if (!signedIn(20 * 60000)) signIn().catch(() => { renderSending(); });
+    if (!useR2() && !signedIn(20 * 60000)) signIn().catch(() => { renderSending(); });
     $('sendState').textContent = 'Keeping the take on this phone…';
     const blob = state.blob;
     const take = { key: onPhone.key, parts: onPhone.parts, writes: onPhone.writes };
@@ -2036,8 +2203,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     note(`Kept ${it.lesson} take ${it.n} (${sizeSaid(it.size)}), trimmed ${fmtMark(it.a)} to ${fmtMark(it.b)}${it.rewinds.length ? `, back ${it.rewinds.length}x` : ''}${it.stored ? ', on the phone' : ', ONLY IN THIS PAGE'}`);
     const trim = `trimmed ${fmtMark(it.a)} to ${fmtMark(it.b)}${it.rewinds.length ? `, ${it.rewinds.length === 1 ? 'one time' : `${it.rewinds.length} times`} back for the edit to cut` : ''}`;
     $('sendState').textContent = it.stored
-      ? `Kept on this phone, ${trim}. It goes to your Drive behind you with your marks: film the next one.`
-      : `Kept in this page, ${trim}. It goes to your Drive behind you with your marks: keep the Studio open until it has gone.`;
+      ? `Kept on this phone, ${trim}. It goes to ${whereLong()} behind you with your marks: film the next one.`
+      : `Kept in this page, ${trim}. It goes to ${whereLong()} behind you with your marks: keep the Studio open until it has gone.`;
     $('sendState').classList.add('ok');
     discard();
     letGoLive();
@@ -2053,8 +2220,8 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       if (!next) { show('home'); renderHome(); return; }
       openLesson(next);
       const note = document.createElement('span');
-      note.textContent = it.stored ? `${it.lesson} kept on this phone: it goes to Drive behind you. Now ${next.id}.`
-        : `${it.lesson} kept in this page: keep the Studio open until it has gone to Drive. Now ${next.id}.`;
+      note.textContent = it.stored ? `${it.lesson} kept on this phone: it goes to ${where()} behind you. Now ${next.id}.`
+        : `${it.lesson} kept in this page: keep the Studio open until it has gone to ${where()}. Now ${next.id}.`;
       $('keptNote').replaceChildren(note); $('keptNote').hidden = false;
       clearTimeout(send.noteTimer);
       send.noteTimer = setTimeout(() => { $('keptNote').hidden = true; }, it.stored ? 4000 : 9000);
@@ -2064,7 +2231,9 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
 
   // ── start ───────────────────────────────────────────────────────────────
   syncSettings();
+  state.checked = local.get('checked', {});
   restoreQueue();
+  askStore();
   idb.get('scriptsAt').then((at) => { if (at) { state.scriptsAt = at; renderScriptsLine(); } }).catch(() => {});
   idb.get('scripts').then((text) => { if (text) takeScripts(text); }).catch(() => {}).finally(async () => {
     if (state.scripts && await reviewKept().catch(() => false)) return;
