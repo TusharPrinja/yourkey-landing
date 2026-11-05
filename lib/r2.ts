@@ -43,12 +43,36 @@ export interface Bucket {
 
 /** The bucket, or null until the four settings are in the website's environment. */
 export function bucket(): Bucket | null {
-  const endpoint = process.env.R2_ENDPOINT?.trim().replace(/\/+$/, "");
-  const name = process.env.R2_STUDIO_BUCKET?.trim();
+  const name = process.env.R2_STUDIO_BUCKET?.trim().replace(/^\/+|\/+$/g, "");
+  let endpoint = process.env.R2_ENDPOINT?.trim().replace(/\/+$/, "") ?? "";
+  // Pasted as Cloudflare shows it, with or without https:// and with or without the bucket's name on the end.
+  if (endpoint && !/^https?:\/\//i.test(endpoint)) endpoint = `https://${endpoint}`;
+  if (name && endpoint.toLowerCase().endsWith(`/${name.toLowerCase()}`)) endpoint = endpoint.slice(0, -(name.length + 1));
   const accessKeyId = process.env.R2_STUDIO_ACCESS_KEY_ID?.trim();
   const secretAccessKey = process.env.R2_STUDIO_SECRET_ACCESS_KEY?.trim();
   if (!endpoint || !name || !accessKeyId || !secretAccessKey || !/^https:\/\//.test(endpoint)) return null;
   return { client: new AwsClient({ accessKeyId, secretAccessKey, service: "s3", region: "auto" }), base: `${endpoint}/${name}` };
+}
+
+/** The bucket answering with these keys: nothing when it does, else R2's own word for why not (NoSuchBucket,
+ *  InvalidAccessKeyId, SignatureDoesNotMatch, AccessDenied…), never a key. */
+export async function checkBucket(b: Bucket): Promise<string | null> {
+  try {
+    const res = await b.client.fetch(`${b.base}?list-type=2&max-keys=1`);
+    if (res.ok) return null;
+    const text = await res.text().catch(() => "");
+    return tags(text, "Code")[0] ?? `HTTP ${res.status}`;
+  } catch {
+    return "no answer";
+  }
+}
+
+/** The Studio's own check that this phone can reach the bucket: a signed address for a few bytes, written over each
+ *  time, which shows whether the bucket's CORS rule lets the phone send (and read the piece's ETag back). */
+export const CHECK_KEY = "Studio check.txt";
+export async function signCheck(b: Bucket) {
+  const signed = await b.client.sign(new Request(urlOf(b, CHECK_KEY, "X-Amz-Expires=600"), { method: "PUT" }), { aws: { signQuery: true } });
+  return signed.url;
 }
 
 const pathOf = (key: string) => key.split("/").map(encodeURIComponent).join("/");

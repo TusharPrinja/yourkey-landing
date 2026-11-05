@@ -3,7 +3,8 @@
  *
  * Only a phone holding the Studio's cookie (the password, lib/studioLock.ts) gets an answer; proxy.ts checks it
  * first and this checks it again. The Studio sends one JSON request at a time, { op, ... }:
- *   status            whether R2 is set up (the four settings are in the website's environment)
+ *   status            whether R2 is set up and answers with its keys (R2's own word when it doesn't)
+ *   probe             a signed address for a few bytes, so the phone can check the bucket lets it send (CORS)
  *   start             a take's upload begins, its marks written beside it as JSON
  *   sign              signed addresses for the next pieces, which the phone sends straight to R2
  *   parts             the pieces R2 already holds, so a take picks up where it stopped
@@ -23,6 +24,7 @@ import {
   R2Error,
   abortUpload,
   bucket,
+  checkBucket,
   checkedTakeKey,
   completeUpload,
   headObject,
@@ -30,6 +32,7 @@ import {
   listParts,
   listTakes,
   putText,
+  signCheck,
   signParts,
   startUpload,
   takeKey,
@@ -55,7 +58,12 @@ export async function POST(request: NextRequest): Promise<Response> {
     return reply({ error: "bad" }, 400);
   }
   const b = bucket();
-  if (body.op === "status") return reply({ ready: !!b, part: PART });
+  if (body.op === "status") {
+    if (!b) return reply({ ready: false, part: PART, said: "R2 isn’t set up on the website yet." });
+    // The keys and the bucket's name, tried for real: R2's own word when they don't work.
+    const problem = await checkBucket(b);
+    return reply(problem ? { ready: false, part: PART, said: `R2 said ${problem}: check the bucket name and the keys in Vercel.` } : { ready: true, part: PART });
+  }
   if (!b) return reply({ error: "not-set-up", said: "R2 isn’t set up on the website yet." }, 503);
 
   try {
@@ -113,6 +121,8 @@ export async function POST(request: NextRequest): Promise<Response> {
         await abortUpload(b, key, uploadId);
         return reply({ ok: true });
       }
+      case "probe":
+        return reply({ url: await signCheck(b) });
       case "list": {
         if (!isFolder(body.folder)) return reply({ error: "bad" }, 400);
         return reply({ takes: await listTakes(b, body.folder) });

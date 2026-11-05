@@ -422,7 +422,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   const CHUNK = 8 * 1024 * 1024; // a multiple of 256 KiB, as Drive's resumable upload asks
   /** Where takes go (5 November 2026, his ask: "My Google drive storage is full ... make it take it to r2 from the studio
    *  instead"): his private R2 bucket once the website has it set up, or Google Drive if he ticks it in the settings. */
-  const store = { ready: false, asked: false };
+  const store = { ready: false, asked: false, blocked: '', said: '' };
   const R2_PART = 8 * 1024 * 1024;
   const HOLD_AFTER_WORDS = 2000;
 
@@ -715,10 +715,13 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     $('scriptsState').classList.toggle('ok', !!state.scripts && state.scriptsSaved !== false);
     $('scriptsState').classList.toggle('bad', state.scriptsSaved === false);
     $('storeState').textContent = !store.asked ? 'Asking the website about R2…'
-      : useR2() ? 'Takes go to your private R2 bucket. No Google sign-in needed, and each take is checked in R2 before it leaves this phone.'
-        : store.ready ? 'R2 is set up, but takes go to Google Drive (untick the setting on the lessons page for R2).'
-          : 'R2 isn’t set up on the website yet, so takes go to Google Drive.';
-    $('storeState').classList.toggle('ok', useR2());
+      : useR2() && store.blocked ? `R2 is set up, but this phone can’t send to it yet. ${store.blocked} Takes wait safe on this phone until it can.`
+        : useR2() ? 'Takes go to your private R2 bucket, checked from this phone just now. No Google sign-in needed, and each take is checked in R2 before it leaves this phone.'
+          : store.ready ? 'R2 is set up, but takes go to Google Drive (untick the setting on the lessons page for R2).'
+            : store.said && !/isn’t set up/.test(store.said) ? `${store.said} Until then, takes go to Google Drive.`
+              : 'R2 isn’t set up on the website yet, so takes go to Google Drive.';
+    $('storeState').classList.toggle('ok', useR2() && !store.blocked);
+    $('storeState').classList.toggle('bad', (useR2() && !!store.blocked) || (store.asked && !store.ready && !!store.said && !/isn’t set up/.test(store.said)));
     $('googleState').textContent = signedIn() ? 'Signed in. Takes go to “Your Key seminars” in your Drive.' : useR2() ? 'Google: not needed while R2 is on.' : 'Not signed in.';
     $('googleState').classList.toggle('ok', signedIn());
     $('toLessons').disabled = !state.scripts;
@@ -1744,7 +1747,29 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
       renderHome();
     } catch (e) { $('r2Said').textContent = e.message; $('r2Said').classList.add('bad'); }
   }
-  $('r2Check').addEventListener('click', checkR2);
+  $('r2Check').addEventListener('click', async () => { if (await probeR2() && sending.nudge) sending.nudge(); checkR2(); });
+  /**
+   * This phone sending a few bytes to R2 the way a take's pieces go (5 November 2026): whether the bucket's CORS rule
+   * lets it, said in words on the setup page. Until it works, takes wait safe on the phone and the check is tried again
+   * each minute.
+   */
+  async function probeR2() {
+    try {
+      const { url } = await r2('probe');
+      await putPart(url, new Blob([`Studio check ${new Date().toISOString()}`], { type: 'text/plain' }), () => {});
+      if (store.blocked) note('R2 checked from this phone: it can send takes');
+      store.blocked = '';
+    } catch (e) {
+      const before = store.blocked;
+      store.blocked = navigator.onLine === false ? 'There’s no connection to check R2 just now.'
+        : /ETag/.test(e.message) ? 'The bucket’s CORS rule needs "ExposeHeaders": ["ETag"].'
+          : e.network ? 'This phone can’t send to the bucket: its CORS rule is missing, or doesn’t list https://yourkey.app.'
+            : e.message;
+      if (store.blocked !== before) note(`R2 not reachable from this phone: ${store.blocked}`);
+    }
+    renderSetup(); renderSending();
+    return !store.blocked;
+  }
   $('useDrive').addEventListener('change', () => {
     local.set('useDrive', $('useDrive').checked);
     note($('useDrive').checked ? 'Takes go to Google Drive from now on' : 'Takes go to R2 from now on');
@@ -1752,8 +1777,9 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   });
   /** Whether the website has R2 set up, asked once as the Studio opens. */
   async function askStore() {
-    try { const d = await r2('status'); store.ready = !!d.ready; } catch (e) { store.ready = false; }
+    try { const d = await r2('status'); store.ready = !!d.ready; store.said = d.said || ''; } catch (e) { store.ready = false; store.said = e.message; }
     store.asked = true;
+    if (store.ready) await probeR2();
     note(store.ready ? (useR2() ? 'R2 is set up: takes go to the private bucket' : 'R2 is set up, but takes go to Google Drive (the setting)') : 'R2 isn’t set up on the website: takes go to Google Drive');
     renderSetup(); renderHome(); renderSending();
     if (useR2()) refreshTakes();
@@ -1931,6 +1957,13 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     try {
       while (sending.items.length) {
         sending.why = '';
+        if (useR2() && store.blocked) {
+          // R2 is set up but this phone can't reach it yet (most often the bucket's CORS rule): the takes wait here.
+          sending.why = 'r2blocked'; renderSending();
+          await rest(60000);
+          await probeR2();
+          continue;
+        }
         let full = false;
         // Every waiting take gets its Drive session while a sign-in is to hand.
         if (canOpen()) {
@@ -2026,6 +2059,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     const onPage = items.filter((x) => !x.stored).length;
     let line;
     if (sending.why === 'signin') line = `${takesSaid(items.length)} kept on this phone (${sizeSaid(left)}), waiting for Google. Sign in and they carry on.`;
+    else if (sending.why === 'r2blocked') line = `R2 isn’t taking takes from this phone yet. ${store.blocked} ${takesSaid(items.length)} kept safe on this phone (${sizeSaid(left)}): they go as soon as it works.`;
     else if (sending.why === 'full') line = `Your Google Drive is full. ${takesSaid(items.length)} kept safe on this phone (${sizeSaid(left)}): make room in Drive, or add storage, and they carry on by themselves.`;
     else if (sending.why === 'offline') line = `No connection just now. ${takesSaid(items.length)} kept on this phone (${sizeSaid(left)}); sending carries on when it’s back.`;
     else if (sending.why === 'retry') line = `${sending.said || `${where()} said no for now.`} Trying again in a moment. ${takesSaid(items.length)} kept on this phone (${sizeSaid(left)}).`;
@@ -2061,6 +2095,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     else if (sending.lostLessons.length) { text = `${sending.lostLessons.join(', ')} lost: film again`; tone = 'bad'; }
     else if (items.length && sending.why === 'signin') { text = `Tap to sign in to Google · ${waiting(items.length)}`; tone = 'bad'; }
     else if (items.length && sending.why === 'full') { text = `Drive is full · ${waiting(items.length)}`; tone = 'bad'; }
+    else if (items.length && sending.why === 'r2blocked') { text = `R2 not reachable yet · ${waiting(items.length)}`; tone = 'bad'; }
     else if (onPage) { text = `${onPage} only in this page: keep the Studio open`; tone = 'bad'; }
     else if (items.length && cur) {
       const pct = cur.size ? Math.min(100, Math.floor((sending.at / cur.size) * 100)) : 0;

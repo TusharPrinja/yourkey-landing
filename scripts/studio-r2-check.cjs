@@ -25,7 +25,7 @@ const PAGE = fs.readFileSync(path.join(__dirname, '..', 'public', 'studio', 'ind
   .replace('const R2_PART = 8 * 1024 * 1024;', 'const R2_PART = 64 * 1024;'); // small pieces, so a short take has several
 if (!PAGE.includes('const R2_PART = 64 * 1024;')) throw new Error('the Studio no longer has R2_PART');
 
-const r2 = { uploads: {}, objects: {}, texts: {}, seq: 0, puts: 0, drops: new Set(), paused: false, log: [], errors: [], statusAsked: 0 };
+const r2 = { uploads: {}, objects: {}, texts: {}, seq: 0, puts: 0, drops: new Set(), paused: false, log: [], errors: [], statusAsked: 0, blockProbe: true, probes: 0 };
 const cors = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'PUT, GET, HEAD, OPTIONS', 'access-control-allow-headers': '*', 'access-control-expose-headers': 'ETag' };
 const wait = (ms) => new Promise((res) => setTimeout(res, ms));
 const sha = (b) => crypto.createHash('sha256').update(b).digest('hex');
@@ -77,6 +77,7 @@ async function door(route) {
       return ok(route, { takes: Object.entries(r2.objects).filter(([k]) => k.startsWith(prefix)).map(([key, o]) => ({ key, name: key.slice(prefix.length), size: o.data.length, at: new Date().toISOString() })) });
     }
     case 'log': r2.texts['Studio log.txt'] = b.text; return ok(route, { ok: true });
+    case 'probe': return ok(route, { url: 'https://r2.fake/check?X-Amz-Signature=secretcheck' });
     default: return ok(route, { error: 'bad' }, 400);
   }
 }
@@ -85,6 +86,12 @@ const FOLDERS = Object.values(FOLDER);
 async function putPiece(route) {
   const req = route.request();
   if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
+  if (/r2\.fake\/check\?/.test(req.url())) {
+    r2.probes++;
+    // A bucket with no CORS rule: the browser refuses the answer, which the page sees as a failed request.
+    if (r2.blockProbe) return route.abort('failed');
+    return route.fulfill({ status: 200, headers: { ...cors, etag: '"check"' }, body: '' });
+  }
   const m = /\/put\/(up\d+)\/(\d+)/.exec(req.url());
   const u = m && r2.uploads[m[1]];
   if (!u) return route.fulfill({ status: 404, headers: cors, body: '<Error><Code>NoSuchUpload</Code></Error>' });
@@ -135,8 +142,9 @@ async function putPiece(route) {
   await page.waitForSelector('#setup:not([hidden]), #home:not([hidden])');
   await page.evaluate((t) => { const box = document.getElementById('pasteBox'); const dt = new DataTransfer(); dt.setData('text/plain', t); box.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true })); }, SCRIPTS);
   await page.waitForFunction(() => /lessons, on this phone/.test(document.getElementById('scriptsState').textContent));
-  await page.waitForFunction(() => /private R2 bucket/.test(document.getElementById('storeState').textContent));
-  const setupSays = await page.textContent('#storeState');
+  await page.waitForFunction(() => /can’t send to it yet/.test(document.getElementById('storeState').textContent));
+  const blockedSays = await page.textContent('#storeState');
+  const setupSays = blockedSays;
   await page.screenshot({ path: path.join(OUT, 'setup.png') });
   await page.click('#toLessons');
   await page.waitForSelector('#home:not([hidden])');
@@ -164,8 +172,22 @@ async function putPiece(route) {
     r.onsuccess = () => { const db = r.result; const t = db.transaction(['queue']); const q = t.objectStore('queue').getAll(); t.oncomplete = () => { resolve((q.result || []).length); db.close(); }; };
   }));
 
+  // 0. R2 set up but not reachable from the phone (no CORS rule): the setup page says so, the take waits on the phone,
+  // and once the rule is right ("Check what's in R2" checks again) it goes.
+  await film(4, 3);
+  await send();
+  await page.waitForFunction(() => /R2 isn’t taking takes from this phone yet/.test(document.getElementById('sendingState').textContent), null, { timeout: 15000 });
+  const waitingSays = await page.textContent('#sendingState');
+  const waitingLine = await page.textContent('#driveLine').catch(() => '');
+  const waitingOnPhone = await onPhone();
+  await page.screenshot({ path: path.join(OUT, 'blocked.png') });
+  r2.blockProbe = false;
+  await page.click('#r2Check');
+  await allSent(60000);
+  const afterUnblock = Object.keys(r2.objects);
+  const unblockedSays = await page.textContent('#storeState').catch(() => '');
   // 1. A take whose second piece drops: it picks up from the pieces R2 holds, and lands whole.
-  r2.drops.add('up1#2');
+  r2.drops.add('up2#2');
   await film(1, 4);
   await send();
   await allSent();
@@ -197,17 +219,18 @@ async function putPiece(route) {
   const lineState = await page.textContent('#driveLine').catch(() => '');
 
   const names = Object.keys(r2.objects).sort();
-  check('the setup page says takes go to R2, with no Google sign-in', /private R2 bucket/.test(setupSays) && googleAsked === 0, { setupSays, googleAsked });
-  check('four takes in R2, named and numbered right', JSON.stringify(names) === JSON.stringify(['Sales/S01.01 take 1.mp4', 'Sales/S01.01 take 2.mp4', 'Sales/S01.02 take 1.mp4', 'Sales/S01.03 take 1.mp4'].map((n) => n.replace('.mp4', names[0] && names[0].endsWith('.webm') ? '.webm' : '.mp4'))), names);
+  check('with no CORS rule the setup page says so in words, and the take waits safe on the phone', /CORS rule is missing/.test(blockedSays) && /kept safe on this phone/.test(waitingSays) && /R2 not reachable/.test(waitingLine) && waitingOnPhone === 1, { blockedSays, waitingSays, waitingLine, waitingOnPhone });
+  check('once the rule is right, the check passes and the waiting take goes, with no Google sign-in', afterUnblock.includes('Sales/S01.04 take 1.mp4') && /checked from this phone/.test(unblockedSays) && googleAsked === 0, { afterUnblock, unblockedSays, googleAsked });
+  check('five takes in R2, named and numbered right', JSON.stringify(names) === JSON.stringify(['Sales/S01.01 take 1.mp4', 'Sales/S01.01 take 2.mp4', 'Sales/S01.02 take 1.mp4', 'Sales/S01.03 take 1.mp4', 'Sales/S01.04 take 1.mp4']), names);
   const shas = new Set(kept.map((k) => k.sha));
-  check('every take arrived byte for byte', names.length === 4 && names.every((n) => shas.has(r2.objects[n].sha)), names.map((n) => [n, r2.objects[n].data.length]));
-  check('the dropped piece was sent again and the take resumed from R2’s pieces', r2.log.some((l) => l === 'drop up1#2') && r2.log.some((l) => /^parts up1 /.test(l)), r2.log.filter((l) => /up1/.test(l)));
+  check('every take arrived byte for byte', names.length === 5 && names.every((n) => shas.has(r2.objects[n].sha)), names.map((n) => [n, r2.objects[n].data.length]));
+  check('the dropped piece was sent again and the take resumed from R2’s pieces', r2.log.some((l) => l === 'drop up2#2') && r2.log.some((l) => /^parts up2 1/.test(l)), r2.log.filter((l) => /up2/.test(l)));
   const marks = names.map((n) => JSON.parse(r2.texts[`${n}.json`] || '{}'));
   check('each take’s marks are beside it in R2', marks.every((m) => m.lesson && m.trimStart != null && m.trimEnd != null && /Take \d\. Start /.test(m.description || '')), marks.map((m) => [m.lesson, m.take, m.trimStart, m.trimEnd]));
   check('the reloaded take was still on the phone and landed', beforeReload >= 1 && r2.objects['Sales/S01.03 take 1.mp4'] !== undefined, { beforeReload });
   check('nothing left on the phone once R2 holds every take', left === 0, { left });
   check('the lesson line says the take was checked in R2', listed.some((t) => /checked in R2/.test(t)), listed);
-  check('Check what’s in R2 says what the bucket holds', /R2 holds 4 takes of Sales/.test(r2Said), r2Said);
+  check('Check what’s in R2 says what the bucket holds', /R2 holds 5 takes of Sales/.test(r2Said), r2Said);
   const log = r2.texts['Studio log.txt'] || '';
   check('the log went to R2, says it checked each take, and holds no signed address', /In R2, checked/.test(log) && /Takes go to: R2/.test(log) && !/X-Amz-Signature|secret\d/.test(log), log.split('\n').slice(0, 3));
   check('the camera line says R2', /R2/.test(lineState || '') || lineState === null || lineState === '', lineState);
