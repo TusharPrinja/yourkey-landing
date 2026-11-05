@@ -99,7 +99,7 @@ const check = (name, ok, seen) => { results.push({ name, ok: !!ok, seen }); cons
   }).listen(0, '127.0.0.1');
   await new Promise((done) => server.once('listening', done));
   const URL_ = `http://127.0.0.1:${server.address().port}/studio/index.html`;
-  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium',
     args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required'] });
 
   for (const [w, h] of [[844, 390], [932, 430]]) {

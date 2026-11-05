@@ -422,7 +422,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   const CHUNK = 8 * 1024 * 1024; // a multiple of 256 KiB, as Drive's resumable upload asks
   /** Where takes go (5 November 2026, his ask: "My Google drive storage is full ... make it take it to r2 from the studio
    *  instead"): his private R2 bucket once the website has it set up, or Google Drive if he ticks it in the settings. */
-  const store = { ready: false, asked: false, blocked: '', said: '' };
+  const store = { ready: false, asked: false, blocked: '', said: '', dropped: false };
   const R2_PART = 8 * 1024 * 1024;
   const HOLD_AFTER_WORDS = 2000;
 
@@ -716,6 +716,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
     $('scriptsState').classList.toggle('bad', state.scriptsSaved === false);
     $('storeState').textContent = !store.asked ? 'Asking the website about R2…'
       : useR2() && store.blocked ? `R2 is set up, but this phone can’t send to it yet. ${store.blocked} Takes wait safe on this phone until it can.`
+        : useR2() && store.dropped ? 'Takes go to your private R2 bucket. The last check lost its connection, but this phone has sent to R2 before, so nothing needs changing: the takes carry on by themselves.'
         : useR2() ? 'Takes go to your private R2 bucket, checked from this phone just now. No Google sign-in needed, and each take is checked in R2 before it leaves this phone.'
           : store.ready ? 'R2 is set up, but takes go to Google Drive (untick the setting on the lessons page for R2).'
             : store.said && !/isn’t set up/.test(store.said) ? `${store.said} Until then, takes go to Google Drive.`
@@ -1639,11 +1640,14 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
   const canOpen = () => useR2() || signedIn();
   const where = () => (useR2() ? 'R2' : 'Drive');
   const whereLong = () => (useR2() ? 'your private R2 bucket' : 'your Drive');
+  /** Whether this phone has ever sent to R2, kept on the phone: once it has, the bucket's CORS rule is known to let it. */
+  let reachedR2 = !!local.get('reachedR2', false);
+  const reached = () => { if (!reachedR2) { reachedR2 = true; local.set('reachedR2', true); } };
   async function r2(op, payload = {}) {
     let res;
     try {
       res = await fetch('/studio/r2', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ op, ...payload }) });
-    } catch (e) { throw Object.assign(new Error('The connection dropped.'), { network: true }); }
+    } catch (e) { throw Object.assign(new Error('The connection dropped.'), { network: true, ours: true }); }
     let data = {};
     try { data = await res.json(); } catch (e) { /* no body */ }
     if (res.status === 401) throw Object.assign(new Error('The Studio is locked on this phone: open it with the password again.'), { status: 401 });
@@ -1706,7 +1710,7 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
         const from = (n - 1) * R2_PART;
         const base = sentBytes();
         const etag = await putPart(url, it.blob.slice(from, from + pieceSize(n)), (loaded) => { sending.at = base + loaded; renderSending(); });
-        done.set(n, etag);
+        done.set(n, etag); reached();
         it.sent = sentBytes(); noteDown(it);
         sending.at = it.sent; renderSending();
       }
@@ -1753,19 +1757,33 @@ input[type="text"] { width: 100%; border: 1px solid var(--line); border-radius: 
    * lets it, said in words on the setup page. Until it works, takes wait safe on the phone and the check is tried again
    * each minute.
    */
-  async function probeR2() {
+  async function probeR2(again = true) {
     try {
       const { url } = await r2('probe');
       await putPart(url, new Blob([`Studio check ${new Date().toISOString()}`], { type: 'text/plain' }), () => {});
+      reached();
       if (store.blocked) note('R2 checked from this phone: it can send takes');
-      store.blocked = '';
+      store.blocked = ''; store.dropped = false;
     } catch (e) {
       const before = store.blocked;
-      store.blocked = navigator.onLine === false ? 'There’s no connection to check R2 just now.'
-        : /ETag/.test(e.message) ? 'The bucket’s CORS rule needs "ExposeHeaders": ["ETag"].'
-          : e.network ? 'This phone can’t send to the bucket: its CORS rule is missing, or doesn’t list https://yourkey.app.'
-            : e.message;
-      if (store.blocked !== before) note(`R2 not reachable from this phone: ${store.blocked}`);
+      if (e.network && reachedR2) {
+        // This phone has sent to R2 before, so the bucket's rule lets it: a dropped connection is only that, and the
+        // takes carry on trying by themselves, as for any dropped piece (5 November: tapped just after Safari came back on
+        // screen, the check had blamed the CORS rule and held the take for a minute).
+        store.blocked = ''; store.dropped = true;
+        note('R2 check: the connection dropped. This phone has sent to R2 before, so the takes carry on by themselves');
+      } else if (e.network && again && navigator.onLine !== false) {
+        // Never sent from this phone yet: tried once more before the bucket's rule is blamed.
+        await new Promise((resolve) => setTimeout(resolve, 2500));
+        return probeR2(false);
+      } else {
+        store.dropped = false;
+        store.blocked = navigator.onLine === false || (e.network && e.ours) ? 'There’s no connection to check R2 just now.'
+          : /ETag/.test(e.message) ? 'The bucket’s CORS rule needs "ExposeHeaders": ["ETag"].'
+            : e.network ? 'This phone can’t send to the bucket: its CORS rule is missing, or doesn’t list https://yourkey.app.'
+              : e.message;
+        if (store.blocked !== before) note(`R2 not reachable from this phone: ${store.blocked}`);
+      }
     }
     renderSetup(); renderSending();
     return !store.blocked;

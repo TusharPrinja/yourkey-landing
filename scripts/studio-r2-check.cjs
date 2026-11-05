@@ -110,7 +110,7 @@ async function putPiece(route) {
   const server = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'text/html' }); r.end(PAGE); }).listen(0, '127.0.0.1');
   await new Promise((done) => server.once('listening', done));
   const URL_ = `http://127.0.0.1:${server.address().port}/studio/index.html`;
-  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium',
     args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required'] });
   const context = await browser.newContext({ viewport: { width: 932, height: 430 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
   await context.addInitScript(() => {
@@ -212,6 +212,24 @@ async function putPiece(route) {
   await page.waitForFunction(() => /R2 holds/.test(document.getElementById('r2Said').textContent), null, { timeout: 10000 });
   const r2Said = await page.textContent('#r2Said');
   await page.screenshot({ path: path.join(OUT, 'check-r2.png') });
+  // 4. The connection drops during the check on a phone that has sent to R2 before (5 November: tapped just after Safari
+  // came back on screen, the check had blamed the CORS rule and held the take for a minute): the rule is never blamed,
+  // and a take filmed then goes at once.
+  r2.blockProbe = true;
+  const probesBefore = r2.probes;
+  await page.click('#r2Check');
+  await page.waitForFunction(() => /lost its connection|can’t send to it yet/.test(document.getElementById('storeState').textContent), null, { timeout: 15000 });
+  const droppedSays = await page.textContent('#storeState');
+  await film(5, 3);
+  await send();
+  const sentFrom = Date.now();
+  while (Date.now() - sentFrom < 30000 && !(r2.objects['Sales/S01.05 take 1.mp4'] && (await onPhone()) === 0)) await page.waitForTimeout(400);
+  const droppedSentIn = Date.now() - sentFrom;
+  const droppedLine = await page.textContent('#driveLine').catch(() => '');
+  const droppedSending = await page.textContent('#sendingState').catch(() => '');
+  const probesDuring = r2.probes - probesBefore;
+  await page.screenshot({ path: path.join(OUT, 'dropped.png') });
+  r2.blockProbe = false;
   await page.waitForTimeout(9000); // the log is written a few seconds after each change
   const kept = await page.evaluate(() => JSON.parse(localStorage.getItem('test:kept') || '[]'));
   const googleAsked = await page.evaluate(() => window.__googleAsked || 0);
@@ -221,9 +239,10 @@ async function putPiece(route) {
   const names = Object.keys(r2.objects).sort();
   check('with no CORS rule the setup page says so in words, and the take waits safe on the phone', /CORS rule is missing/.test(blockedSays) && /kept safe on this phone/.test(waitingSays) && /R2 not reachable/.test(waitingLine) && waitingOnPhone === 1, { blockedSays, waitingSays, waitingLine, waitingOnPhone });
   check('once the rule is right, the check passes and the waiting take goes, with no Google sign-in', afterUnblock.includes('Sales/S01.04 take 1.mp4') && /checked from this phone/.test(unblockedSays) && googleAsked === 0, { afterUnblock, unblockedSays, googleAsked });
-  check('five takes in R2, named and numbered right', JSON.stringify(names) === JSON.stringify(['Sales/S01.01 take 1.mp4', 'Sales/S01.01 take 2.mp4', 'Sales/S01.02 take 1.mp4', 'Sales/S01.03 take 1.mp4', 'Sales/S01.04 take 1.mp4']), names);
+  check('a dropped connection on a phone that has sent before never blames the bucket’s rule, and the next take goes at once', probesDuring >= 1 && /lost its connection/.test(droppedSays) && !/CORS/.test(droppedSays) && !/R2 not reachable|isn’t taking takes/.test(`${droppedLine} ${droppedSending}`) && r2.objects['Sales/S01.05 take 1.mp4'] !== undefined && droppedSentIn < 30000, { probesDuring, droppedSays, droppedLine, droppedSending, droppedSentIn });
+  check('six takes in R2, named and numbered right', JSON.stringify(names) === JSON.stringify(['Sales/S01.01 take 1.mp4', 'Sales/S01.01 take 2.mp4', 'Sales/S01.02 take 1.mp4', 'Sales/S01.03 take 1.mp4', 'Sales/S01.04 take 1.mp4', 'Sales/S01.05 take 1.mp4']), names);
   const shas = new Set(kept.map((k) => k.sha));
-  check('every take arrived byte for byte', names.length === 5 && names.every((n) => shas.has(r2.objects[n].sha)), names.map((n) => [n, r2.objects[n].data.length]));
+  check('every take arrived byte for byte', names.length === 6 && names.every((n) => shas.has(r2.objects[n].sha)), names.map((n) => [n, r2.objects[n].data.length]));
   check('the dropped piece was sent again and the take resumed from R2’s pieces', r2.log.some((l) => l === 'drop up2#2') && r2.log.some((l) => /^parts up2 1/.test(l)), r2.log.filter((l) => /up2/.test(l)));
   const marks = names.map((n) => JSON.parse(r2.texts[`${n}.json`] || '{}'));
   check('each take’s marks are beside it in R2', marks.every((m) => m.lesson && m.trimStart != null && m.trimEnd != null && /Take \d\. Start /.test(m.description || '')), marks.map((m) => [m.lesson, m.take, m.trimStart, m.trimEnd]));
