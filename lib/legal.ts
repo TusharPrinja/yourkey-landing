@@ -74,7 +74,7 @@ If you are located in the United Kingdom or the European Economic Area, you have
   - Right to Erasure: request deletion of your personal data ("right to be forgotten").
   - Right to Data Portability: request your data in a structured, commonly used format.
   - Right to Object: object to the processing of your personal data in certain circumstances.
-  - Right to Withdraw Consent: where processing is based on your consent (such as inner-work data), you may withdraw it at any time by deleting the relevant content or your account.
+  - Right to Withdraw Consent: where processing is based on your consent (the health information you keep in Quitting Addictions, which the package asks your permission for before it keeps anything), you may withdraw it at any time by deleting the relevant content or your account.
 
 To exercise any of these rights, contact us at: hello@yourkey.app. We will respond within 30 days. You also have the right to lodge a complaint with the Information Commissioner's Office (ico.org.uk).
 
