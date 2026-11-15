@@ -49,19 +49,20 @@ export default function SupportPage() {
 
           <Block id="website" about="Manage or cancel" title="Bought on this website">
             <p>
-              Packages bought on yourkey.app are sold through Link, a Stripe service, which takes the payment and sends the
-              receipt. The charge shows on your statement as <span className="num text-[var(--text)]">LINK.COM* YOURKEY</span>.
+              Plans and packages bought on yourkey.app are sold through Link, a Stripe service, which takes the payment and
+              sends the receipt. The charge shows on your statement as <span className="num text-[var(--text)]">LINK.COM* YOURKEY</span>.
             </p>
             <p>
-              Cancel any time in the Recurring section of your Link account at link.com, or from the Packages tab in the app.
-              It takes effect at the end of the current period. Deleting your Your Key account does not cancel it.
+              Cancel any time in the Recurring section of your Link account at link.com, signed in with the email you paid
+              with. A package can also be cancelled from the Packages tab in the app. It takes effect at the end of the
+              current period. Deleting your Your Key account does not cancel it.
             </p>
           </Block>
 
           <Block id="refunds" about="Refunds" title="If you want your money back">
             <p>
-              For a package bought on this website: ask within 14 days of your first payment and we refund that payment in
-              full. Email <a href={`mailto:${SITE.contact}`}>{SITE.contact}</a>.
+              For a plan or a package bought on this website: ask within 14 days of your first payment and we refund that
+              payment in full. Email <a href={`mailto:${SITE.contact}`}>{SITE.contact}</a>.
             </p>
             <p>
               For anything bought in the app, Apple handles refunds: ask at reportaproblem.apple.com. Your statutory rights
@@ -101,6 +102,7 @@ export default function SupportPage() {
           items={[
             { q: "Is the free week charged?", a: "No. A free week, where it is offered in the app, is shown before you start with the date it ends, and the app reminds you two days before. Cancel before then and nothing is charged. There is no free week on the website." },
             { q: "Does Your Key Max include the packages?", a: "Yes. Your Key Max includes all four paid packages. If you already have Your Key Max, the packages are open to you." },
+            { q: "I joined Your Key Max. Am I still paying for Your Key Pro, or for a package?", a: "You may be. Your Key Max includes Your Key Pro and all four paid packages, but it is its own subscription, so anything you were already paying for keeps running until you cancel it. If you took Max inside the app while on Pro inside the app, Apple ends Pro for you. Otherwise cancel what Max now includes: in your iPhone's Settings if you bought it in the app, at link.com if you bought it on this website." },
             { q: "Can I use Your Key on Android?", a: "Your Key is on iPhone, from the App Store." },
             { q: "Something is not working.", a: <>Email <a className="inline-link" href={`mailto:${SITE.contact}`}>{SITE.contact}</a> with what you pressed and what happened. A screenshot helps.</> },
           ]}

@@ -326,7 +326,10 @@ html[data-sky="night"] .greet.night { display: inline; }
 .price { font-size: 34px; line-height: 1.1; font-weight: 600; font-variant-numeric: tabular-nums; }
 .price span { display: block; margin-top: 6px; font-size: 14px; line-height: 1.4; font-weight: 400; color: var(--faint); }
 .plan .body { color: var(--muted); font-size: 15px; line-height: 1.5; }
-.plan .foot { margin-top: auto; padding-top: 8px; }
+.plan-buy { margin-top: auto; padding-top: 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.plan-buy .btn { width: 100%; }
+.plan-buy .link { font-size: 15px; }
+.plan-buy .link.quiet { color: var(--muted); font-weight: 500; text-decoration-color: rgba(242, 240, 236, 0.25); }
 
 /* ─── The packages, as a list ──────────────────────────────────────────────────────────────────── */
 

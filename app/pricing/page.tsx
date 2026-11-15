@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AppStoreButton, ComingTag, PackagesList, Page, PageHead, Plans, Section } from "@/components/site";
-import { BILLING, PACKAGE_PRICES } from "@/lib/site";
+import { ComingTag, PackagesList, Page, PageHead, Plans, Section } from "@/components/site";
+import { BILLING, PACKAGE_PRICES, PLANS_WHERE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -24,13 +24,8 @@ export default function PricingPage() {
       />
 
       <Section title="The plans.">
-        <Plans />
-        <p className="tiny" style={{ fontSize: 14.5 }}>
-          Your Key Pro and Your Key Max are bought in the app, with a free week for new subscribers where the app offers one.
-        </p>
-        <div className="cta" style={{ marginTop: 4 }}>
-          <AppStoreButton label="Get Your Key" />
-        </div>
+        <Plans buy />
+        <p className="tiny" style={{ fontSize: 14.5 }}>{PLANS_WHERE}</p>
       </Section>
 
       <Section
@@ -55,9 +50,13 @@ export default function PricingPage() {
             days before. Cancel before then and nothing is charged.
           </p>
           <p>
-            Packages bought on this website are sold through Link, a Stripe service, and renew each month or year until you
-            cancel. There is no free week on the website. Cancel at link.com or from the Packages tab in the app, and ask
-            within 14 days of your first payment for a full refund of it.
+            Plans and packages bought on this website are sold through Link, a Stripe service, and renew each month or year
+            until you cancel. There is no free week on the website: you pay on the day. Cancel at link.com (a package also
+            from the Packages tab in the app), and ask within 14 days of your first payment for a full refund of it.
+          </p>
+          <p>
+            Your Key Max includes Your Key Pro and all four paid packages, and each of those keeps running until you cancel
+            it. If you join Max while paying for one of them, cancel that one so you pay once.
           </p>
           <Link href="/support#cancel" className="link" style={{ alignSelf: "flex-start" }}>How to cancel</Link>
         </div>

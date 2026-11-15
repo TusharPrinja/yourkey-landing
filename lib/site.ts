@@ -106,6 +106,29 @@ export const TIERS: { id: string; name: string; price: string | null; per?: stri
   },
 ];
 
+/**
+ * THE PLANS ON THIS WEBSITE (15 November 2026). Your Key Pro and Your Key Max can be bought here the way a package
+ * is: an account on the join page, then the checkout, at the App Store's own UK prices, with no free week and the
+ * same full refund within 14 days. Which of the two the website sells today comes from the app
+ * (lib/packages.generated.json `plans.sold`, from yourkey-app lib/web/purchaseLink.ts WEBSITE_SELLS_PLANS, where the
+ * reason is written): today Your Key Max. A plan not in it is bought in the app, and no page here offers it.
+ */
+export const WEB_PLANS = generated.plans;
+export type WebPlan = (typeof generated.plans.items)[number];
+/** This plan's join pages, if the website sells it. */
+export const webPlan = (id: string): WebPlan | null =>
+  ((generated.plans.sold as string[]).includes(id) ? generated.plans.items.find((p) => p.id === id) ?? null : null);
+
+const SOLD_HERE = TIERS.filter((t) => webPlan(t.id));
+const ONLY_IN_APP = TIERS.filter((t) => t.price && !webPlan(t.id));
+const both = (names: string[]) => names.join(" and ");
+/** Where the plans are bought, said from what is true today, so the pages never say more than the website does. */
+export const PLANS_WHERE: string = !SOLD_HERE.length
+  ? "Your Key Pro and Your Key Max are bought in the app, with a free week for new subscribers."
+  : !ONLY_IN_APP.length
+    ? `${both(SOLD_HERE.map((t) => t.name))} are bought in the app, with a free week for new subscribers, or on this website.`
+    : `${both(ONLY_IN_APP.map((t) => t.name))} ${ONLY_IN_APP.length === 1 ? "is" : "are"} bought in the app, and ${both(SOLD_HERE.map((t) => t.name))} in the app or on this website. In the app, new subscribers get a free week.`;
+
 export const PRIVACY_PLAINLY =
   "Your Key uses no AI: every affirmation, mental picture and spoken session is written and recorded in advance. Your own-voice recordings remain on your device. Your account, your goal, and what you save in a package are stored on our secured service in the UK, so they are there on any phone you sign in on. We do not sell your data or share it with advertisers. Apple takes payment in the app and Stripe takes payment on this website, so we never see your full card details.";
 

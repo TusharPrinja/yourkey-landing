@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { SITE, type PaidPackage, FREE_PACKAGE, PAID_PACKAGES, PACKAGE_PRICES, TIERS, TOOL_TILES, WHEN_YOU_NEED_IT } from "@/lib/site";
+import { SITE, type PaidPackage, FREE_PACKAGE, PAID_PACKAGES, PACKAGE_PRICES, TIERS, TOOL_TILES, WHEN_YOU_NEED_IT, webPlan } from "@/lib/site";
 import mark from "@/lib/wordmark.generated.json";
 import { MobileMenu, NavLinks, type NavLink } from "./nav-client";
 
@@ -166,20 +166,49 @@ export function ToolTiles() {
   );
 }
 
-/** The three plans, in the listing's words. Max carries the one accent, as its door does in the app. */
-export function Plans() {
+/**
+ * The three plans, in the listing's words. Max carries the one accent, as its door does in the app.
+ * `buy` (the pricing page) puts each plan's way in under it: the App Store for all three, and the join page for a
+ * plan this website sells (lib/site.ts webPlan), the month first, as the app's own plans page has it.
+ */
+export function Plans({ buy = false }: { buy?: boolean }) {
   return (
     <div className="plans">
-      {TIERS.map((t) => (
-        <article key={t.id} className={`card plan${t.id === "max" ? " max" : ""}`}>
-          <p className="plan-name">{t.name}</p>
-          <p className="price">
-            {t.price ?? "Free"}
-            {t.per ? <span>{t.per}</span> : null}
-          </p>
-          <p className="body">{t.body}</p>
-        </article>
-      ))}
+      {TIERS.map((t) => {
+        const web = buy ? webPlan(t.id) : null;
+        return (
+          <article key={t.id} className={`card plan${t.id === "max" ? " max" : ""}`}>
+            <p className="plan-name">{t.name}</p>
+            <p className="price">
+              {t.price ?? "Free"}
+              {t.per ? <span>{t.per}</span> : null}
+            </p>
+            <p className="body">{t.body}</p>
+            {buy ? (
+              <div className="plan-buy">
+                {web ? (
+                  <>
+                    <Link href={web.joinMonthly} className="btn">Join for {web.monthly} a month</Link>
+                    <Link href={web.joinYearly} className="link">Or {web.yearly} a year</Link>
+                    <p className="tiny">On this website: you pay today, with a full refund within 14 days if you ask.</p>
+                    <a href={SITE.appStoreUrl} className="link quiet">Or in the app, with 7 days free</a>
+                  </>
+                ) : t.price ? (
+                  <>
+                    <a href={SITE.appStoreUrl} className="btn ghost">Get it in the app</a>
+                    <p className="tiny">7 days free for new subscribers, then {t.price} a month.</p>
+                  </>
+                ) : (
+                  <>
+                    <a href={SITE.appStoreUrl} className="btn ghost">Download the app</a>
+                    <p className="tiny">No card, no trial, no end date.</p>
+                  </>
+                )}
+              </div>
+            ) : null}
+          </article>
+        );
+      })}
     </div>
   );
 }

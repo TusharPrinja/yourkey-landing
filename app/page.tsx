@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AppStoreButton, ComingTag, Faq, PackagesList, Page, PhoneFan, Plans, Section, SiteNav, ToolTiles } from "@/components/site";
-import { PACKAGE_PRICES, PRIVACY_PLAINLY, RESULTS, SITE } from "@/lib/site";
+import { PACKAGE_PRICES, PLANS_WHERE, PRIVACY_PLAINLY, RESULTS, SITE } from "@/lib/site";
 
 /**
  * yourkey.app — the home page, in the app's Moonlit look (rebuilt 15 November 2026 with app version 1.3.0).
@@ -73,7 +73,7 @@ export default function Home() {
       {/* ─── The plans ────────────────────────────────────────────────────────────────────── */}
       <Section
         title="Free, for as long as you like."
-        lede="Go further when you want to. Your Key Pro and Your Key Max are bought in the app, with a free week for new subscribers."
+        lede={`Go further when you want to. ${PLANS_WHERE}`}
       >
         <Plans />
         <Link href="/pricing" className="link" style={{ alignSelf: "flex-start", marginTop: 6 }}>Compare the plans</Link>
@@ -107,11 +107,11 @@ export default function Home() {
       <Section title="Before you download." narrow>
         <Faq
           items={[
-            { q: "Is it free?", a: "Yes. Your Key Free is free for as long as you like, with daily limits on some tools. Your Key Pro and Your Key Max are optional subscriptions, shown with their prices in the app before you buy." },
+            { q: "Is it free?", a: <>Yes. Your Key Free is free for as long as you like, with daily limits on some tools. Your Key Pro and Your Key Max are optional subscriptions, shown with their prices before you buy. <Link className="inline-link" href="/pricing">See the plans</Link>.</> },
             { q: "Do the packages cost extra?", a: <>Each paid package is its own subscription, {PACKAGE_PRICES.appMonthly} a month or {PACKAGE_PRICES.appYearly} a year in the app, with a free week for new subscribers, or {PACKAGE_PRICES.webMonthly} a month or {PACKAGE_PRICES.webYearly} a year on this website. Quitting is free. Your Key Max includes all four. <Link className="inline-link" href="/pricing">See pricing</Link>.</> },
             { q: "Which phones is it on?", a: "iPhone, from the App Store." },
             { q: "Is this therapy, or medical advice?", a: RESULTS },
-            { q: "How do I cancel?", a: <>In your iPhone&apos;s subscription settings, or from the Packages tab in the app. <Link className="inline-link" href="/support#cancel">Every way to cancel</Link>.</> },
+            { q: "How do I cancel?", a: <>In your iPhone&apos;s subscription settings for anything bought in the app, and at link.com for anything bought on this website. <Link className="inline-link" href="/support#cancel">Every way to cancel</Link>.</> },
           ]}
         />
       </Section>
