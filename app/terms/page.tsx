@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { TERMS_OF_SERVICE } from "@/lib/legal";
-import { EARLIER_TERMS, EARLIER_TITLE } from "@/lib/legal-earlier";
 import { LegalPage } from "@/components/site";
 
 export const metadata: Metadata = {
@@ -10,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function TermsPage() {
-  return <LegalPage title="Terms of Service" body={TERMS_OF_SERVICE} earlier={{ title: EARLIER_TITLE, body: EARLIER_TERMS }} />;
+  return <LegalPage title="Terms of Service" body={TERMS_OF_SERVICE} />;
 }

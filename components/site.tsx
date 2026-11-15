@@ -255,34 +255,19 @@ export function FreeCard({ p }: { p: typeof FREE_PACKAGE }) {
 /**
  * The privacy policy and the terms, read the way the rest of the site reads. The words are the
  * legal mirror in lib/legal.ts, kept in step with the app's own copy; only the setting is new.
- * `earlier` is the website's own note for an app older than 1.3.0 (lib/legal-earlier.ts): it sits
- * under the mirrored text, in a card of its own, so the mirror stays word for word.
  */
-export function LegalPage({ title, body, earlier }: { title: string; body: string; earlier?: { title: string; body: string } }) {
+export function LegalPage({ title, body }: { title: string; body: string }) {
   const lines = body.split("\n");
   const updated = lines.find((l) => l.startsWith("Last updated:")) ?? "";
   const start = lines.findIndex((l) => !l.trim() || (!l.startsWith("Last updated:") && l !== title.toUpperCase()));
   const content = start >= 0 ? lines.slice(start).join("\n").trim() : body;
   return (
     <Page>
-      <PageHead kicker="Legal" title={title} lede={updated || undefined}>
-        {earlier ? (
-          <p className="text-[14.5px] leading-6 text-[var(--color-mute)]">
-            <a href="#earlier-versions" className="underline underline-offset-4">Is your app older than version 1.3.0? Read the note at the end.</a>
-          </p>
-        ) : null}
-      </PageHead>
+      <PageHead kicker="Legal" title={title} lede={updated || undefined} />
       <article className="px-4 pb-24 sm:px-6">
         <div className="glass mx-auto max-w-3xl whitespace-pre-line p-6 text-[15px] leading-7 text-[var(--color-soft)] [overflow-wrap:anywhere] sm:p-10">
           {content}
         </div>
-        {earlier ? (
-          <section id="earlier-versions" aria-labelledby="earlier-versions-title" className="glass mx-auto mt-6 max-w-3xl scroll-mt-28 p-6 text-[15px] leading-7 text-[var(--color-soft)] [overflow-wrap:anywhere] sm:p-10">
-            <Kicker>Earlier versions</Kicker>
-            <h2 id="earlier-versions-title" className="taught mt-2 text-[24px] leading-[1.25]">{earlier.title}</h2>
-            <div className="mt-4 whitespace-pre-line">{earlier.body}</div>
-          </section>
-        ) : null}
       </article>
     </Page>
   );
