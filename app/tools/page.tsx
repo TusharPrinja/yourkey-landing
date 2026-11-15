@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AppStoreButton, Page, PageHead, Section } from "@/components/site";
-import { PRACTICE, TIERS, TOOLKIT } from "@/lib/site";
+import { AppStoreButton, Page, PageHead, Phone, Section } from "@/components/site";
+import { PRACTICE, PRACTICE_PHOTO, TIERS, TOOLKIT } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "The practice",
@@ -10,43 +10,61 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://yourkey.app/tools" },
 };
 
+/** The app's own screens, as its App Store pictures show them (public/moonlit/screen-<name>.webp). */
+const SCREENS: { name: string; label: string; alt: string }[] = [
+  { name: "home", label: "Home", alt: "Home in the app: the morning practice and your statement" },
+  { name: "affirmations", label: "Affirmations", alt: "Affirmations in the app: today's five" },
+  { name: "gratitude", label: "Gratitude", alt: "The gratitude journal in the app" },
+  { name: "identity-blueprint", label: "Identity Blueprint", alt: "The Identity Blueprint in the app: today's act" },
+];
+
 export default function ToolsPage() {
   const free = TIERS.find((t) => t.id === "free")!;
   return (
     <Page>
       <PageHead
-        kicker="The practice"
         title="Everything you do with your goal, every day."
         lede="Six parts make the daily practice, and more tools sit around them. Nothing is written by AI: every word is written and recorded in advance. The plan you are on decides how long the sessions run and how far the Identity Blueprint goes."
       >
-        <AppStoreButton />
+        <div className="cta"><AppStoreButton /></div>
       </PageHead>
 
-      <Section kicker="The daily practice" title="Six parts, morning and night." wide>
-        <div className="grid gap-4 sm:grid-cols-2">
+      <Section title="Six parts, morning and night.">
+        <div className="grid-2 parts">
           {PRACTICE.map((p) => (
-            <div key={p.name} className="glass flex flex-col gap-2 p-6">
-              <h3 className="text-[19px] font-bold">{p.name}</h3>
-              <p className="text-[15.5px] leading-7 text-[var(--color-soft)]">{p.body}</p>
-            </div>
+            <article key={p.name} className="part">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={`/moonlit/tool-${PRACTICE_PHOTO[p.name]}.jpg`} alt="" width={720} height={720} loading="lazy" decoding="async" />
+              <div>
+                <h3 className="serif h3">{p.name}</h3>
+                <p>{p.body}</p>
+              </div>
+            </article>
           ))}
         </div>
       </Section>
 
-      <Section kicker="The tools" title="Around the practice." wide>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {TOOLKIT.map((t) => (
-            <li key={t} className="glass px-5 py-4 text-[15.5px] font-semibold">{t}</li>
+      <Section title="As it looks in the app.">
+        <div className="screens">
+          {SCREENS.map((s) => (
+            <figure key={s.name}>
+              <Phone name={s.name} alt={s.alt} />
+              <figcaption className="serif">{s.label}</figcaption>
+            </figure>
           ))}
+        </div>
+      </Section>
+
+      <Section title="Around the practice.">
+        <ul className="chips">
+          {TOOLKIT.map((t) => <li key={t} className="chip">{t}</li>)}
         </ul>
       </Section>
 
-      <Section kicker="Free" title="What the free plan includes.">
-        <div className="glass flex flex-col gap-3 p-6 sm:p-8">
-          <p className="text-[16px] leading-7 text-[var(--color-soft)]">{free.body}</p>
-          <Link href="/pricing" className="text-[15px] font-semibold text-[var(--color-amethyst)] underline-offset-4 hover:underline">
-            Compare the plans →
-          </Link>
+      <Section title="What the free plan includes." narrow>
+        <div className="card prose stack">
+          <p>{free.body}</p>
+          <Link href="/pricing" className="link" style={{ alignSelf: "flex-start" }}>Compare the plans</Link>
         </div>
       </Section>
     </Page>

@@ -33,38 +33,37 @@ export default function AboutPage() {
   return (
     <Page>
       <PageHead
-        kicker="About"
         title="A daily practice, built around what you want."
         lede="Your Key is an iPhone app. You choose what you want most, and it gives you a practice for every day around it, with five packages for the skills that carry a goal: selling, time, communication, leadership, and stopping what holds you back."
       />
 
-      <Section kicker="What we believe" title="Four things that decide how it is made." wide>
-        <div className="grid gap-4 sm:grid-cols-2">
+      <Section title="Four things that decide how it is made.">
+        <div className="grid-2">
           {BELIEFS.map((x) => (
-            <div key={x.h} className="glass flex flex-col gap-2 p-6">
-              <h3 className="text-[18px] font-bold">{x.h}</h3>
-              <p className="text-[15px] leading-6 text-[var(--color-soft)]">{x.b}</p>
+            <div key={x.h} className="card stack" style={{ gap: 8 }}>
+              <h3 className="serif h3">{x.h}</h3>
+              <p className="text-[15.5px] leading-7 text-[var(--muted)]">{x.b}</p>
             </div>
           ))}
         </div>
       </Section>
 
-      <Section kicker="The company" title="Who we are.">
-        <div className="glass flex flex-col gap-3 p-6 sm:p-8 text-[16px] leading-7 text-[var(--color-soft)]">
+      <Section title="Who we are." narrow>
+        <div className="card prose stack">
           <p>
             Your Key is made in the UK by {SITE.company}. Write to us at{" "}
-            <a className="font-semibold text-[var(--color-amethyst)]" href={`mailto:${SITE.contact}`}>{SITE.contact}</a>.
+            <a href={`mailto:${SITE.contact}`}>{SITE.contact}</a>.
           </p>
           <p>{RESULTS}</p>
           <p>
-            <Link className="text-[var(--color-amethyst)] underline" href="/privacy">Privacy policy</Link>
+            <Link href="/privacy">Privacy policy</Link>
             {" · "}
-            <Link className="text-[var(--color-amethyst)] underline" href="/terms">Terms</Link>
+            <Link href="/terms">Terms</Link>
             {" · "}
-            <Link className="text-[var(--color-amethyst)] underline" href="/support">Support</Link>
+            <Link href="/support">Support</Link>
           </p>
         </div>
-        <AppStoreButton />
+        <div className="cta" style={{ marginTop: 6 }}><AppStoreButton /></div>
       </Section>
     </Page>
   );

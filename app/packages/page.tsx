@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AppStoreButton, ComingTag, FreeCard, Kicker, PackageCard, Page, PageHead, Section } from "@/components/site";
+import { AppStoreButton, ComingTag, FreeCard, PackageCard, Page, PageHead, Section } from "@/components/site";
 import { FREE_PACKAGE, PAID_PACKAGES, PACKAGE_PRICES } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -46,67 +46,62 @@ export default function PackagesPage() {
   return (
     <Page>
       <PageHead
-        kicker="The packages"
         title="Five skills, each its own world inside Your Key."
         lede={
           <>
             Each package has its own home, daily tools, guided voice sessions and a course, and starts by asking
-            where you are starting from. Four are subscriptions at {PACKAGE_PRICES.appMonthly} a month or{" "}
-            {PACKAGE_PRICES.appYearly} a year in the app, with a free week for new subscribers, or{" "}
-            {PACKAGE_PRICES.webMonthly} a month or {PACKAGE_PRICES.webYearly} a year on this website. Quitting is free.
+            where you are starting from. Four are subscriptions at {PACKAGE_PRICES.webMonthly} a month or{" "}
+            {PACKAGE_PRICES.webYearly} a year on this website, or {PACKAGE_PRICES.appMonthly} a month or{" "}
+            {PACKAGE_PRICES.appYearly} a year in the app, with a free week for new subscribers. Quitting is free.
             Your Key Max includes all four.
           </>
         }
       >
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="cta">
           <AppStoreButton label="Get Your Key" />
           <ComingTag />
         </div>
       </PageHead>
 
-      <Section kicker="Choose a skill" title="Start with the one you need most." wide>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <Section title="Start with the one you need most.">
+        <div className="grid-2 worlds">
           {PAID_PACKAGES.map((p) => <PackageCard key={p.id} p={p} />)}
           <FreeCard p={FREE_PACKAGE} />
         </div>
       </Section>
 
       <Section
-        kicker="Who each one is for"
         title="Everybody, not only the people with the job title."
         lede="Setup asks who you are in it, and every example, line and lesson after that is written for that life."
-        wide
       >
-        <div className="flex flex-col gap-4">
+        <div className="stack" style={{ gap: 14 }}>
           {REACH.map((r) => (
-            <div key={r.id} className="glass grid gap-4 p-6 md:grid-cols-[0.9fr_1.1fr]">
-              <div className="flex flex-col gap-2">
-                <p className="kicker" style={{ color: r.accent }}>{r.name}</p>
-                <p className="text-[16px] leading-7 text-[var(--color-ink)]">{r.who}</p>
+            <div key={r.id} className="card reach">
+              <div className="stack" style={{ gap: 8 }}>
+                <p className="text-[14px] font-semibold" style={{ color: r.accent }}>{r.name}</p>
+                <p className="text-[16px] leading-7">{r.who}</p>
                 {r.id !== "quitting" ? (
-                  <Link href={`/${r.id}`} className="text-[14px] font-semibold underline-offset-4 hover:underline" style={{ color: r.accent }}>
-                    Inside {r.name} →
+                  <Link href={`/${r.id}`} className="text-[14px] font-semibold underline-offset-4 hover:underline" style={{ color: r.accent, alignSelf: "flex-start" }}>
+                    Inside {r.name}
                   </Link>
                 ) : null}
               </div>
-              <ul className="flex flex-wrap content-start gap-2">
-                {r.kinds.map((k) => (
-                  <li key={k} className="rounded-full border border-[var(--glass-border-hi)] px-3 py-1.5 text-[13.5px] text-[var(--color-soft)]">{k}</li>
-                ))}
+              <ul className="chips" style={{ alignContent: "flex-start" }}>
+                {r.kinds.map((k) => <li key={k} className="chip soft">{k}</li>)}
               </ul>
             </div>
           ))}
         </div>
       </Section>
 
-      <Section kicker="How they are written" title="Every line, written and checked before you see it.">
-        <div className="glass flex flex-col gap-3 p-6 sm:p-8">
-          <p className="text-[16px] leading-7 text-[var(--color-soft)]">
+      <Section title="Every line, written and checked before you see it." narrow>
+        <div className="card prose stack">
+          <p>
             Nothing in a package is made up on the spot. Every daily line, spoken session, example and lesson is written
             in full and checked before it ships: figures carry their source, nothing promises you a result, and the lines
             you say to yourself say what you want rather than what you are moving away from.
           </p>
-          <p className="text-[16px] leading-7 text-[var(--color-soft)]">
+          <p>
             The courses are built on published research, and a lesson that gives a figure names where it comes from. Quitting puts safety first: it asks what you
             are working on before anything else, and where stopping suddenly is dangerous it says so and points you to a doctor.
           </p>

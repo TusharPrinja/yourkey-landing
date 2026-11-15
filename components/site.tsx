@@ -1,49 +1,54 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { SITE, type PaidPackage, FREE_PACKAGE } from "@/lib/site";
+import { SITE, type PaidPackage, FREE_PACKAGE, PAID_PACKAGES, PACKAGE_PRICES, TIERS, TOOL_TILES, WHEN_YOU_NEED_IT } from "@/lib/site";
+import mark from "@/lib/wordmark.generated.json";
+import { MobileMenu, NavLinks, type NavLink } from "./nav-client";
 
 /**
- * Shared site chrome and parts (rebuilt 2026-10-04 to the app's design: aubergine ground, glass,
- * amethyst, Manrope / Fraunces / Space Grotesk). Server components only.
+ * The site's shared parts, in the app's Moonlit look (rebuilt 15 November 2026 with app version 1.3.0; his pick of
+ * three looks: C under B's sky). The night-plum ground, solid raised cards, one accent, Castoro for the words that
+ * matter. Everything is drawn on the server but the phone's menu and the "you are here" on a link
+ * (components/nav-client.tsx). The styles are app/globals.css.
  */
 
-const NAV = [
-  { href: "/#practice", label: "The practice" },
+const NAV: NavLink[] = [
+  { href: "/tools", label: "The practice" },
   { href: "/packages", label: "Packages" },
   { href: "/pricing", label: "Pricing" },
   { href: "/support", label: "Support" },
 ];
 
-export function SiteNav() {
+/** "Your Key" in Castoro with the keyhole lit in the O: the app's own outline, drawn once a page and used by name. */
+function WordmarkDefs() {
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--hair)] bg-[var(--color-void)]/85 backdrop-blur-md">
-      <nav aria-label="Main" className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-        <Link href="/" className="flex shrink-0 items-center gap-2.5">
-          <Image src="/app-icon.png" alt="" width={30} height={30} className="rounded-[8px]" />
-          <span className="text-[16px] font-bold tracking-tight text-[var(--color-ink)]">Your Key</span>
-        </Link>
-        <div className="hidden items-center gap-6 md:flex">
-          {NAV.map((l) => (
-            <Link key={l.href} href={l.href} className="text-[14px] font-medium text-[var(--color-soft)] transition-colors hover:text-[var(--color-ink)]">
-              {l.label}
-            </Link>
-          ))}
-        </div>
-        <a
-          href={SITE.appStoreUrl}
-          className="shrink-0 rounded-full bg-[var(--color-amethyst)] px-4 py-2 text-[14px] font-bold text-[#120E19] transition-opacity hover:opacity-90"
-        >
-          Get the app
-        </a>
-      </nav>
-      {/* On a phone the links sit in one scrolling row under the brand. */}
-      <div className="flex justify-between gap-3 overflow-x-auto border-t border-[var(--hair)] px-4 py-2.5 sm:justify-start sm:gap-5 md:hidden">
-        {NAV.map((l) => (
-          <Link key={l.href} href={l.href} className="whitespace-nowrap text-[13px] font-medium text-[var(--color-soft)]">
-            {l.label}
-          </Link>
-        ))}
+    <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden>
+      <symbol id="wm" viewBox={mark.view}>
+        <path d={mark.words} fill="currentColor" />
+        <path d={mark.key} fill="#D7B46A" />
+      </symbol>
+    </svg>
+  );
+}
+
+export function Wordmark() {
+  return (
+    <svg className="wm" role="img" aria-label="Your Key">
+      <use href="#wm" />
+    </svg>
+  );
+}
+
+/** The top bar. `over` is for the home page, where it lies on the photograph and its buttons are glass. */
+export function SiteNav({ over = false }: { over?: boolean }) {
+  return (
+    <header className={`nav wrap${over ? " over" : ""}`}>
+      <Link href="/" aria-label="Your Key, home">
+        <Wordmark />
+      </Link>
+      <NavLinks links={NAV} />
+      <div className="nav-right">
+        <a href={SITE.appStoreUrl} className={`btn small ${over ? "glass" : "ghost"}`}>Get the app</a>
+        <MobileMenu links={NAV} />
       </div>
     </header>
   );
@@ -51,39 +56,34 @@ export function SiteNav() {
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-[var(--hair)] bg-[var(--color-recessed)] px-4 py-12 sm:px-6">
-      <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-[1.4fr_1fr_1fr]">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-2.5">
-            <Image src="/app-icon.png" alt="" width={28} height={28} className="rounded-[7px]" />
-            <span className="font-bold text-[var(--color-ink)]">Your Key</span>
+    <footer className="site-foot">
+      <div className="wrap">
+        <div className="foot-grid">
+          <div className="foot-col">
+            <Wordmark />
+            <p className="text-[15px] leading-6 text-[var(--muted)]" style={{ maxWidth: "34em", marginTop: 6 }}>
+              Your Key uses no AI. Every affirmation, mental picture and spoken session is written and recorded in advance.
+            </p>
+            <a href={`mailto:${SITE.contact}`} className="inline-link text-[15px]" style={{ alignSelf: "flex-start" }}>{SITE.contact}</a>
           </div>
-          <p className="max-w-sm text-[14px] leading-6 text-[var(--color-mute)]">
-            The Law of Attraction as a daily practice, built around what you want most. On iPhone.
-          </p>
-          <a href={`mailto:${SITE.contact}`} className="text-[14px] font-medium text-[var(--color-amethyst)]">
-            {SITE.contact}
-          </a>
+          <FooterColumn title="Your Key" links={[{ href: "/tools", label: "The practice" }, { href: "/packages", label: "Packages" }, { href: "/pricing", label: "Pricing" }, { href: "/about", label: "About" }]} />
+          <FooterColumn title="Help" links={[{ href: "/support", label: "Support" }, { href: "/support#cancel", label: "Manage or cancel" }, { href: "/privacy", label: "Privacy" }, { href: "/terms", label: "Terms" }]} />
         </div>
-        <FooterColumn title="Your Key" links={[{ href: "/#practice", label: "The practice" }, { href: "/packages", label: "Packages" }, { href: "/pricing", label: "Pricing" }, { href: "/about", label: "About" }]} />
-        <FooterColumn title="Help" links={[{ href: "/support", label: "Support" }, { href: "/support#cancel", label: "Manage or cancel" }, { href: "/privacy", label: "Privacy" }, { href: "/terms", label: "Terms" }]} />
-      </div>
-      <div className="mx-auto mt-10 max-w-6xl border-t border-[var(--hair)] pt-6 text-[12.5px] leading-5 text-[var(--color-faint)]">
-        <p>© 2026 {SITE.company}. Made in the UK.</p>
-        <p>Apple, the Apple logo and iPhone are trademarks of Apple Inc. App Store is a service mark of Apple Inc.</p>
+        <div className="foot-note tiny">
+          <p>Your Key is a practice, not a promise. © 2026 {SITE.company}. Made in the UK.</p>
+          <p>Apple, the Apple logo and iPhone are trademarks of Apple Inc. App Store is a service mark of Apple Inc.</p>
+        </div>
       </div>
     </footer>
   );
 }
 
-function FooterColumn({ title, links }: { title: string; links: { href: string; label: string }[] }) {
+function FooterColumn({ title, links }: { title: string; links: NavLink[] }) {
   return (
-    <div className="flex flex-col gap-3">
-      <p className="kicker text-[var(--color-faint)]">{title}</p>
+    <div className="foot-col">
+      <p className="eyebrow">{title}</p>
       {links.map((l) => (
-        <Link key={l.href} href={l.href} className="text-[14px] text-[var(--color-soft)] transition-colors hover:text-[var(--color-ink)]">
-          {l.label}
-        </Link>
+        <Link key={l.href} href={l.href}>{l.label}</Link>
       ))}
     </div>
   );
@@ -92,36 +92,27 @@ function FooterColumn({ title, links }: { title: string; links: { href: string; 
 /** The one button that matters on the site: to the App Store. */
 export function AppStoreButton({ label = "Download on the App Store" }: { label?: string }) {
   return (
-    <a
-      href={SITE.appStoreUrl}
-      className="inline-flex items-center gap-3 rounded-[18px] bg-[var(--color-amethyst)] px-6 py-3.5 text-[#120E19] transition-opacity hover:opacity-90"
-    >
-      <svg aria-hidden width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <a href={SITE.appStoreUrl} className="btn">
+      <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
         <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.19 7.3c1.35.07 2.29.74 3.08.8.94-.19 1.84-.87 3.05-.78 1.6.13 2.81.79 3.63 2.11-3.33 2-2.71 6.42.6 7.7-.62 1.62-1.43 3.22-2.5 4.15zM12.03 7.25c-.15-2.23 1.66-4.05 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
       </svg>
-      <span className="text-[15.5px] font-bold">{label}</span>
+      {label}
     </a>
   );
 }
 
-export function Kicker({ children, color = "var(--color-amethyst)" }: { children: ReactNode; color?: string }) {
-  return <p className="kicker" style={{ color }}>{children}</p>;
-}
-
-/** A page section: a kicker, a heading in the taught voice, an optional lede, then its content. */
-export function Section({ id, kicker, title, lede, children, wide = false }: { id?: string; kicker?: string; title?: ReactNode; lede?: ReactNode; children?: ReactNode; wide?: boolean }) {
+/** A page section: its sentence in Castoro, an optional lede, then its content. */
+export function Section({ id, eyebrow, title, lede, children, narrow = false }: { id?: string; eyebrow?: string; title?: ReactNode; lede?: ReactNode; children?: ReactNode; narrow?: boolean }) {
   return (
-    <section id={id} className="scroll-mt-24 border-t border-[var(--hair)] px-4 py-16 sm:px-6 sm:py-24">
-      <div className={`mx-auto flex flex-col gap-8 ${wide ? "max-w-6xl" : "max-w-4xl"}`}>
-        {(kicker || title || lede) && (
-          <div className="flex max-w-3xl flex-col gap-4">
-            {kicker ? <Kicker>{kicker}</Kicker> : null}
-            {title ? <h2 className="taught text-[30px] leading-[1.18] sm:text-[40px]">{title}</h2> : null}
-            {lede ? <p className="text-[17px] leading-7 text-[var(--color-soft)]">{lede}</p> : null}
-          </div>
-        )}
-        {children}
-      </div>
+    <section id={id} className={`wrap sect${narrow ? " narrow" : ""}`}>
+      {(eyebrow || title || lede) && (
+        <div className="sect-head">
+          {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
+          {title ? <h2 className="serif h2">{title}</h2> : null}
+          {lede ? <p className="lede">{lede}</p> : null}
+        </div>
+      )}
+      {children}
     </section>
   );
 }
@@ -129,17 +120,103 @@ export function Section({ id, kicker, title, lede, children, wide = false }: { i
 /** "In the next update" until the version carrying the packages is on the App Store. */
 export function ComingTag() {
   if (SITE.packagesLive) return null;
+  return <span className="chip" style={{ alignSelf: "flex-start" }}>In the next update</span>;
+}
+
+/** The app's own screen, cut from its App Store pictures (public/moonlit/screen-<name>.webp). */
+export function Phone({ name, alt = "", className = "", eager = false }: { name: string; alt?: string; className?: string; eager?: boolean }) {
   return (
-    <span className="kicker rounded-full border border-[var(--glass-border-hi)] px-2.5 py-1 text-[10.5px] text-[var(--color-mute)]">
-      In the next update
-    </span>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img className={`phone ${className}`} src={`/moonlit/screen-${name}.webp`} alt={alt} width={516} height={1102} loading={eager ? "eager" : "lazy"} decoding="async" />
+  );
+}
+
+/** Three of the app's screens, Home in front: what stands in the sky at the top of the home page. */
+export function PhoneFan() {
+  return (
+    <div className="fan" role="img" aria-label="Three screens from the app: a visualisation, Home, and the Night Session">
+      <Phone name="visualisation" className="left" eager />
+      <Phone name="night-session" className="right" eager />
+      <Phone name="home" className="mid" eager />
+    </div>
+  );
+}
+
+/** Every tool on its own photograph, as the app's Attract tab draws them, then the ones for a particular moment. */
+export function ToolTiles() {
+  return (
+    <>
+      <div className="tiles">
+        {TOOL_TILES.map((t) => (
+          <Link key={t.id} href="/tools" className="tile">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/moonlit/tool-${t.id}.jpg`} alt="" width={720} height={720} loading="lazy" decoding="async" />
+            <div>
+              <h3 className="serif">{t.name}</h3>
+              <p>{t.line}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+      <p className="eyebrow" style={{ marginTop: 12 }}>When you need it</p>
+      <ul className="chips">
+        {WHEN_YOU_NEED_IT.map((t) => <li key={t} className="chip">{t}</li>)}
+      </ul>
+    </>
+  );
+}
+
+/** The three plans, in the listing's words. Max carries the one accent, as its door does in the app. */
+export function Plans() {
+  return (
+    <div className="plans">
+      {TIERS.map((t) => (
+        <article key={t.id} className={`card plan${t.id === "max" ? " max" : ""}`}>
+          <p className="plan-name">{t.name}</p>
+          <p className="price">
+            {t.price ?? "Free"}
+            {t.per ? <span>{t.per}</span> : null}
+          </p>
+          <p className="body">{t.body}</p>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+/** The five packages as one quiet list, each with its own colour. `both` adds the app's price beside the website's. */
+export function PackagesList({ both = false }: { both?: boolean }) {
+  return (
+    <div className="card pkgs">
+      {PAID_PACKAGES.map((p) => (
+        <Link key={p.id} href={p.href} className="pkg">
+          <i style={{ background: p.accent }} />
+          <span className="who">
+            <b>{p.name}</b>
+            <em>{p.headline}</em>
+          </span>
+          <span className="cost">
+            <strong>{PACKAGE_PRICES.webMonthly} a month</strong>
+            {both ? <>{PACKAGE_PRICES.appMonthly} in the app</> : null}
+          </span>
+        </Link>
+      ))}
+      <div className="pkg">
+        <i style={{ background: FREE_PACKAGE.accent }} />
+        <span className="who">
+          <b>{FREE_PACKAGE.name}</b>
+          <em>For stopping something, or cutting down.</em>
+        </span>
+        <span className="cost"><strong>Free</strong></span>
+      </div>
+    </div>
   );
 }
 
 /**
- * A package as its own world, as the app's Packages tab draws it (2026-10-14): its light from the top
- * corner, its tile, its own colours, and its real Today screen rising from the bottom of the card. Every
- * value comes from the app (lib/packages.generated.json, from yourkey-app's tokens).
+ * A package as its own world, as the app's Packages tab draws it: its light from the top corner, its tile, its
+ * own colours, and its real Today screen rising from the bottom of the card. Every value comes from the app
+ * (lib/packages.generated.json, from yourkey-app's tokens).
  */
 function worldStyle(p: { accent: string; accent2: string; kicker: string; onAccent: string; deep: string; glow: string; mark: string }) {
   return {
@@ -157,98 +234,87 @@ function WorldPhone({ src }: { src: string }) {
   );
 }
 
-export function PackageCard({ p }: { p: PaidPackage }) {
-  return (
-    <Link href={p.href} className="world glass glass-hover group" style={worldStyle(p)}>
-      {/* The grid this sits in carries the one "In the next update" tag, so the card does not repeat it. */}
-      <div className="flex items-center gap-3">
-        <span className="world-tile" aria-hidden />
-        <p className="kicker" style={{ color: p.kicker }}>{p.name}</p>
-      </div>
-      <h3 className="taught text-[24px] leading-[1.25]">{p.headline}</h3>
-      <p className="text-[14.5px] leading-6" style={{ color: p.kicker }}>{p.forWho}</p>
-      <ul className="flex flex-col gap-2 border-t border-[var(--hair)] pt-4">
-        {p.inside.map((line) => (
-          <li key={line} className="flex gap-2.5 text-[14.5px] leading-6 text-[var(--color-soft)]">
-            <span aria-hidden className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: p.accent }} />
-            {line}
-          </li>
-        ))}
-      </ul>
-      <span className="text-[14px] font-semibold" style={{ color: p.kicker }}>
-        See inside {p.name} →
-      </span>
-      <WorldPhone src={p.screen} />
-    </Link>
-  );
-}
-
-export function Faq({ items }: { items: { q: string; a: ReactNode }[] }) {
-  return (
-    <div className="glass divide-y divide-[var(--hair)] overflow-hidden">
-      {items.map((f) => (
-        <details key={f.q} className="group px-5 py-4 sm:px-6">
-          <summary className="flex items-center justify-between gap-4 text-[16px] font-semibold text-[var(--color-ink)]">
-            {f.q}
-            <span aria-hidden className="text-[var(--color-mute)] transition-transform group-open:rotate-45">+</span>
-          </summary>
-          <div className="pt-3 text-[15px] leading-6 text-[var(--color-soft)]">{f.a}</div>
-        </details>
-      ))}
-    </div>
-  );
-}
-
-export function Page({ children }: { children: ReactNode }) {
+function WorldBody({ p }: { p: { name: string; headline: string; forWho: string; inside: string[]; kicker: string } }) {
   return (
     <>
-      <SiteNav />
-      <main className="flex flex-1 flex-col">{children}</main>
-      <SiteFooter />
+      <h3 className="serif h3">{p.headline}</h3>
+      <p className="text-[14.5px] leading-6" style={{ color: p.kicker }}>{p.forWho}</p>
+      <ul>
+        {p.inside.map((line) => <li key={line}>{line}</li>)}
+      </ul>
     </>
   );
 }
 
-/** The top of every page but the home page: a kicker, the page's one sentence, and a lede. */
-export function PageHead({ kicker, title, lede, children }: { kicker: string; title: ReactNode; lede?: ReactNode; children?: ReactNode }) {
+export function PackageCard({ p }: { p: PaidPackage }) {
   return (
-    <section className="glow px-4 pb-12 pt-16 sm:px-6 sm:pt-24">
-      <div className="mx-auto flex max-w-4xl flex-col gap-5">
-        <Kicker>{kicker}</Kicker>
-        <h1 className="taught text-[38px] leading-[1.1] sm:text-[56px]">{title}</h1>
-        {lede ? <p className="max-w-3xl text-[17.5px] leading-7 text-[var(--color-soft)]">{lede}</p> : null}
-        {children}
+    <Link href={p.href} className="world" style={worldStyle(p)}>
+      <div className="flex items-center gap-3">
+        <span className="world-tile" aria-hidden />
+        <p className="world-name" style={{ color: p.kicker }}>{p.name}</p>
       </div>
-    </section>
+      <WorldBody p={p} />
+      <span className="text-[14px] font-semibold" style={{ color: p.kicker }}>See inside {p.name}</span>
+      <WorldPhone src={p.screen} />
+    </Link>
   );
 }
 
 /** Quitting, which costs nothing and never will, on the same footing as the four. */
 export function FreeCard({ p }: { p: typeof FREE_PACKAGE }) {
   return (
-    <div className="world glass" style={{ ...worldStyle(p), borderColor: "rgba(126,214,195,0.28)" }}>
+    <div className="world" style={worldStyle(p)}>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <span className="world-tile" aria-hidden />
-          <p className="kicker" style={{ color: p.kicker }}>{p.name}</p>
+          <p className="world-name" style={{ color: p.kicker }}>{p.name}</p>
         </div>
-        <span className="kicker rounded-full px-2.5 py-1 text-[10.5px]" style={{ background: "rgba(126,214,195,0.14)", color: p.kicker }}>
-          Free
-        </span>
+        <span className="rounded-full px-2.5 py-1 text-[12px] font-semibold" style={{ background: "rgba(126,214,195,0.14)", color: p.kicker }}>Free</span>
       </div>
-      <h3 className="taught text-[24px] leading-[1.25]">{p.headline}</h3>
-      <p className="text-[14.5px] leading-6" style={{ color: p.kicker }}>{p.forWho}</p>
-      <ul className="flex flex-col gap-2 border-t border-[var(--hair)] pt-4">
-        {p.inside.map((line) => (
-          <li key={line} className="flex gap-2.5 text-[14.5px] leading-6 text-[var(--color-soft)]">
-            <span aria-hidden className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: p.accent }} />
-            {line}
-          </li>
-        ))}
-      </ul>
+      <WorldBody p={p} />
       <span className="text-[14px] font-semibold" style={{ color: p.kicker }}>{p.price}, in the app</span>
       <WorldPhone src={p.screen} />
     </div>
+  );
+}
+
+export function Faq({ items }: { items: { q: string; a: ReactNode }[] }) {
+  return (
+    <div className="faq">
+      {items.map((f) => (
+        <details key={f.q}>
+          <summary>
+            {f.q}
+            <span aria-hidden>+</span>
+          </summary>
+          <div className="answer">{f.a}</div>
+        </details>
+      ))}
+    </div>
+  );
+}
+
+/** A page: the top bar (unless the page lays its own on a photograph), the page, the foot. */
+export function Page({ children, nav = true }: { children: ReactNode; nav?: boolean }) {
+  return (
+    <>
+      <WordmarkDefs />
+      {nav ? <SiteNav /> : null}
+      <main className="flex flex-1 flex-col">{children}</main>
+      <SiteFooter />
+    </>
+  );
+}
+
+/** The top of every page but the home page: plain, on the ground. The page's one sentence, and a lede. */
+export function PageHead({ eyebrow, title, lede, children }: { eyebrow?: string; title: ReactNode; lede?: ReactNode; children?: ReactNode }) {
+  return (
+    <section className="wrap page-head">
+      {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
+      <h1 className="serif h1-page">{title}</h1>
+      {lede ? <p className="lede">{lede}</p> : null}
+      {children}
+    </section>
   );
 }
 
@@ -263,11 +329,9 @@ export function LegalPage({ title, body }: { title: string; body: string }) {
   const content = start >= 0 ? lines.slice(start).join("\n").trim() : body;
   return (
     <Page>
-      <PageHead kicker="Legal" title={title} lede={updated || undefined} />
-      <article className="px-4 pb-24 sm:px-6">
-        <div className="glass mx-auto max-w-3xl whitespace-pre-line p-6 text-[15px] leading-7 text-[var(--color-soft)] [overflow-wrap:anywhere] sm:p-10">
-          {content}
-        </div>
+      <PageHead eyebrow="Legal" title={title} lede={updated || undefined} />
+      <article className="wrap narrow" style={{ paddingBlock: "20px 56px" }}>
+        <div className="card legal">{content}</div>
       </article>
     </Page>
   );

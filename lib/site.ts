@@ -1,5 +1,6 @@
 /**
- * lib/site.ts — every fact the website states, in one place (rebuilt 2026-10-04; for app version 1.3.0, 2026-11-15).
+ * lib/site.ts — every fact the website states, in one place (rebuilt 2026-10-04; for app version 1.3.0, and in the
+ * app's Moonlit look, 2026-11-15).
  *
  * The rule is the app's: nothing here that the app does not do, and no promise about what will
  * happen to the reader. Prices are the UK prices the app shows before purchase (yourkey-app
@@ -55,8 +56,34 @@ export const TOOLKIT: string[] = [
   "Unblock (in Your Key Pro)", "Why this works, in every tool",
 ];
 
+/**
+ * The six tools the app's Attract tab shows on their own photographs, with its own line for each
+ * (yourkey-app components/moonlit/AttractHub.tsx). The photographs are the app's: public/moonlit/tool-<id>.jpg.
+ */
+export const TOOL_TILES: { id: string; name: string; line: string }[] = [
+  { id: "affirmations", name: "Affirmations", line: "Five a day, out loud" },
+  { id: "visualisation", name: "Visualisations", line: "2, 5, 10 or 30 minutes" },
+  { id: "night-session", name: "The Night Session", line: "Fall asleep inside your scene" },
+  { id: "gratitude", name: "Gratitude", line: "Three things a day" },
+  { id: "identity-blueprint", name: "Identity Blueprint", line: "Sixty-six days, one act a day" },
+  { id: "vision-board", name: "Vision Board", line: "Seen every morning" },
+];
+
+/** The tools for a particular moment, as the Attract tab lists them under "When you need it". */
+export const WHEN_YOU_NEED_IT: string[] = ["Revision", "Unblock", "The Vibration Raiser", "Scripting", "Future Self Letter", "Blessing cards"];
+
+/** Each part of the daily practice on the photograph its tool opens on in the app. */
+export const PRACTICE_PHOTO: Record<string, string> = {
+  "Your Statement": "statement",
+  Visualisation: "visualisation",
+  Affirmations: "affirmations",
+  "The Night Session": "night-session",
+  "Identity Blueprint": "identity-blueprint",
+  Revision: "revision",
+};
+
 /** The plans, in the listing's words, with the UK prices the app shows. */
-export const TIERS: { id: string; name: string; price: string | null; per?: string; body: string; paid?: "gold" }[] = [
+export const TIERS: { id: string; name: string; price: string | null; per?: string; body: string }[] = [
   {
     id: "free",
     name: "Your Key Free",
@@ -76,7 +103,6 @@ export const TIERS: { id: string; name: string; price: string | null; per?: stri
     price: "£39.99",
     per: "a month, or £224.99 a year",
     body: "Everything in Your Key Pro, all 66 days of the Identity Blueprint, and all four paid packages.",
-    paid: "gold",
   },
 ];
 

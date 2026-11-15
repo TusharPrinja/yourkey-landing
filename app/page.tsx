@@ -1,144 +1,129 @@
-import Image from "next/image";
 import Link from "next/link";
-import { AppStoreButton, ComingTag, Faq, FreeCard, Kicker, PackageCard, Page, Section } from "@/components/site";
-import { FREE_PACKAGE, PAID_PACKAGES, PACKAGE_PRICES, PRACTICE, PRIVACY_PLAINLY, RESULTS, SITE, TOOLKIT } from "@/lib/site";
+import { AppStoreButton, ComingTag, Faq, PackagesList, Page, PhoneFan, Plans, Section, SiteNav, ToolTiles } from "@/components/site";
+import { PACKAGE_PRICES, PRIVACY_PLAINLY, RESULTS, SITE } from "@/lib/site";
 
 /**
- * yourkey.app — the home page (rebuilt 2026-10-04 to the app's own design and words).
+ * yourkey.app — the home page, in the app's Moonlit look (rebuilt 15 November 2026 with app version 1.3.0).
  *
- * Everything here is what the app does today, in the words of its App Store listing and its
- * package pages. Nothing on this page promises the reader a result: Your Key is a practice, and
- * the page says so in the same sentence the listing uses.
+ * His pick of three looks: "I like option C ... we keep the C's website and the phone things and everything for C,
+ * but we change the very top of C to what is in the top of B." So the top is the sky, a photograph that follows
+ * the visitor's clock as Home does in the app, with the app's own screens standing in it; then every tool on its
+ * own photograph, the plans, and the packages.
+ *
+ * Everything here is what the app does today, in the words of its App Store listing for 1.3.0. Nothing on this
+ * page promises the reader a result: Your Key is a practice, and the page says so.
  */
 export default function Home() {
   return (
-    <Page>
-      {/* ─── The one sentence ─────────────────────────────────────────────────────────────── */}
-      <section className="glow px-4 pb-16 pt-16 sm:px-6 sm:pb-24 sm:pt-28">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="flex flex-col gap-6">
-            <Kicker>Your Key · on iPhone</Kicker>
-            <h1 className="taught text-[42px] leading-[1.06] sm:text-[64px]">
-              Your goal, spoken back to you as already real.
-            </h1>
-            <p className="max-w-xl text-[18px] leading-8 text-[var(--color-soft)]">
-              Your Key is the Law of Attraction as a daily practice: a few minutes in the morning, a few at
-              night, guided all the way. Choose what you want most, from money to love to your first
-              customers, and every tool speaks to it. Free to start.
+    <Page nav={false}>
+      {/* ─── The sky, the one sentence, and the app ────────────────────────────────────────── */}
+      <section className="sky-hero">
+        <div className="sky dawn" />
+        <div className="sky golden" />
+        <div className="sky dusk" />
+        <div className="sky night" />
+        <div className="sky-shade" />
+        <SiteNav over />
+        <div className="wrap hero-grid">
+          <div className="hero-words">
+            {/* The greeting is the hour's, as on the app's Home; the stylesheet shows the one that is true. */}
+            <p className="eyebrow">
+              <span className="greet dawn">Good morning</span>
+              <span className="greet golden">Good afternoon</span>
+              <span className="greet dusk">Good evening</span>
+              <span className="greet night">Good evening</span>
             </p>
-            <div className="flex flex-wrap items-center gap-4">
+            <h1 className="serif h1">The Law of Attraction, as a daily practice.</h1>
+            <p className="lede">
+              Choose what you want most, and every tool speaks to it. A few minutes in the morning, a few at night,
+              guided all the way.
+            </p>
+            <div className="cta">
               <AppStoreButton />
-              <Link href="/packages" className="text-[15px] font-semibold text-[var(--color-amethyst)] underline-offset-4 hover:underline">
-                See the five packages →
-              </Link>
+              <Link href="/packages" className="link">See the five packages</Link>
             </div>
+            <p className="tiny">Free to start. On iPhone.</p>
           </div>
-          <div className="relative mx-auto flex aspect-square w-full max-w-[220px] items-center justify-center sm:max-w-[380px]">
-            <div aria-hidden className="absolute inset-0 rounded-full" style={{ background: "radial-gradient(circle, rgba(154,134,255,0.30) 0%, transparent 65%)" }} />
-            <Image src="/app-icon.png" alt="The Your Key app icon" width={220} height={220} priority className="relative w-[130px] rounded-[30px] shadow-[0_30px_80px_rgba(0,0,0,0.5)] sm:w-[220px] sm:rounded-[48px]" />
-          </div>
+          <PhoneFan />
         </div>
       </section>
 
+      {/* ─── Every tool ───────────────────────────────────────────────────────────────────── */}
+      <Section id="practice" title="Every tool, ready when you need it.">
+        <ToolTiles />
+        <Link href="/tools" className="link" style={{ alignSelf: "flex-start", marginTop: 6 }}>Everything in the practice</Link>
+      </Section>
+
       {/* ─── How it works ─────────────────────────────────────────────────────────────────── */}
-      <Section kicker="How it works" title="Three steps, then every day." wide>
-        <ol className="grid gap-4 md:grid-cols-3">
+      <Section title="Three steps, then every day.">
+        <ol className="steps">
           {[
-            { n: "1", h: "Choose what you want most", b: "From money to love to your first customers. Then say it exactly: what you want, what you give, a date and your first step, in one sentence you read aloud." },
-            { n: "2", h: "Feel it as already done", b: "Your scene, felt from inside and guided all the way. Five affirmations a day, and a Night Session you fall asleep inside." },
-            { n: "3", h: "Live it, day by day", b: "The Identity Blueprint: one small act a day for sixty-six days. Say it on waking, do it, and close the day at night." },
+            { h: "Choose what you want most", b: "From money to love to your first customers. Then say it exactly: what you want, what you give, a date and your first step, in one sentence you read aloud." },
+            { h: "Feel it as already done", b: "Your scene, felt from inside and guided all the way. Five affirmations a day, and a Night Session you fall asleep inside." },
+            { h: "Live it, day by day", b: "The Identity Blueprint: one small act a day for sixty-six days. Say it on waking, do it, and close the day at night." },
           ].map((s) => (
-            <li key={s.n} className="glass flex flex-col gap-3 p-6">
-              <span className="num text-[30px] text-[var(--color-amethyst)]">{s.n}</span>
-              <h3 className="text-[19px] font-bold">{s.h}</h3>
-              <p className="text-[15px] leading-6 text-[var(--color-soft)]">{s.b}</p>
+            <li key={s.h} className="step">
+              <h3>{s.h}</h3>
+              <p>{s.b}</p>
             </li>
           ))}
         </ol>
       </Section>
 
-      {/* ─── The free practice ───────────────────────────────────────────────────────────── */}
+      {/* ─── The plans ────────────────────────────────────────────────────────────────────── */}
       <Section
-        id="practice"
-        kicker="The practice"
-        title="What you get, free."
-        lede="Every part of the practice is in Your Key Free, at its shortest length, for as long as you like. Your Key Pro opens every tool at every length, and Your Key Max adds the full Identity Blueprint and all four paid packages."
-        wide
+        title="Free, for as long as you like."
+        lede="Go further when you want to. Your Key Pro and Your Key Max are bought in the app, with a free week for new subscribers."
       >
-        <div className="grid gap-4 sm:grid-cols-2">
-          {PRACTICE.map((p) => (
-            <div key={p.name} className="glass flex flex-col gap-2 p-6">
-              <h3 className="text-[18px] font-bold">{p.name}</h3>
-              <p className="text-[15px] leading-6 text-[var(--color-soft)]">{p.body}</p>
-            </div>
-          ))}
-        </div>
-        <div className="flex flex-col gap-3">
-          <p className="kicker text-[var(--color-faint)]">And around it</p>
-          <ul className="flex flex-wrap gap-2">
-            {TOOLKIT.map((t) => (
-              <li key={t} className="rounded-full border border-[var(--glass-border-hi)] px-3.5 py-1.5 text-[14px] text-[var(--color-soft)]">{t}</li>
-            ))}
-          </ul>
-          <Link href="/tools" className="text-[15px] font-semibold text-[var(--color-amethyst)] underline-offset-4 hover:underline">
-            Everything in the practice →
-          </Link>
-        </div>
+        <Plans />
+        <Link href="/pricing" className="link" style={{ alignSelf: "flex-start", marginTop: 6 }}>Compare the plans</Link>
       </Section>
 
       {/* ─── The packages ─────────────────────────────────────────────────────────────────── */}
       <Section
-        kicker="The packages"
-        title="Five skills, each its own world inside the app."
+        title="Five packages for five skills."
         lede={
           <>
-            Sales, time, communication and leadership, each its own subscription at {PACKAGE_PRICES.appMonthly} a month in the
-            app, with a free week for new subscribers, or {PACKAGE_PRICES.webMonthly} a month on this website. Quitting is
-            free, always. For a complete beginner and for somebody who has done it for years.
+            Each has its own home, daily tools, course and guided voice sessions. {PACKAGE_PRICES.webMonthly} a month or{" "}
+            {PACKAGE_PRICES.webYearly} a year on this website, and {PACKAGE_PRICES.appMonthly} a month in the app with a free
+            week for new subscribers. Quitting is free, always.
           </>
         }
-        wide
       >
-        <div className="flex items-center gap-3"><ComingTag /></div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {PAID_PACKAGES.map((p) => <PackageCard key={p.id} p={p} />)}
-          <FreeCard p={FREE_PACKAGE} />
-        </div>
-        <Link href="/packages" className="text-[15px] font-semibold text-[var(--color-amethyst)] underline-offset-4 hover:underline">
-          Who each package is for →
-        </Link>
+        <ComingTag />
+        <PackagesList />
+        <Link href="/packages" className="link" style={{ alignSelf: "flex-start", marginTop: 6 }}>Who each package is for</Link>
       </Section>
 
       {/* ─── Privacy ──────────────────────────────────────────────────────────────────────── */}
-      <Section kicker="Privacy, plainly" title="Your practice stays yours.">
-        <div className="glass p-6 sm:p-8">
-          <p className="text-[16px] leading-7 text-[var(--color-soft)]">{PRIVACY_PLAINLY}</p>
-          <Link href="/privacy" className="mt-4 inline-block text-[15px] font-semibold text-[var(--color-amethyst)] underline-offset-4 hover:underline">
-            Read the privacy policy →
-          </Link>
+      <Section title="Your practice stays yours." narrow>
+        <div className="card prose stack">
+          <p>{PRIVACY_PLAINLY}</p>
+          <Link href="/privacy" className="link" style={{ alignSelf: "flex-start" }}>Read the privacy policy</Link>
         </div>
       </Section>
 
       {/* ─── Questions ────────────────────────────────────────────────────────────────────── */}
-      <Section kicker="Questions" title="Before you download.">
+      <Section title="Before you download." narrow>
         <Faq
           items={[
             { q: "Is it free?", a: "Yes. Your Key Free is free for as long as you like, with daily limits on some tools. Your Key Pro and Your Key Max are optional subscriptions, shown with their prices in the app before you buy." },
-            { q: "Do the packages cost extra?", a: <>Each paid package is its own subscription, {PACKAGE_PRICES.appMonthly} a month or {PACKAGE_PRICES.appYearly} a year in the app, with a free week for new subscribers, or {PACKAGE_PRICES.webMonthly} a month or {PACKAGE_PRICES.webYearly} a year on this website. Quitting is free. Your Key Max includes all four. <Link className="text-[var(--color-amethyst)] underline" href="/pricing">See pricing</Link>.</> },
+            { q: "Do the packages cost extra?", a: <>Each paid package is its own subscription, {PACKAGE_PRICES.appMonthly} a month or {PACKAGE_PRICES.appYearly} a year in the app, with a free week for new subscribers, or {PACKAGE_PRICES.webMonthly} a month or {PACKAGE_PRICES.webYearly} a year on this website. Quitting is free. Your Key Max includes all four. <Link className="inline-link" href="/pricing">See pricing</Link>.</> },
             { q: "Which phones is it on?", a: "iPhone, from the App Store." },
             { q: "Is this therapy, or medical advice?", a: RESULTS },
-            { q: "How do I cancel?", a: <>In your iPhone's subscription settings, or from the Packages tab in the app. <Link className="text-[var(--color-amethyst)] underline" href="/support#cancel">Every way to cancel</Link>.</> },
+            { q: "How do I cancel?", a: <>In your iPhone&apos;s subscription settings, or from the Packages tab in the app. <Link className="inline-link" href="/support#cancel">Every way to cancel</Link>.</> },
           ]}
         />
       </Section>
 
-      {/* ─── Closing ──────────────────────────────────────────────────────────────────────── */}
-      <section className="glow border-t border-[var(--hair)] px-4 py-20 sm:px-6 sm:py-28" style={{ ["--glow" as string]: "rgba(154,134,255,0.18)" }}>
-        <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
-          <Image src="/app-icon.png" alt="" width={72} height={72} className="rounded-[18px]" />
-          <h2 className="taught text-[34px] leading-[1.15] sm:text-[46px]">Start with your goal tonight.</h2>
+      {/* ─── The last word ────────────────────────────────────────────────────────────────── */}
+      <section className="band">
+        <div className="band-photo" />
+        <div className="band-shade" />
+        <div className="wrap band-words">
+          <h2 className="serif h2">Start with your goal tonight.</h2>
           <AppStoreButton />
-          <p className="max-w-2xl text-[13px] leading-5 text-[var(--color-faint)]">{RESULTS}</p>
+          <p className="tiny">{RESULTS}</p>
         </div>
       </section>
     </Page>

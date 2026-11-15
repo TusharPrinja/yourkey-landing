@@ -1,26 +1,28 @@
 @import "tailwindcss";
 
-/* ─── Your Key, the website — the app's own design system (rebuilt 2026-10-04) ───────────────────
-   Every value here is the app's: yourkey-app/constants/packages/tokens.json (round 13, studio v2).
-   Ground is aubergine-dark, ink is warm white, the core accent is amethyst, and gold means earned or
-   paid and nothing else (Inner Circle only). Each package keeps its own accent, as in the app, so a
-   card here looks like the world it opens. Type is the app's: Manrope for what you read quickly,
-   Fraunces for the taught voice, Space Grotesk for numbers and kickers. */
+/* ─── Your Key, the website — Moonlit, the app's own look (rebuilt 15 November 2026) ──────────────
+   The app was redesigned for version 1.3.0, and the website follows it. His pick of three looks:
+   "I like option C ... we keep the C's website and the phone things and everything for C, but we
+   change the very top of C to what is in the top of B." So: a photograph of the sky that follows the
+   visitor's clock, as Home does in the app, then the app's own screens and every tool on its photograph.
+
+   Every value here is the app's (yourkey-app constants/moonlit.ts, docs/launch/design-brief-2026-11-09.md):
+   the night-plum ground, solid raised cards, ONE accent (heather), brass for the key and nothing else,
+   Castoro for the words that matter and the device's own font for everything you read quickly or tap.
+   A package keeps its own colours, as in the app's Packages tab, so a card looks like the world it opens. */
 
 @theme inline {
-  --color-recessed: #0E0A14;
-  --color-void: #120E19;
-  --color-raised: #1A1426;
-  --color-sheet: #161020;
+  --color-ground: #120C14;
+  --color-raised: #1A1320;
+  --color-raised2: #231A2A;
 
   --color-ink: #F2F0EC;
-  --color-soft: rgba(242, 240, 236, 0.72);
-  --color-mute: rgba(242, 240, 236, 0.58);
-  --color-faint: rgba(242, 240, 236, 0.40);
+  --color-soft: rgba(242, 240, 236, 0.70);
+  --color-faint: rgba(242, 240, 236, 0.56);
 
-  --color-amethyst: #D9C9F5;
-  --color-amethyst-deep: #9A86FF;
-  --color-gold: #C9A227;
+  --color-heather: #CDA8D6;
+  --color-pale: #E2CBE7;
+  --color-brass: #D7B46A;
 
   --color-sales: #4FD3E6;
   --color-time: #B8A6F2;
@@ -28,18 +30,28 @@
   --color-leadership: #A9C48A;
   --color-quitting: #7ED6C3;
 
-  --font-sans: var(--font-manrope);
-  --font-serif: var(--font-fraunces);
-  --font-num: var(--font-space-grotesk);
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: var(--font-castoro), "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
 }
 
 :root {
   color-scheme: dark;
-  --hair: rgba(242, 240, 236, 0.10);
-  --glass: rgba(255, 255, 255, 0.045);
-  --glass-hi: rgba(255, 255, 255, 0.08);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-border-hi: rgba(255, 255, 255, 0.14);
+  --ground: #120C14;
+  --raised: #1A1320;
+  --raised2: #231A2A;
+  --line: rgba(242, 240, 236, 0.10);
+  --text: #F2F0EC;
+  --muted: rgba(242, 240, 236, 0.70);
+  --faint: rgba(242, 240, 236, 0.56);
+  --heather: #CDA8D6;
+  --on-heather: #140C16;
+  --pale: #E2CBE7;
+  --brass: #D7B46A;
+  --glass: rgba(34, 24, 40, 0.5);
+  --glass-edge: rgba(255, 255, 255, 0.16);
+  --outline: rgba(242, 240, 236, 0.22);
+  --gutter: max(20px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(20px, env(safe-area-inset-right, 0px));
 }
 
 html {
@@ -48,96 +60,320 @@ html {
 }
 
 body {
-  background: var(--color-void);
-  color: var(--color-ink);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  background: var(--ground);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background: rgba(217, 201, 245, 0.28);
+  background: rgba(205, 168, 214, 0.30);
 }
 
 a:focus-visible,
 button:focus-visible,
 summary:focus-visible {
-  outline: 2px solid var(--color-amethyst);
+  outline: 2px solid var(--heather);
   outline-offset: 3px;
   border-radius: 10px;
 }
 
-/* The app's kicker: Space Grotesk, small, wide, uppercase. */
-.kicker {
-  font-family: var(--font-num), system-ui, sans-serif;
-  font-size: 12px;
-  line-height: 15px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
+/* ─── Type ─────────────────────────────────────────────────────────────────────────────────────── */
 
-/* The taught voice: Fraunces, never bold. */
-.taught {
-  font-family: var(--font-serif), Georgia, serif;
+/* Castoro, one weight, never bold: the words that matter. */
+.serif {
+  font-family: var(--font-serif);
   font-weight: 400;
-  letter-spacing: -0.01em;
   text-wrap: balance;
 }
+.h1 { font-size: clamp(38px, 9.2vw, 64px); line-height: 1.06; letter-spacing: -0.012em; }
+.h1-page { font-size: clamp(34px, 8vw, 54px); line-height: 1.08; letter-spacing: -0.01em; }
+.h2 { font-size: clamp(29px, 6.6vw, 42px); line-height: 1.12; letter-spacing: -0.008em; }
+.h3 { font-size: 22px; line-height: 1.2; }
+.lede { color: var(--muted); font-size: 17px; line-height: 1.55; max-width: 36em; }
+.eyebrow { color: var(--faint); font-size: 14px; font-weight: 600; }
+.tiny { color: var(--faint); font-size: 13px; line-height: 1.45; }
+.num { font-variant-numeric: tabular-nums; }
 
-/* Glass on the dark, as the app draws its cards and grouped rows. */
-.glass {
+/* ─── Layout ───────────────────────────────────────────────────────────────────────────────────── */
+
+.wrap {
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter-r);
+}
+.wrap.narrow > * { max-width: 780px; }
+.sect { padding-block: 44px; display: flex; flex-direction: column; gap: 18px; scroll-margin-top: 24px; }
+.sect-head { display: flex; flex-direction: column; gap: 12px; }
+.card { background: var(--raised); border-radius: 20px; padding: 22px; }
+.grid-2 { display: grid; gap: 14px; }
+.grid-3 { display: grid; gap: 14px; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.prose p { color: var(--muted); font-size: 16px; line-height: 1.65; }
+.prose a, .inline-link { color: var(--pale); text-decoration: underline; text-decoration-color: rgba(226, 203, 231, 0.4); text-underline-offset: 4px; }
+
+/* ─── Buttons and links ────────────────────────────────────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 0 24px;
+  border-radius: 999px;
+  background: var(--heather);
+  color: var(--on-heather);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1;
+  white-space: nowrap;
+  transition: opacity 160ms ease;
+}
+.btn:hover { opacity: 0.9; }
+.btn.small { min-height: 40px; padding: 0 16px; font-size: 14px; }
+.btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--outline); }
+.btn.glass {
   background: var(--glass);
-  border: 1px solid var(--glass-border);
-  border-radius: 22px;
+  color: var(--text);
+  border: 1px solid var(--glass-edge);
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
 }
-.glass-hover {
-  transition: background-color 160ms ease, border-color 160ms ease;
+.link {
+  color: var(--pale);
+  font-weight: 600;
+  font-size: 16px;
+  text-decoration: underline;
+  text-decoration-color: rgba(226, 203, 231, 0.35);
+  text-underline-offset: 5px;
 }
-.glass-hover:hover {
-  background: var(--glass-hi);
-  border-color: var(--glass-border-hi);
-}
+.link:hover { text-decoration-color: var(--pale); }
+.cta { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; }
+.cta .btn { width: 100%; max-width: 340px; }
 
-/* A soft light behind a hero, in the page's own accent. */
-.glow {
-  background: radial-gradient(ellipse 70% 55% at 50% 0%, var(--glow, rgba(154, 134, 255, 0.24)) 0%, transparent 70%);
-}
+/* ─── The top bar ──────────────────────────────────────────────────────────────────────────────── */
 
-.num {
-  font-family: var(--font-num), system-ui, sans-serif;
-  font-variant-numeric: tabular-nums;
-}
-
-details > summary {
-  list-style: none;
+.nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 16px; position: relative; z-index: 5; }
+.wm { height: 24px; width: 95px; color: var(--text); display: block; flex-shrink: 0; }
+.nav-links { display: none; align-items: center; gap: 28px; }
+.nav-links a { color: var(--muted); font-size: 15px; font-weight: 500; transition: color 160ms ease; }
+.nav-links a:hover, .nav-links a[aria-current="page"] { color: var(--text); }
+.nav-right { display: flex; align-items: center; gap: 8px; }
+.menu-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  border: 1px solid var(--outline);
+  background: transparent;
   cursor: pointer;
 }
-details > summary::-webkit-details-marker {
-  display: none;
+.nav.over .menu-btn { background: var(--glass); border-color: var(--glass-edge); -webkit-backdrop-filter: blur(22px); backdrop-filter: blur(22px); }
+.menu-sheet {
+  position: absolute;
+  top: calc(100% - 4px);
+  right: var(--gutter-r);
+  min-width: 220px;
+  padding: 8px;
+  border-radius: 20px;
+  background: rgba(26, 19, 32, 0.94);
+  border: 1px solid var(--glass-edge);
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+}
+.menu-sheet a { padding: 13px 14px; border-radius: 12px; font-size: 16px; font-weight: 600; }
+.menu-sheet a:hover, .menu-sheet a[aria-current="page"] { background: var(--raised2); }
+
+/* ─── The sky: a photograph that follows the visitor's clock, as Home does in the app ──────────── */
+
+/* layout.tsx sets data-sky on <html> before the first paint (dawn 5 to 11, golden 11 to 17, dusk 17 to
+   21, night 21 to 5: the app's own hours). Only that hour's photograph is ever asked for. */
+.sky-hero { position: relative; isolation: isolate; overflow: hidden; }
+.sky { position: absolute; inset: 0; z-index: -2; background-size: cover; display: none; }
+.sky.dawn { background-image: url(/moonlit/sky-dawn-m.jpg); background-position: 50% 10%; }
+.sky.golden { background-image: url(/moonlit/sky-golden-m.jpg); background-position: 50% 22%; }
+.sky.dusk { background-image: url(/moonlit/sky-dusk-m.jpg); background-position: 50% 40%; }
+.sky.night { background-image: url(/moonlit/sky-night-m.jpg); background-position: 50% 30%; filter: brightness(0.78); }
+html[data-sky="dawn"] .sky.dawn,
+html[data-sky="golden"] .sky.golden,
+html[data-sky="dusk"] .sky.dusk,
+html[data-sky="night"] .sky.night { display: block; }
+/* The fall into the ground is measured in points on a phone, where the top is tall (the phones stand in
+   it), so the words read the same however tall it grows. */
+.sky-shade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(18, 12, 20, 0.46) 0, rgba(18, 12, 20, 0.06) 150px, rgba(18, 12, 20, 0.52) 320px, rgba(18, 12, 20, 0.82) 470px, rgba(18, 12, 20, 0.95) 640px, var(--ground) 800px);
+}
+.greet { display: none; }
+html[data-sky="dawn"] .greet.dawn,
+html[data-sky="golden"] .greet.golden,
+html[data-sky="dusk"] .greet.dusk,
+html[data-sky="night"] .greet.night { display: inline; }
+.hero-grid { display: grid; gap: 6px; }
+.hero-words { display: flex; flex-direction: column; gap: 16px; padding-top: clamp(150px, 46vw, 300px); padding-bottom: 22px; }
+.hero-words .eyebrow { color: rgba(242, 240, 236, 0.86); }
+.hero-words .lede { color: rgba(242, 240, 236, 0.84); }
+
+/* The last word on the home page, on the moon over the lake (the Night Session's own photograph in the app). */
+.band { position: relative; isolation: isolate; overflow: hidden; margin-top: 12px; }
+.band-photo { position: absolute; inset: 0; z-index: -2; background: url(/moonlit/band-moon.jpg) 50% 24% / cover no-repeat; }
+.band-shade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, var(--ground) 0%, rgba(18, 12, 20, 0.42) 24%, rgba(18, 12, 20, 0.5) 60%, var(--ground) 100%); }
+.band-words { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; padding-block: 96px; }
+.band-words .tiny { max-width: 46em; }
+
+/* The top of every page but the home page: plain, on the ground, so the words lead. */
+.page-head { display: flex; flex-direction: column; gap: 16px; padding-block: 30px 12px; }
+
+/* ─── The app's own screens ────────────────────────────────────────────────────────────────────── */
+
+.phone {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1032 / 2205;
+  border-radius: 14.4% / 6.74%;
+  background: var(--raised);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+}
+/* Three screens, Home in front. On a photograph the fan has no box of its own, and each side phone is
+   darkened (never see-through) and fades at its outer edge. */
+.fan { position: relative; height: clamp(380px, 106vw, 520px); margin-bottom: 30px; }
+.fan .phone { position: absolute; top: 14px; left: 50%; width: clamp(170px, 46vw, 226px); }
+.fan .mid { transform: translateX(-50%); z-index: 2; }
+.fan .left,
+.fan .right { filter: brightness(0.66); box-shadow: none; }
+.fan .left {
+  transform: translateX(-108%) translateY(40px) rotate(-7deg) scale(0.92);
+  -webkit-mask-image: linear-gradient(90deg, transparent 4%, #000 62%);
+  mask-image: linear-gradient(90deg, transparent 4%, #000 62%);
+}
+.fan .right {
+  transform: translateX(8%) translateY(40px) rotate(7deg) scale(0.92);
+  -webkit-mask-image: linear-gradient(270deg, transparent 4%, #000 62%);
+  mask-image: linear-gradient(270deg, transparent 4%, #000 62%);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  * {
-    transition: none !important;
-    animation: none !important;
-  }
-}
+/* ─── Every tool on its own photograph, as the app's Attract tab draws them ────────────────────── */
 
-/* ─── A package as its own world (2026-10-14) ─────────────────────────────────────────────────────
-   As the app's Packages tab draws it: the package's light from the top corner, its tile in its own
-   gradient with its mark, and its real Today screen rising from the bottom of the card. The colours
-   and the mark arrive as --a, --a2, --k, --on, --deep, --glow and --mark (components/site.tsx). */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.tile {
+  position: relative;
+  aspect-ratio: 1 / 1.08;
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  background: var(--raised);
+}
+.tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tile > div { position: relative; width: 100%; padding: 46px 14px 14px; background: linear-gradient(180deg, transparent, rgba(18, 12, 20, 0.86) 62%); }
+.tile h3 { font-size: clamp(17px, 5vw, 20px); line-height: 1.15; }
+.tile p { color: var(--muted); font-size: 13px; line-height: 1.35; margin-top: 3px; }
+
+/* A tool with its words beside its photograph (the practice page). */
+.part { background: var(--raised); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; }
+.part img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; }
+.part > div { padding: 20px 22px 24px; display: flex; flex-direction: column; gap: 8px; }
+.part p { color: var(--muted); font-size: 16px; line-height: 1.55; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { padding: 9px 15px; border-radius: 999px; border: 1px solid var(--outline); font-size: 14px; font-weight: 600; }
+.chip.soft { font-weight: 500; color: var(--muted); padding: 7px 13px; font-size: 13.5px; }
+
+/* The app's screens in a row (the practice page): two across on a phone, four on a computer. */
+.screens { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 18px; max-width: 520px; margin-inline: auto; width: 100%; }
+.screens figure { display: flex; flex-direction: column; gap: 14px; }
+.screens figcaption { font-size: 18px; text-align: center; }
+
+/* Who a package is for: its words, then the kinds of life it is written for. */
+.reach { display: grid; gap: 16px; }
+
+/* ─── Steps ────────────────────────────────────────────────────────────────────────────────────── */
+
+.steps { display: grid; gap: 14px; counter-reset: step; }
+.step { background: var(--raised); border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 8px; }
+.step::before {
+  counter-increment: step;
+  content: counter(step);
+  font-family: var(--font-serif);
+  font-size: 30px;
+  line-height: 1;
+  color: var(--heather);
+}
+.step h3 { font-size: 18px; font-weight: 600; line-height: 1.3; }
+.step p { color: var(--muted); font-size: 15px; line-height: 1.55; }
+
+/* ─── The plans ────────────────────────────────────────────────────────────────────────────────── */
+
+.plans { display: grid; gap: 14px; }
+.plan { display: flex; flex-direction: column; gap: 10px; }
+.plan-name { color: var(--pale); font-size: 14px; font-weight: 600; }
+.plan.max { box-shadow: inset 0 0 0 1px rgba(205, 168, 214, 0.55); }
+.price { font-size: 34px; line-height: 1.1; font-weight: 600; font-variant-numeric: tabular-nums; }
+.price span { display: block; margin-top: 6px; font-size: 14px; line-height: 1.4; font-weight: 400; color: var(--faint); }
+.plan .body { color: var(--muted); font-size: 15px; line-height: 1.5; }
+.plan .foot { margin-top: auto; padding-top: 8px; }
+
+/* ─── The packages, as a list ──────────────────────────────────────────────────────────────────── */
+
+.pkgs { padding: 4px 22px; }
+.pkg { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; align-items: center; gap: 14px; padding-block: 16px; border-top: 1px solid var(--line); }
+.pkg:first-child { border-top: 0; }
+.pkg i { width: 10px; height: 10px; border-radius: 50%; }
+.pkg .who { display: flex; flex-direction: column; min-width: 0; }
+.pkg b { font-weight: 600; font-size: 16px; }
+.pkg em { font-style: normal; color: var(--muted); font-size: 14px; line-height: 1.4; }
+.pkg .cost { color: var(--faint); font-size: 14px; text-align: right; font-variant-numeric: tabular-nums; }
+.pkg .cost strong { display: block; color: var(--text); font-weight: 600; white-space: nowrap; }
+a.pkg:hover b { color: var(--pale); }
+
+/* ─── Questions ────────────────────────────────────────────────────────────────────────────────── */
+
+.faq { background: var(--raised); border-radius: 20px; padding: 4px 22px; }
+.faq details { border-top: 1px solid var(--line); padding-block: 16px; }
+.faq details:first-child { border-top: 0; }
+.faq summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 16px; font-weight: 600; list-style: none; cursor: pointer; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary span { color: var(--faint); font-size: 20px; line-height: 1; transition: transform 160ms ease; }
+.faq details[open] summary span { transform: rotate(45deg); }
+.faq .answer { padding-top: 10px; color: var(--muted); font-size: 15px; line-height: 1.6; }
+
+/* ─── The foot of every page ───────────────────────────────────────────────────────────────────── */
+
+.site-foot { border-top: 1px solid var(--line); margin-top: 28px; padding-block: 36px 28px; }
+.foot-grid { display: grid; gap: 28px; }
+.foot-col { display: flex; flex-direction: column; gap: 10px; }
+.foot-col a { color: var(--muted); font-size: 15px; }
+.foot-col a:hover { color: var(--text); }
+.foot-note { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px; }
+
+/* ─── A package as its own world (as the app's Packages tab draws it) ───────────────────────────
+   The package's light from the top corner, its tile in its own gradient with its mark, and its real
+   Today screen rising from the bottom of the card. The colours and the mark arrive as --a, --a2, --k,
+   --on, --deep, --glow and --mark (components/site.tsx). */
 .world {
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 24px 24px 0;
+  gap: 14px;
+  padding: 22px 22px 0;
+  background: var(--raised);
+  border-radius: 20px;
 }
 .world::before {
   content: "";
@@ -147,9 +383,8 @@ details > summary::-webkit-details-marker {
   background: linear-gradient(158deg, var(--glow) 0%, transparent 72%);
   pointer-events: none;
 }
-.world > * {
-  position: relative;
-}
+.world > * { position: relative; }
+.world-name { font-size: 14px; font-weight: 600; letter-spacing: 0.01em; }
 .world-tile {
   width: 36px;
   height: 36px;
@@ -170,14 +405,10 @@ details > summary::-webkit-details-marker {
   -webkit-mask: var(--mark) center / contain no-repeat;
   mask: var(--mark) center / contain no-repeat;
 }
-.world-phone {
-  margin-top: auto;
-  align-self: center;
-  width: 184px;
-  height: 214px;
-  overflow: hidden;
-  padding-top: 6px;
-}
+.world ul { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); padding-top: 14px; }
+.world li { display: flex; gap: 10px; color: var(--muted); font-size: 14.5px; line-height: 1.5; }
+.world li::before { content: ""; margin-top: 8px; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; background: var(--a); }
+.world-phone { margin-top: auto; align-self: center; width: 184px; height: 214px; overflow: hidden; padding-top: 6px; }
 .world-frame {
   position: relative;
   container-type: inline-size;
@@ -200,13 +431,57 @@ details > summary::-webkit-details-marker {
   border-radius: 999px;
   background: #000;
 }
-.world-frame img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 25px;
-  background: var(--color-recessed);
+.world-frame img { display: block; width: 100%; height: 100%; border-radius: 25px; background: var(--ground); }
+a.world:hover .world-frame { transform: translateY(-6px); }
+
+/* ─── The legal pages ──────────────────────────────────────────────────────────────────────────── */
+
+.legal { white-space: pre-line; color: var(--muted); font-size: 15px; line-height: 1.75; overflow-wrap: anywhere; }
+
+/* ─── The smallest phones ──────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 359px) {
+  .btn { padding: 0 18px; font-size: 15px; gap: 8px; }
+  .btn.small { padding: 0 14px; font-size: 13.5px; }
 }
-.world:hover .world-frame {
-  transform: translateY(-6px);
+
+/* ─── A computer ───────────────────────────────────────────────────────────────────────────────── */
+
+@media (min-width: 640px) {
+  .sky.dawn { background-image: url(/moonlit/sky-dawn.jpg); }
+  .sky.golden { background-image: url(/moonlit/sky-golden.jpg); }
+  .sky.dusk { background-image: url(/moonlit/sky-dusk.jpg); }
+  .sky.night { background-image: url(/moonlit/sky-night.jpg); }
+  .grid-2 { grid-template-columns: 1fr 1fr; gap: 18px; }
+  .foot-grid { grid-template-columns: 1.4fr 1fr 1fr; }
+}
+
+@media (min-width: 900px) {
+  .sect { padding-block: 64px; gap: 22px; }
+  .parts { grid-template-columns: repeat(3, 1fr); }
+  .worlds { grid-template-columns: repeat(3, 1fr); }
+  .screens { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 26px; max-width: 980px; }
+  .reach { grid-template-columns: 0.9fr 1.1fr; gap: 28px; }
+  .page-head { padding-block: 58px 14px; gap: 20px; }
+  .band-words { padding-block: 132px; }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .steps { grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plans { grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .cta .btn { width: auto; }
+  .nav-links { display: flex; }
+  .menu { display: none; }
+  .hero-grid { grid-template-columns: 1.05fr 0.95fr; align-items: end; gap: 30px; }
+  .hero-words { padding-top: 250px; padding-bottom: 76px; }
+  .hero-words > * { max-width: 620px; }
+  /* On a computer the top is as tall as the words make it, so the sky falls away in proportion. */
+  .sky-shade { background: linear-gradient(180deg, rgba(18, 12, 20, 0.46) 0%, rgba(18, 12, 20, 0.06) 20%, rgba(18, 12, 20, 0.5) 40%, rgba(18, 12, 20, 0.8) 58%, rgba(18, 12, 20, 0.94) 76%, var(--ground) 96%); }
+  .fan { height: 560px; margin-bottom: 56px; }
+  .fan .phone { width: 236px; }
+  .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .tile { aspect-ratio: 1 / 0.82; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; animation: none !important; }
 }
