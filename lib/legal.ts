@@ -14,7 +14,7 @@
 export const PRIVACY_POLICY = `PRIVACY POLICY
 Last updated: November 2026
 
-Your Key is operated by Your Key App Ltd, a company registered in England and Wales (company number 17047088, registered office: 1 Stevenson Road, Hedgerley, Slough SL2 3YD, United Kingdom). Your Key App Ltd is the data controller for the personal data described in this policy.
+Your Key is operated by Your Key App Ltd, a company registered in England and Wales (company number 17047088). Your Key App Ltd is the data controller for the personal data described in this policy.
 
 1. INFORMATION WE COLLECT
 
@@ -94,17 +94,16 @@ We do not sell, rent, trade, or otherwise transfer your personal data to third p
 
 Your Key App Ltd
 Company number 17047088 (England and Wales)
-1 Stevenson Road, Hedgerley, Slough SL2 3YD, United Kingdom
 hello@yourkey.app
 
-If you have any questions about this Privacy Policy, wish to exercise your data rights, or want to request account deletion, please contact us at the email address above.`;
+If you have any questions about this Privacy Policy, wish to exercise your data rights, or want to request account deletion, please contact us at the email address above. If you would rather write by post, our registered office is given at the end of our Terms of Service.`;
 
 export const TERMS_OF_SERVICE = `TERMS OF SERVICE
 Last updated: November 2026
 
 1. ACCEPTANCE OF TERMS
 
-Your Key is operated by Your Key App Ltd, a company registered in England and Wales (company number 17047088, registered office: 1 Stevenson Road, Hedgerley, Slough SL2 3YD, United Kingdom) ("Your Key App Ltd", "we", "us", "our"). "Your Key" and the key device are trading names and trade marks of Your Key App Ltd.
+Your Key is operated by Your Key App Ltd, a company registered in England and Wales (company number 17047088) ("Your Key App Ltd", "we", "us", "our"). "Your Key" and the key device are trading names and trade marks of Your Key App Ltd.
 
 By downloading, installing, or using the Your Key application ("the App"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the App. We reserve the right to update these terms at any time, and your continued use of the App following any changes constitutes acceptance of the revised terms.
 
@@ -168,5 +167,5 @@ These Terms are governed by the laws of England and Wales. Consumers elsewhere r
 
 Your Key App Ltd
 Company number 17047088 (England and Wales)
-1 Stevenson Road, Hedgerley, Slough SL2 3YD, United Kingdom
+Registered office: 1 Stevenson Road, Hedgerley, Slough SL2 3YD, United Kingdom
 hello@yourkey.app`;
