@@ -54,7 +54,7 @@ export default function PackagesPage() {
             where you are starting from. Four are subscriptions at {PACKAGE_PRICES.appMonthly} a month or{" "}
             {PACKAGE_PRICES.appYearly} a year in the app, with a free week for new subscribers, or{" "}
             {PACKAGE_PRICES.webMonthly} a month or {PACKAGE_PRICES.webYearly} a year on this website. Quitting is free.
-            Inner Circle includes all four.
+            Your Key Max includes all four.
           </>
         }
       >

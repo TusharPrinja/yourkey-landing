@@ -1,12 +1,18 @@
 /**
- * lib/site.ts — every fact the website states, in one place (rebuilt 2026-10-04).
+ * lib/site.ts — every fact the website states, in one place (rebuilt 2026-10-04; for app version 1.3.0, 2026-11-15).
  *
  * The rule is the app's: nothing here that the app does not do, and no promise about what will
  * happen to the reader. Prices are the UK prices the app shows before purchase (yourkey-app
- * app/premium.tsx, lib/web/packagePages.ts); the App Store shows each reader the price in their own
- * currency. The free practice is described in the App Store listing's own words
- * (yourkey-app docs/launch/listing-packages-release.md), which the app's claims check reads. The
- * package cards are generated from the app (lib/packages.generated.json), never typed here.
+ * lib/revenueCat.ts PRICES_GBP, lib/web/packagePages.ts); the App Store shows each reader the price in their own
+ * currency. The practice, the plans and the privacy paragraph are in the App Store listing's own words for 1.3.0
+ * (yourkey-app docs/launch/listing-release-1.3.0.md). The package cards are generated from the app
+ * (lib/packages.generated.json), never typed here.
+ *
+ * FOR 1.3.0, AND LIVE ONLY WITH IT. Until 15 November 2026 this file described the 1.2.0 app: Growth, Elite and Inner
+ * Circle, the couples and family plans, the Mastermind, and personalisation on the device. Version 1.3.0 has three
+ * plans (Your Key Free, Pro and Max), no AI, and nothing called Growth, Elite or Inner Circle. These words go to main
+ * the day 1.3.0 is live, on Tushar's go, and not before: until then the live site matches the live app. Max's month
+ * is £39.99 from 17 November 2026 (it was £44.99 beside a founding month at £39.99, which he retired).
  */
 
 import generated from "./packages.generated.json";
@@ -18,7 +24,7 @@ export const SITE = {
   contact: "hello@yourkey.app",
   company: "Your Key App Ltd",
   description:
-    "Your goal, in your own words, at the centre of a daily practice: visualisations that speak it back to you as already real, affirmations written for it, and identity work around it. Private on your iPhone. Free to start.",
+    "The Law of Attraction as a daily practice: a few guided minutes each morning and night, built around what you want most. Your statement, guided visualisations, affirmations and a Night Session you fall asleep inside. Free to start.",
   /**
    * The five packages shipped in App Store version 1.2.0, released 22 October 2026. While it was in
    * review, every place that offered them said so ("in the next update"), so the site was never ahead
@@ -33,59 +39,52 @@ export const PAID_PACKAGES: PaidPackage[] = generated.paid;
 export const FREE_PACKAGE = generated.free;
 export const PACKAGE_PRICES = generated.prices;
 
-/** The daily practice, in the listing's words. */
+/** The daily practice, in the listing's words. Every part is in Your Key Free at its shortest length. */
 export const PRACTICE: { name: string; body: string }[] = [
-  { name: "Visualisation", body: "A guided fulfilled scene shaped around your goal and spoken aloud. Enter it morning and night." },
-  { name: "Affirmations", body: "Present-tense, first-person practice specific to your goal. Hear the lines, read them, or record them in your own voice." },
-  { name: "The Mastermind", body: "Ask a question and receive an answer grounded in Your Key’s authored practice library, fitted to your situation on your device." },
-  { name: "Identity Blueprint", body: "Seven, twenty-one or sixty-six days of structured identity practice." },
+  { name: "Your Statement", body: "Exactly what you want, what you give, a date and your first step, in one sentence you read aloud morning and night." },
+  { name: "Visualisation", body: "Your scene, already done, felt from inside. Guided all the way, in 2, 5, 10 or 30 minutes." },
+  { name: "Affirmations", body: "Five a day, written for what you want, at the level that feels true today. Say them out loud, and add lines of your own." },
+  { name: "The Night Session", body: "Fall asleep inside your scene, then hear your own voice softly as you drift off." },
+  { name: "Identity Blueprint", body: "Sixty-six days to become the person who already has it. One small act a day: say it on waking, do it, and close the day at night." },
+  { name: "Revision", body: "Replay today’s moment the way it should have gone, before you sleep. Over 300 moments to choose from, from an argument to a fall in the street." },
 ];
 
+/** The tools around the practice. Unblock is in Your Key Pro and Max; the rest are in every plan. */
 export const TOOLKIT: string[] = [
-  "Dream Programming", "Revision", "Subliminal Mode", "EFT tapping", "Future Self Letter", "Scripting",
-  "Gratitude", "Blessings", "Habit Forge", "Three-six-nine", "Breathwork", "Vision Board", "Camera Mirror",
-  "The Vibration Raiser", "The Magnet",
+  "Scripting", "Future Self Letter", "The Vibration Raiser", "Gratitude journal", "Vision Board", "Blessing cards",
+  "Unblock (in Your Key Pro)", "Why this works, in every tool",
 ];
 
-/** The plans, in the listing's words, with the UK monthly price the app shows. */
+/** The plans, in the listing's words, with the UK prices the app shows. */
 export const TIERS: { id: string; name: string; price: string | null; per?: string; body: string; paid?: "gold" }[] = [
   {
     id: "free",
-    name: "Free",
+    name: "Your Key Free",
     price: null,
-    body: "Personalised affirmations, visualisation, Dream Programming, Subliminal Mode, EFT, Camera Mirror, the Mastermind, the first seven Identity Blueprint days, and the always-open writing, breathing, gratitude and Vision Board tools. Usage limits apply to selected tools.",
+    body: "Two 2-minute visualisations a day, five affirmations a day, the gratitude journal, today’s script and today’s letter, the Night Session at 2 minutes, one revision a night, and the first week of the Identity Blueprint. For as long as you like.",
   },
   {
-    id: "growth",
-    name: "Growth",
+    id: "pro",
+    name: "Your Key Pro",
     price: "£9.99",
-    per: "a month",
-    body: "Longer sessions, higher limits, Future Self Letter, Revision, fifty Mastermind sessions and fifty follow-up turns a day, the twenty-one-day Identity Blueprint, Vision Board Action Layer and The Downstream.",
+    per: "a month, or £49.99 a year",
+    body: "Every tool at every length, as often as you like: the 5, 10 and 30-minute visualisations, the 5 and 10-minute Night Sessions, the first 21 days of the Identity Blueprint, Unblock, every ready-made script and letter, and as many vision boards as you like.",
   },
   {
-    id: "elite",
-    name: "Elite",
-    price: "£19.99",
-    per: "a month",
-    body: "The highest limits, the full sixty-six-day Identity Blueprint, an uncapped on-device Mastermind, Unblock Your Manifestations, and the complete Elite practice.",
-  },
-  {
-    id: "inner-circle",
-    name: "Inner Circle",
-    price: "£44.99",
+    id: "max",
+    name: "Your Key Max",
+    price: "£39.99",
     per: "a month, or £224.99 a year",
-    body: "Everything in Elite and all four paid packages, plus The Monthly Reading and the Inner Circle Exclusive tools presented in the app.",
+    body: "Everything in Your Key Pro, all 66 days of the Identity Blueprint, and all four paid packages.",
     paid: "gold",
   },
 ];
 
-export const HOUSEHOLD = "Couples plans start at £14.99 a month and Family plans at £19.99 a month, for eligible households.";
-
 export const PRIVACY_PLAINLY =
-  "The core personalisation and voice generation run on your device. Your own-voice recordings remain on your device. Account and goal data, and what you save in a package, are stored on our secured service so your account can function across sessions. The Downstream, a paid tool, sends the text required for that request through our authenticated Azure service for processing. A Mastermind or Invisible Council question may look up its topic, a word or two, on Wikipedia. We do not sell your data or share it with advertisers. Apple takes payment in the app and Stripe takes payment on this website, so we never see your full card details.";
+  "Your Key uses no AI: every affirmation, mental picture and spoken session is written and recorded in advance. Your own-voice recordings remain on your device. Your account, your goal, and what you save in a package are stored on our secured service in the UK, so they are there on any phone you sign in on. We do not sell your data or share it with advertisers. Apple takes payment in the app and Stripe takes payment on this website, so we never see your full card details.";
 
 export const RESULTS =
   "Your Key is a practice framework, not a promise. Individual results vary, and we do not guarantee any life, financial, health or relationship outcome. It is not medical, psychological or financial advice and is no substitute for professional care.";
 
 export const BILLING =
-  "Subscriptions bought in the app renew automatically until cancelled and are managed through your Apple ID. Live prices, billing periods and plan availability are shown before purchase, in your own currency. Restore Purchases is on the plan screen.";
+  "Subscriptions bought in the app renew automatically until cancelled and are managed through your Apple ID. Prices, billing periods and the free week are shown before purchase, in your own currency. Restore Purchases is on the plans page.";

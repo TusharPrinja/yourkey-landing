@@ -59,7 +59,7 @@ export function SiteFooter() {
             <span className="font-bold text-[var(--color-ink)]">Your Key</span>
           </div>
           <p className="max-w-sm text-[14px] leading-6 text-[var(--color-mute)]">
-            A daily practice built around your goal, in your own words. On iPhone.
+            The Law of Attraction as a daily practice, built around what you want most. On iPhone.
           </p>
           <a href={`mailto:${SITE.contact}`} className="text-[14px] font-medium text-[var(--color-amethyst)]">
             {SITE.contact}

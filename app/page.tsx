@@ -22,9 +22,9 @@ export default function Home() {
               Your goal, spoken back to you as already real.
             </h1>
             <p className="max-w-xl text-[18px] leading-8 text-[var(--color-soft)]">
-              Write your goal in your own words. Your Key builds a daily practice around it: a guided
-              visualisation, affirmations written for it, and identity work, morning and night. Free to
-              start, and private on your phone.
+              Your Key is the Law of Attraction as a daily practice: a few minutes in the morning, a few at
+              night, guided all the way. Choose what you want most, from money to love to your first
+              customers, and every tool speaks to it. Free to start.
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <AppStoreButton />
@@ -44,9 +44,9 @@ export default function Home() {
       <Section kicker="How it works" title="Three steps, then every day." wide>
         <ol className="grid gap-4 md:grid-cols-3">
           {[
-            { n: "1", h: "Say what you want", b: "Your goal, in your own words. The whole practice is written around it, so it never reads like somebody else's." },
-            { n: "2", h: "Hear it as already real", b: "A guided scene spoken aloud, affirmations in the present tense, and lines you can record in your own voice." },
-            { n: "3", h: "Live it, day by day", b: "Identity work for seven, twenty-one or sixty-six days, and the tools for the habits that carry a goal." },
+            { n: "1", h: "Choose what you want most", b: "From money to love to your first customers. Then say it exactly: what you want, what you give, a date and your first step, in one sentence you read aloud." },
+            { n: "2", h: "Feel it as already done", b: "Your scene, felt from inside and guided all the way. Five affirmations a day, and a Night Session you fall asleep inside." },
+            { n: "3", h: "Live it, day by day", b: "The Identity Blueprint: one small act a day for sixty-six days. Say it on waking, do it, and close the day at night." },
           ].map((s) => (
             <li key={s.n} className="glass flex flex-col gap-3 p-6">
               <span className="num text-[30px] text-[var(--color-amethyst)]">{s.n}</span>
@@ -62,7 +62,7 @@ export default function Home() {
         id="practice"
         kicker="The practice"
         title="What you get, free."
-        lede="The core of Your Key costs nothing. Growth and Elite add longer sessions, higher limits and the longer programmes."
+        lede="Every part of the practice is in Your Key Free, at its shortest length, for as long as you like. Your Key Pro opens every tool at every length, and Your Key Max adds the full Identity Blueprint and all four paid packages."
         wide
       >
         <div className="grid gap-4 sm:grid-cols-2">
@@ -74,7 +74,7 @@ export default function Home() {
           ))}
         </div>
         <div className="flex flex-col gap-3">
-          <p className="kicker text-[var(--color-faint)]">And the toolkit</p>
+          <p className="kicker text-[var(--color-faint)]">And around it</p>
           <ul className="flex flex-wrap gap-2">
             {TOOLKIT.map((t) => (
               <li key={t} className="rounded-full border border-[var(--glass-border-hi)] px-3.5 py-1.5 text-[14px] text-[var(--color-soft)]">{t}</li>
@@ -123,8 +123,8 @@ export default function Home() {
       <Section kicker="Questions" title="Before you download.">
         <Faq
           items={[
-            { q: "Is it free?", a: "Yes. The core practice is free, with usage limits on some tools. Growth, Elite and Inner Circle are optional subscriptions, shown with their prices in the app before you buy." },
-            { q: "Do the packages cost extra?", a: <>Each paid package is its own subscription, {PACKAGE_PRICES.appMonthly} a month or {PACKAGE_PRICES.appYearly} a year in the app, with a free week for new subscribers, or {PACKAGE_PRICES.webMonthly} a month or {PACKAGE_PRICES.webYearly} a year on this website. Quitting is free. Inner Circle includes all four. <Link className="text-[var(--color-amethyst)] underline" href="/pricing">See pricing</Link>.</> },
+            { q: "Is it free?", a: "Yes. Your Key Free is free for as long as you like, with daily limits on some tools. Your Key Pro and Your Key Max are optional subscriptions, shown with their prices in the app before you buy." },
+            { q: "Do the packages cost extra?", a: <>Each paid package is its own subscription, {PACKAGE_PRICES.appMonthly} a month or {PACKAGE_PRICES.appYearly} a year in the app, with a free week for new subscribers, or {PACKAGE_PRICES.webMonthly} a month or {PACKAGE_PRICES.webYearly} a year on this website. Quitting is free. Your Key Max includes all four. <Link className="text-[var(--color-amethyst)] underline" href="/pricing">See pricing</Link>.</> },
             { q: "Which phones is it on?", a: "iPhone, from the App Store." },
             { q: "Is this therapy, or medical advice?", a: RESULTS },
             { q: "How do I cancel?", a: <>In your iPhone's subscription settings, or from the Packages tab in the app. <Link className="text-[var(--color-amethyst)] underline" href="/support#cancel">Every way to cancel</Link>.</> },

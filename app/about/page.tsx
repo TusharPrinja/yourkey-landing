@@ -6,18 +6,18 @@ import { RESULTS, SITE } from "@/lib/site";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Your Key is an iPhone app for a daily practice built around your own goal, made in the UK by Your Key App Ltd. What it is, how it is made, and how to reach us.",
+    "Your Key is an iPhone app for the Law of Attraction as a daily practice, built around what you want most and made in the UK by Your Key App Ltd. What it is, how it is made, and how to reach us.",
   alternates: { canonical: "https://yourkey.app/about" },
 };
 
 const BELIEFS: { h: string; b: string }[] = [
   {
-    h: "Your goal, in your words",
-    b: "A practice works better when it sounds like you. So it starts from the sentence you write, and every visualisation, affirmation and identity day is built around it.",
+    h: "What you want most, first",
+    b: "A practice works when it is about one thing. So it starts with what you want most, from money to love to your first customers, and every visualisation, affirmation and identity day speaks to it.",
   },
   {
     h: "Written before you read it",
-    b: "The five packages are written in full and checked before they ship: no line is made up on the spot, a figure carries its source, and nothing promises you a result.",
+    b: "Every word in Your Key is written and recorded in advance, and checked before it ships. No AI writes to you and no line is made up on the spot; a figure carries its source, and nothing promises you a result.",
   },
   {
     h: "For everybody",
@@ -35,7 +35,7 @@ export default function AboutPage() {
       <PageHead
         kicker="About"
         title="A daily practice, built around what you want."
-        lede="Your Key is an iPhone app. You write your goal in your own words, and it gives you a practice for every day around it, with five packages for the skills that carry a goal: selling, time, communication, leadership, and stopping what holds you back."
+        lede="Your Key is an iPhone app. You choose what you want most, and it gives you a practice for every day around it, with five packages for the skills that carry a goal: selling, time, communication, leadership, and stopping what holds you back."
       />
 
       <Section kicker="What we believe" title="Four things that decide how it is made." wide>

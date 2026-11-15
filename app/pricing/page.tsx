@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AppStoreButton, ComingTag, Page, PageHead, Section } from "@/components/site";
-import { BILLING, HOUSEHOLD, PACKAGE_PRICES, PAID_PACKAGES, TIERS } from "@/lib/site";
+import { BILLING, PACKAGE_PRICES, PAID_PACKAGES, TIERS } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "Your Key is free to start. Growth, Elite and Inner Circle go further, and each skill package is its own subscription, in the app with a free week for new subscribers, or on this website. Quitting is free.",
+    "Your Key is free to start. Your Key Pro and Your Key Max go further, and each skill package is its own subscription, in the app with a free week for new subscribers, or on this website. Quitting is free.",
   alternates: { canonical: "https://yourkey.app/pricing" },
 };
 
 /**
- * The UK prices the app shows before purchase (yourkey-app: app/premium.tsx, lib/web/packagePages.ts).
+ * The UK prices the app shows before purchase (yourkey-app: lib/revenueCat.ts PRICES_GBP, lib/web/packagePages.ts).
+ * Three plans since app version 1.3.0: Your Key Free, Pro and Max. No couples or family plan, no Elite.
  * The App Store shows each reader the price in their own currency, and that is the price they pay.
  */
 export default function PricingPage() {
@@ -24,7 +25,7 @@ export default function PricingPage() {
       />
 
       <Section kicker="Your Key" title="The plans." wide>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-3">
           {TIERS.map((t) => (
             <div
               key={t.id}
@@ -40,12 +41,14 @@ export default function PricingPage() {
             </div>
           ))}
         </div>
-        <p className="text-[14.5px] leading-6 text-[var(--color-mute)]">{HOUSEHOLD}</p>
+        <p className="text-[14.5px] leading-6 text-[var(--color-mute)]">
+          Your Key Pro and Your Key Max are bought in the app, with a free week for new subscribers where the app offers one.
+        </p>
       </Section>
 
       <Section
         kicker="The packages"
-        title="One skill at a time, or all four with Inner Circle."
+        title="One skill at a time, or all four with Your Key Max."
         lede={
           <>
             Each paid package is its own subscription: {PACKAGE_PRICES.appMonthly} a month or {PACKAGE_PRICES.appYearly} a year

@@ -6,7 +6,7 @@ import { PRACTICE, TIERS, TOOLKIT } from "@/lib/site";
 export const metadata: Metadata = {
   title: "The practice",
   description:
-    "Everything in the Your Key practice: a guided visualisation of your goal, affirmations written for it, the Mastermind, the Identity Blueprint, and the toolkit around them.",
+    "Everything in the Your Key practice: your statement, guided visualisations, affirmations, the Night Session, the Identity Blueprint, Revision, and the tools around them.",
   alternates: { canonical: "https://yourkey.app/tools" },
 };
 
@@ -17,12 +17,12 @@ export default function ToolsPage() {
       <PageHead
         kicker="The practice"
         title="Everything you do with your goal, every day."
-        lede="Four parts make the daily practice, and a toolkit sits around them. The plan you are on decides how long the sessions run and how far the programmes go."
+        lede="Six parts make the daily practice, and more tools sit around them. Nothing is written by AI: every word is written and recorded in advance. The plan you are on decides how long the sessions run and how far the Identity Blueprint goes."
       >
         <AppStoreButton />
       </PageHead>
 
-      <Section kicker="The daily practice" title="Four parts, morning and night." wide>
+      <Section kicker="The daily practice" title="Six parts, morning and night." wide>
         <div className="grid gap-4 sm:grid-cols-2">
           {PRACTICE.map((p) => (
             <div key={p.name} className="glass flex flex-col gap-2 p-6">
@@ -33,7 +33,7 @@ export default function ToolsPage() {
         </div>
       </Section>
 
-      <Section kicker="The toolkit" title="Around the practice." wide>
+      <Section kicker="The tools" title="Around the practice." wide>
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {TOOLKIT.map((t) => (
             <li key={t} className="glass px-5 py-4 text-[15.5px] font-semibold">{t}</li>

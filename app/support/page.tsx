@@ -72,7 +72,7 @@ export default function SupportPage() {
 
           <Block id="restore" kicker="A new phone" title="Restoring what you bought">
             <p>
-              Sign in with the same account and tap Restore Purchases on the plan screen, or on the package&apos;s own page.
+              Sign in with the same account and tap Restore Purchases on the plans page, or on the package&apos;s own page.
               Your subscription follows your Apple ID, and what you saved in a package follows your account.
             </p>
           </Block>
@@ -101,7 +101,7 @@ export default function SupportPage() {
         <Faq
           items={[
             { q: "Is the free week charged?", a: "No. A free week, where it is offered in the app, is shown before you start with the date it ends, and the app reminds you two days before. Cancel before then and nothing is charged. There is no free week on the website." },
-            { q: "Does Inner Circle include the packages?", a: "Yes. Inner Circle includes all four paid packages. If you already have Inner Circle, the packages are open to you." },
+            { q: "Does Your Key Max include the packages?", a: "Yes. Your Key Max includes all four paid packages. If you already have Your Key Max, the packages are open to you." },
             { q: "Can I use Your Key on Android?", a: "Your Key is on iPhone, from the App Store." },
             { q: "Something is not working.", a: <>Email <a className="text-[var(--color-amethyst)] underline" href={`mailto:${SITE.contact}`}>{SITE.contact}</a> with what you pressed and what happened. A screenshot helps.</> },
           ]}
