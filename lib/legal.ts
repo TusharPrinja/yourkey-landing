@@ -39,7 +39,7 @@ We use your information to: provide, operate, and maintain Your Key service; cho
 
 3. WHERE YOUR DATA LIVES & INTERNATIONAL TRANSFERS
 
-Our core infrastructure runs on Microsoft Azure in the United Kingdom (UK South region): Azure Cosmos DB stores your account and app data, and Azure Functions provides sign-in and the services the app calls. Cloudflare R2 delivers the App's recorded audio and course videos, which contain no personal data.
+Our core infrastructure runs on Microsoft Azure in the United Kingdom (UK South region): Azure Cosmos DB stores your account and app data, and Azure Functions provides sign-in and the services the app calls. Cloudflare R2 delivers the App's recorded audio, which contains no personal data.
 
 Your Key uses no AI. Every affirmation, guided visualisation, lesson and spoken session is written and recorded in advance, and nothing you write is sent to any AI service. Some additional processing takes place outside the UK through our error-monitoring, subscription and website-payment providers (Sentry, RevenueCat and Stripe). The safeguards described below apply to those transfers.
 
@@ -51,7 +51,7 @@ We use the following third-party services to operate Your Key:
 
   Microsoft Azure (Authentication, Database & Functions): Your account credentials and app data are stored in the United Kingdom using Azure Cosmos DB, with sign-in provided by our own service on Azure Functions. Microsoft is governed by the Microsoft Privacy Statement (privacy.microsoft.com/privacystatement).
 
-  Cloudflare R2 (Content Delivery): Cloudflare R2 delivers the App's recorded audio and course videos to your device. These downloads carry no personal identifiers and nothing you have written. Cloudflare is governed by their Privacy Policy (cloudflare.com/privacypolicy).
+  Cloudflare R2 (Content Delivery): Cloudflare R2 delivers the App's recorded audio to your device. These downloads carry no personal identifiers and nothing you have written. Cloudflare is governed by their Privacy Policy (cloudflare.com/privacypolicy).
 
   RevenueCat (Subscription Management): If you subscribe to a paid plan, RevenueCat processes subscription events, entitlements, and purchase receipts on our behalf. For purchases in the App, RevenueCat receives your anonymised user ID (not your email or display name) and subscription status, solely to keep your paid entitlements in sync across your devices. For a plan or a package bought on our website, RevenueCat also receives your account's user ID and the email address you enter at checkout, so that what you bought is in your account when you sign in to the App. RevenueCat is governed by their Privacy Policy (revenuecat.com/privacy).
 
@@ -80,7 +80,7 @@ To exercise any of these rights, contact us at: hello@yourkey.app. We will respo
 
 7. CHILDREN
 
-Your Key is an 18+ app. Every account holder and every household member must be 18 or over. We do not permit users under 18 and we do not knowingly collect personal data from anyone under 18. If you believe someone under 18 has created an account, contact us at hello@yourkey.app and we will promptly delete the account and all associated data.
+Your Key is an 18+ app. Every account holder must be 18 or over. We do not permit users under 18 and we do not knowingly collect personal data from anyone under 18. If you believe someone under 18 has created an account, contact us at hello@yourkey.app and we will promptly delete the account and all associated data.
 
 8. COOKIES & ANALYTICS
 
@@ -115,7 +115,7 @@ Your Key is a practice framework, not a promise. Personal outcomes depend on man
 
 3. USER ACCOUNTS & AGE REQUIREMENTS
 
-The App is for adults. To create an account, join a household, or purchase any subscription, you must be at least 18 years of age. Every member of a Couples or Family household must also be 18 or over.
+The App is for adults. To create an account or purchase any subscription, you must be at least 18 years of age.
 
 Users under 18 are not permitted to use the App. If you believe someone under 18 has created an account, contact hello@yourkey.app.
 
@@ -123,7 +123,7 @@ You are responsible for maintaining the confidentiality of your account credenti
 
 4. SUBSCRIPTIONS & BILLING
 
-Your Key offers a free tier and paid subscriptions. Current prices, billing periods, annual options, household options, and any eligible introductory offers are displayed in the App, or on our website for plans and packages bought there, before purchase.
+Your Key offers a free tier and paid subscriptions. Current prices, billing periods, annual options and any eligible introductory offers are displayed in the App, or on our website for plans and packages bought there, before purchase.
 
 Paid subscriptions renew automatically until cancelled. Subscriptions bought in the App are billed through the applicable app store and are subject to its billing terms. You may cancel them in your device's subscription settings; cancellation takes effect at the end of the current billing period. Nothing in these terms affects your non-waivable statutory rights or refund rights available through the app store.
 
