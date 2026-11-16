@@ -188,8 +188,10 @@ export function Plans({ buy = false }: { buy?: boolean }) {
               <div className="plan-buy">
                 {web ? (
                   <>
-                    <Link href={web.joinMonthly} className="btn">Join for {web.monthly} a month</Link>
-                    <Link href={web.joinYearly} className="link">Or {web.yearly} a year</Link>
+                    {/* Plain links: the join page is a generated page, not one of this app's routes, so the
+                        browser goes straight there and nothing is fetched ahead for a route that is not one. */}
+                    <a href={web.joinMonthly} className="btn">Join for {web.monthly} a month</a>
+                    <a href={web.joinYearly} className="link">Or {web.yearly} a year</a>
                     <p className="tiny">On this website: you pay today, with a full refund within 14 days if you ask.</p>
                     <a href={SITE.appStoreUrl} className="link quiet">Or in the app, with 7 days free</a>
                   </>
@@ -218,7 +220,8 @@ export function PackagesList({ both = false }: { both?: boolean }) {
   return (
     <div className="card pkgs">
       {PAID_PACKAGES.map((p) => (
-        <Link key={p.id} href={p.href} className="pkg">
+        // A plain link, as for the join page: each package's page is a generated page.
+        <a key={p.id} href={p.href} className="pkg">
           <i style={{ background: p.accent }} />
           <span className="who">
             <b>{p.name}</b>
@@ -228,7 +231,7 @@ export function PackagesList({ both = false }: { both?: boolean }) {
             <strong>{PACKAGE_PRICES.webMonthly} a month</strong>
             {both ? <>{PACKAGE_PRICES.appMonthly} in the app</> : null}
           </span>
-        </Link>
+        </a>
       ))}
       <div className="pkg">
         <i style={{ background: FREE_PACKAGE.accent }} />
@@ -277,7 +280,7 @@ function WorldBody({ p }: { p: { name: string; headline: string; forWho: string;
 
 export function PackageCard({ p }: { p: PaidPackage }) {
   return (
-    <Link href={p.href} className="world" style={worldStyle(p)}>
+    <a href={p.href} className="world" style={worldStyle(p)}>
       <div className="flex items-center gap-3">
         <span className="world-tile" aria-hidden />
         <p className="world-name" style={{ color: p.kicker }}>{p.name}</p>
@@ -285,7 +288,7 @@ export function PackageCard({ p }: { p: PaidPackage }) {
       <WorldBody p={p} />
       <span className="text-[14px] font-semibold" style={{ color: p.kicker }}>See inside {p.name}</span>
       <WorldPhone src={p.screen} />
-    </Link>
+    </a>
   );
 }
 
