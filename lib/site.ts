@@ -119,6 +119,24 @@ export type WebPlan = (typeof generated.plans.items)[number];
 export const webPlan = (id: string): WebPlan | null =>
   ((generated.plans.sold as string[]).includes(id) ? generated.plans.items.find((p) => p.id === id) ?? null : null);
 
+/**
+ * Whether the server turns off, by itself, a website subscription that Your Key Max includes
+ * (yourkey-app server/payOnce.ts; the switch is lib/payOnceOn.ts there, and comes here in the generated
+ * file). While it is false every page says the older truth: what Max includes keeps running until it is
+ * cancelled. The two never mix, so no page promises what is not happening.
+ */
+export const PAY_ONCE: boolean = generated.plans.payOnce === true;
+
+/** Max and what it includes, on the pricing page. */
+export const MAX_AND_THE_REST: string = PAY_ONCE
+  ? "Your Key Max includes Your Key Pro and all four paid packages. If you are paying for one of those on this website when you start paying for Max, we turn off its renewal for you and email you, so you pay once. One bought in the app is yours to cancel, in your iPhone's Settings."
+  : "Your Key Max includes Your Key Pro and all four paid packages, and each of those keeps running until you cancel it. If you join Max while paying for one of them, cancel that one so you pay once.";
+
+/** "I joined Your Key Max. Am I still paying for Your Key Pro, or for a package?" on the support page. */
+export const STILL_PAYING: string = PAY_ONCE
+  ? "Not for anything you bought on this website. Once you are paying for Your Key Max we turn off the renewal of a Your Key Pro or a package you bought here, within the hour, and email you. You keep it until the end of the time you paid for. If you took Max inside the app while on Pro inside the app, Apple ends Pro for you. Anything else you bought in the app keeps running until you cancel it in your iPhone's Settings: only you can cancel an Apple subscription, and if you joined Max here we email you how."
+  : "You may be. Your Key Max includes Your Key Pro and all four paid packages, but it is its own subscription, so anything you were already paying for keeps running until you cancel it. If you took Max inside the app while on Pro inside the app, Apple ends Pro for you. Otherwise cancel what Max now includes: in your iPhone's Settings if you bought it in the app, at link.com if you bought it on this website.";
+
 const SOLD_HERE = TIERS.filter((t) => webPlan(t.id));
 const ONLY_IN_APP = TIERS.filter((t) => t.price && !webPlan(t.id));
 const both = (names: string[]) => names.join(" and ");

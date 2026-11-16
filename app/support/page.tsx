@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Faq, Page, PageHead, Section } from "@/components/site";
-import { SITE } from "@/lib/site";
+import { SITE, STILL_PAYING } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Support",
@@ -102,7 +102,7 @@ export default function SupportPage() {
           items={[
             { q: "Is the free week charged?", a: "No. A free week, where it is offered in the app, is shown before you start with the date it ends, and the app reminds you two days before. Cancel before then and nothing is charged. There is no free week on the website." },
             { q: "Does Your Key Max include the packages?", a: "Yes. Your Key Max includes all four paid packages. If you already have Your Key Max, the packages are open to you." },
-            { q: "I joined Your Key Max. Am I still paying for Your Key Pro, or for a package?", a: "You may be. Your Key Max includes Your Key Pro and all four paid packages, but it is its own subscription, so anything you were already paying for keeps running until you cancel it. If you took Max inside the app while on Pro inside the app, Apple ends Pro for you. Otherwise cancel what Max now includes: in your iPhone's Settings if you bought it in the app, at link.com if you bought it on this website." },
+            { q: "I joined Your Key Max. Am I still paying for Your Key Pro, or for a package?", a: STILL_PAYING },
             { q: "Can I use Your Key on Android?", a: "Your Key is on iPhone, from the App Store." },
             { q: "Something is not working.", a: <>Email <a className="inline-link" href={`mailto:${SITE.contact}`}>{SITE.contact}</a> with what you pressed and what happened. A screenshot helps.</> },
           ]}

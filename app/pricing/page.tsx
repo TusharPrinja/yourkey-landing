@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ComingTag, PackagesList, Page, PageHead, Plans, Section } from "@/components/site";
-import { BILLING, PACKAGE_PRICES, PLANS_WHERE } from "@/lib/site";
+import { BILLING, MAX_AND_THE_REST, PACKAGE_PRICES, PLANS_WHERE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -54,10 +54,7 @@ export default function PricingPage() {
             until you cancel. There is no free week on the website: you pay on the day. Cancel at link.com (a package also
             from the Packages tab in the app), and ask within 14 days of your first payment for a full refund of it.
           </p>
-          <p>
-            Your Key Max includes Your Key Pro and all four paid packages, and each of those keeps running until you cancel
-            it. If you join Max while paying for one of them, cancel that one so you pay once.
-          </p>
+          <p>{MAX_AND_THE_REST}</p>
           <Link href="/support#cancel" className="link" style={{ alignSelf: "flex-start" }}>How to cancel</Link>
         </div>
       </Section>
