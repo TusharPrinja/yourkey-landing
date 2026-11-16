@@ -133,7 +133,7 @@
         "id": "max",
         "name": "Your Key Max",
         "monthly": "£39.99",
-        "yearly": "£224.99",
+        "yearly": "£199.99",
         "joinMonthly": "/join?package=max&plan=monthly",
         "joinYearly": "/join?package=max&plan=yearly"
       }

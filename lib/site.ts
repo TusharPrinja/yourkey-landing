@@ -101,7 +101,7 @@ export const TIERS: { id: string; name: string; price: string | null; per?: stri
     id: "max",
     name: "Your Key Max",
     price: "£39.99",
-    per: "a month, or £224.99 a year",
+    per: "a month, or £199.99 a year",
     body: "Everything in Your Key Pro, all 66 days of the Identity Blueprint, and all four paid packages.",
   },
 ];
