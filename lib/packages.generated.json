@@ -115,9 +115,10 @@
   },
   "plans": {
     "sold": [
+      "pro",
       "max"
     ],
-    "payOnce": false,
+    "payOnce": true,
     "refundDays": 14,
     "items": [
       {
