@@ -134,7 +134,7 @@ export const MAX_AND_THE_REST: string = PAY_ONCE
 
 /** "I joined Your Key Max. Am I still paying for Your Key Pro, or for a package?" on the support page. */
 export const STILL_PAYING: string = PAY_ONCE
-  ? "Not for anything you bought on this website. Once you are paying for Your Key Max we turn off the renewal of a Your Key Pro or a package you bought here, within the hour, and email you. You keep it until the end of the time you paid for. If you took Max inside the app while on Pro inside the app, Apple ends Pro for you. Anything else you bought in the app keeps running until you cancel it in your iPhone's Settings: only you can cancel an Apple subscription, and if you joined Max here we email you how."
+  ? "Not for anything you bought on this website. Once you are paying for Your Key Max we turn off the renewal of a Your Key Pro or a package you bought here, and email you. It is not charged again, and you keep it until the end of the time you paid for. If you took Max inside the app while on Pro inside the app, Apple ends Pro for you. Anything else you bought in the app keeps running until you cancel it in your iPhone's Settings: only you can cancel an Apple subscription, and if you joined Max here we email you how."
   : "You may be. Your Key Max includes Your Key Pro and all four paid packages, but it is its own subscription, so anything you were already paying for keeps running until you cancel it. If you took Max inside the app while on Pro inside the app, Apple ends Pro for you. Otherwise cancel what Max now includes: in your iPhone's Settings if you bought it in the app, at link.com if you bought it on this website.";
 
 const SOLD_HERE = TIERS.filter((t) => webPlan(t.id));
