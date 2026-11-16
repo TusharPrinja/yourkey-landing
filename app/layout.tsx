@@ -29,7 +29,9 @@ export const metadata: Metadata = {
     description: SITE.description,
     images: ["/og.jpg"],
   },
-  icons: { icon: "/app-icon.png", apple: "/app-icon.png" },
+  // No `icons` here: app/favicon.ico (the lit O, for a browser tab) and app/apple-icon.png (the whole icon,
+  // for a phone's home screen) are picked up by the framework, each at an address that changes with the file,
+  // so no browser or chat app keeps an old one. The old purple key lived in favicon.ico until 16 November 2026.
   other: { "apple-itunes-app": `app-id=${SITE.appStoreId}` },
 };
 
