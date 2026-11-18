@@ -155,3 +155,23 @@ export const RESULTS =
 
 export const BILLING =
   "Subscriptions bought in the app renew automatically until cancelled and are managed through your Apple ID. Prices, billing periods and the free week are shown before purchase, in your own currency. Restore Purchases is on the plans page.";
+
+/** What search engines read about the app (schema.org), on the home page. Only facts stated on the page. */
+export function homeJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      { "@type": "Organization", name: "Your Key App Ltd", url: SITE.url, logo: `${SITE.url}/app-icon.png?v=2`, email: "hello@yourkey.app" },
+      {
+        "@type": "MobileApplication",
+        name: "Your Key",
+        operatingSystem: "iOS",
+        applicationCategory: "HealthApplication",
+        url: SITE.url,
+        downloadUrl: SITE.appStoreUrl,
+        description: "The Law of Attraction as a daily practice: guided visualisations, affirmations, a gratitude journal, the Night Session and the Identity Blueprint, built around what you want most.",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
+      },
+    ],
+  };
+}

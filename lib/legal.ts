@@ -30,6 +30,7 @@ When you use Your Key, we collect the following information:
   - Usage data: information about how you use the App, including features accessed and session frequency, to help us improve the service.
   - Device information: basic technical data such as your device platform and operating system version.
   - Problem reports: if you report a problem in the App, we keep what you write with your account, together with the package it came from, the app version and your device's platform and system version, and we email a copy to our own support inbox so we can fix it. The copy carries your account number, never your email address or name.
+  - Android list: if you ask on our website to hear when Your Key is on Android, we keep the email address you give for that one message, sent on the day the App is available on Google Play, and then delete it. To be taken off the list sooner, email hello@yourkey.app.
 
 We do not collect payment card details. Billing in the App is handled directly by Apple (App Store) or Google (Play Store). If you buy a plan or a package on our website, the payment is taken by Link, a Stripe service, and we receive the email address you paid with and a record of the purchase (see section 4).
 

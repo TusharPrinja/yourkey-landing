@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AppStoreButton, ComingTag, Faq, PackagesList, Page, PhoneFan, Plans, Section, SiteNav, ToolTiles } from "@/components/site";
-import { PACKAGE_PRICES, PLANS_WHERE, PRIVACY_PLAINLY, RESULTS, SITE } from "@/lib/site";
+import { AndroidAsk, TryIt } from "@/components/try-client";
+import { PACKAGE_PRICES, PLANS_WHERE, PRIVACY_PLAINLY, RESULTS, SITE, homeJsonLd } from "@/lib/site";
 
 /**
  * yourkey.app — the home page, in the app's Moonlit look (rebuilt 15 November 2026 with app version 1.3.0).
@@ -16,6 +17,8 @@ import { PACKAGE_PRICES, PLANS_WHERE, PRIVACY_PLAINLY, RESULTS, SITE } from "@/l
 export default function Home() {
   return (
     <Page nav={false}>
+      {/* What search engines read about the app and these questions (schema.org). */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd()) }} />
       {/* ─── The sky, the one sentence, and the app ────────────────────────────────────────── */}
       <section className="sky-hero">
         <div className="sky dawn" />
@@ -40,13 +43,30 @@ export default function Home() {
             </p>
             <div className="cta">
               <AppStoreButton />
-              <Link href="/packages" className="link">See the five packages</Link>
+              <a href="#try" className="link">▶ Try a 2-minute visualisation now</a>
             </div>
-            <p className="tiny">Free to start. On iPhone.</p>
+            {/* A div, not a paragraph: the Android box opens inside it as a form. */}
+            <div className="tiny">
+              Free for as long as you like. No card. On iPhone. <AndroidAsk />
+            </div>
+            {/* His words, 18 November 2026; the photo is a frame from his own Law of Attraction seminar. */}
+            <div className="founder">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/moonlit/tushar.jpg" alt="Tushar, the founder of Your Key" width={60} height={60} />
+              <p>
+                Your Key is built on the principles of the Law of Attraction, including everything I teach in my seminars.
+                <span>Tushar, founder</span>
+              </p>
+            </div>
           </div>
           <PhoneFan />
         </div>
       </section>
+
+      {/* ─── Try it before you download (the growth audit, 18 November 2026) ───────────────────── */}
+      <Section id="try" title="Try it before you download." lede="Two minutes, right here. Choose what you want most and press play.">
+        <TryIt />
+      </Section>
 
       {/* ─── Every tool ───────────────────────────────────────────────────────────────────── */}
       <Section id="practice" title="Every tool, ready when you need it.">
@@ -109,7 +129,7 @@ export default function Home() {
           items={[
             { q: "Is it free?", a: <>Yes. Your Key Free is free for as long as you like, with daily limits on some tools. Your Key Pro and Your Key Max are optional subscriptions, shown with their prices before you buy. <Link className="inline-link" href="/pricing">See the plans</Link>.</> },
             { q: "Do the packages cost extra?", a: <>Each paid package is its own subscription, {PACKAGE_PRICES.appMonthly} a month or {PACKAGE_PRICES.appYearly} a year in the app, with a free week for new subscribers, or {PACKAGE_PRICES.webMonthly} a month or {PACKAGE_PRICES.webYearly} a year on this website. Quitting is free. Your Key Max includes all four. <Link className="inline-link" href="/pricing">See pricing</Link>.</> },
-            { q: "Which phones is it on?", a: "iPhone, from the App Store." },
+            { q: "Which phones is it on?", a: "iPhone, from the App Store. Android is coming: leave your email at the top of this page and we'll tell you the day it's out." },
             { q: "Is this therapy, or medical advice?", a: RESULTS },
             { q: "How do I cancel?", a: <>In your iPhone&apos;s subscription settings for anything bought in the app, and at link.com for anything bought on this website. <Link className="inline-link" href="/support#cancel">Every way to cancel</Link>.</> },
           ]}

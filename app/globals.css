@@ -488,3 +488,40 @@ a.world:hover .world-frame { transform: translateY(-6px); }
   html { scroll-behavior: auto; }
   * { transition: none !important; animation: none !important; }
 }
+
+/* ─── Try it, the founder's line, Android, and the honest sums (18 November 2026) ──────────────── */
+
+.founder { display: flex; align-items: center; gap: 14px; margin-top: 22px; max-width: 34em; }
+.founder img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; flex: none; border: 1.5px solid rgba(205, 168, 214, 0.7); }
+.founder p { margin: 0; font-size: 15px; line-height: 1.45; color: var(--text); }
+.founder p span { display: block; color: var(--muted); font-size: 14px; margin-top: 2px; }
+
+.as-link { background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
+.android { display: grid; gap: 10px; margin-top: 10px; max-width: 30em; }
+.android label { font-size: 14px; color: var(--muted); }
+.android-row { display: flex; gap: 8px; }
+.android-row input { flex: 1; min-width: 0; min-height: 50px; border-radius: 14px; border: 1px solid var(--outline); background: var(--raised); color: var(--text); padding: 0 14px; font: inherit; font-size: 16px; }
+.android-row .btn { min-height: 50px; }
+.android-err { margin: 0; color: var(--pale); font-size: 14px; }
+.android-done { margin: 10px 0 0; color: var(--pale); font-size: 15px; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+.try { display: grid; gap: 14px; }
+.try-player { position: relative; border-radius: 24px; overflow: hidden; min-height: 240px; display: flex; flex-direction: column; justify-content: flex-end; }
+.try-photo { position: absolute; inset: 0; background: url(/moonlit/tool-visualisation.jpg) center / cover; }
+.try-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(18, 12, 20, 0.05), rgba(18, 12, 20, 0.9)); }
+.try-row { position: relative; display: flex; align-items: center; gap: 14px; padding: 18px 18px 12px; }
+.try-play { width: 60px; height: 60px; border-radius: 50%; border: 0; background: var(--heather); display: grid; place-items: center; flex: none; cursor: pointer; }
+.try-play .tri { width: 0; height: 0; border-left: 18px solid var(--on-heather); border-top: 11px solid transparent; border-bottom: 11px solid transparent; margin-left: 5px; }
+.try-play .pause { width: 16px; height: 18px; border-left: 5px solid var(--on-heather); border-right: 5px solid var(--on-heather); }
+.try-words { display: grid; gap: 2px; min-width: 0; }
+.try-words b { font-size: 22px; font-weight: 400; line-height: 1.15; }
+.try-words span { color: var(--muted); font-size: 14px; }
+.try-bar { position: relative; height: 3px; margin: 0 18px 16px; background: rgba(242, 240, 236, 0.18); border-radius: 3px; overflow: hidden; }
+.try-bar i { position: absolute; inset: 0 auto 0 0; background: var(--heather); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip.pick { background: transparent; color: var(--muted); cursor: pointer; font: inherit; font-size: 14px; font-weight: 600; }
+.chip.pick.on { color: var(--pale); border-color: var(--heather); }
+
+.anchor { margin: 12px 0 0; padding: 10px 12px; border-radius: 12px; background: rgba(215, 180, 106, 0.12); color: var(--brass); font-size: 14px; line-height: 1.4; }
+.save { align-self: flex-start; display: inline-block; padding: 6px 12px; border-radius: 999px; background: rgba(205, 168, 214, 0.16); color: var(--pale); font-size: 13.5px; font-weight: 600; }

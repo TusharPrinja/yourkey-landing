@@ -184,6 +184,7 @@ export function Plans({ buy = false }: { buy?: boolean }) {
               {t.per ? <span>{t.per}</span> : null}
             </p>
             <p className="body">{t.body}</p>
+            {t.id === "max" && maxAnchor(t.price) ? <p className="anchor">{maxAnchor(t.price)}</p> : null}
             {buy ? (
               <div className="plan-buy">
                 {web ? (
@@ -233,6 +234,7 @@ export function PackagesList({ both = false }: { both?: boolean }) {
           </span>
         </a>
       ))}
+      {websiteSaving() ? <span className="save" style={{ margin: "10px 0 2px" }}>{websiteSaving()}</span> : null}
       <div className="pkg">
         <i style={{ background: FREE_PACKAGE.accent }} />
         <span className="who">
@@ -367,4 +369,24 @@ export function LegalPage({ title, body }: { title: string; body: string }) {
       </article>
     </Page>
   );
+}
+
+const pence = (p: string | null | undefined) => (p && /^£\d+(\.\d\d)?$/.test(p) ? Math.round(Number(p.slice(1)) * 100) : null);
+const pounds = (n: number) => `£${(n / 100).toFixed(2)}`;
+
+/** Max beside what it holds, in real website prices: four packages at their website month, against Max's month. */
+function maxAnchor(maxPrice: string | null): string | null {
+  const one = pence(PACKAGE_PRICES.webMonthly);
+  const max = pence(maxPrice);
+  if (!one || !max || one * PAID_PACKAGES.length <= max) return null;
+  return `The ${PAID_PACKAGES.length === 4 ? "four" : PAID_PACKAGES.length} packages alone are ${pounds(one * PAID_PACKAGES.length)} a month on this website. Your Key Max is ${maxPrice}, with Your Key Pro included.`;
+}
+
+/** What a package costs less here than in the app, a month (the website-first rule). */
+function websiteSaving(): string | null {
+  const web = pence(PACKAGE_PRICES.webMonthly);
+  const app = pence(PACKAGE_PRICES.appMonthly);
+  if (!web || !app || app <= web) return null;
+  const d = app - web;
+  return `Save ${d % 100 === 0 ? `£${d / 100}` : pounds(d)} a month on each package by joining on this website`;
 }
